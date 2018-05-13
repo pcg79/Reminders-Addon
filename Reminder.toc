@@ -1,8 +1,0 @@
-## Interface:
-## Title: Reminder
-## Author: pcg79
-## Dependencies: Ace3
-## OptDeps: !Swatter
-## SavedVariables:
-
-Reminder.lua
