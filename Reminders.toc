@@ -1,0 +1,9 @@
+## Interface: 70300
+## Title: Reminders
+## Author: pcg79
+## OptionalDeps: Ace3
+## SavedVariables: RemindersDB
+
+embeds.xml
+
+Core.lua
