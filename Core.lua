@@ -2,6 +2,11 @@ Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "Ace
 RemindersConsole = LibStub("AceConsole-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
+local R_CLASS      = "class"
+local R_PROFESSION = "profession"
+local R_LEVEL      = "level"
+local R_NAME       = "name"
+
 local function chatMessage(message)
     RemindersConsole:Print(message)
 end
@@ -44,12 +49,129 @@ function Reminders:OnInitialize()
 
     Reminders:PrintReminders()
 
-    -- evaluateReminders(self.db.global.reminders)
 
     if not gui then Reminders:CreateUI() end
+
+    Reminders:LoadReminders()
+
+    Reminders:EvaluateReminders()
+
     gui:Show()
 end
 
+function Reminders:EvaluateReminders()
+    local reminders = self.db.global.reminders
+    local reminderMessages = {}
+
+    for _, reminder in pairs(reminders) do
+        array = {}
+        debug("reminder = "..reminder)
+        for token in string.gmatch(reminder, "[^,]+") do
+            tinsert(array, token:trim())
+        end
+
+        -- for k,v in pairs(array) do
+        --     debug(k.." = "..v)
+        -- end
+
+        local msg = array[1]
+        local condition = array[2]
+
+        debug("msg = "..msg)
+        debug("condition string = "..condition)
+
+        if type(condition) == "string" then
+            if string.match(condition, "\*") then
+                tinsert(reminderMessages, msg)
+            else
+                -- Go through each condition
+                -- class
+                -- profession
+                -- level
+                -- name
+                local tokens = {}
+                local tokenCount = 0
+                for token in string.gmatch(condition, "[^ ]+") do
+                    tokenCount = tokenCount + 1
+                    tokens[tokenCount] = token
+                end
+
+                debug("tokenCount = "..tokenCount)
+
+                local toSkip = 0
+                for i=1, tokenCount do
+                    debug("i = "..i)
+
+                    if toSkip == 0 then
+                        local token = tokens[i]
+                        debug("token = "..token)
+                        local count = 0
+                        if token == R_NAME then
+                            count = count + 1
+                            operation = tokens[i+count]
+                            count = count + 1
+                            name = tokens[i+count]
+
+                            debug("operation = "..operation)
+                            debug("name = "..name)
+
+                            local playerName = UnitName("player")
+
+                            debug("playerName = "..playerName)
+
+                            if playerName == name then
+                                tinsert(reminderMessages, msg)
+                            end
+                        end
+                        toSkip = count
+                    else
+                        toSkip = toSkip - 1
+                    end
+                end
+            end
+        else
+        end
+
+    end
+
+    for _, m in pairs(reminderMessages) do
+        debug("m = "..m)
+    end
+
+    message(table.concat(reminderMessages, "\n"))
+end
+
+function Reminders:LoadReminders()
+    offset = 0
+    for _, reminder in pairs(self.db.global.reminders) do
+        local reminderItem = CreateFrame("Button", nil, reminderList)
+
+        -- reminderItem:SetText(reminder)
+        reminderItem:SetPoint("TOPLEFT", 10, -(25 + offset))
+        reminderItem:SetHeight(20)
+        reminderItem:SetWidth(100)
+
+        reminderItem.text = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
+        reminderItem.text:SetSize(100, 10)
+        reminderItem.text:SetJustifyH("LEFT")
+        reminderItem.text:SetPoint("TOPLEFT", 5, -3)
+        reminderItem.text:SetText(reminder)
+
+        -- reminderItem.text:SetTextColor(0.67, 0.83, 0.48)
+
+
+        -- reminderText = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
+        -- reminderText:SetSize(29, 10)
+        -- reminderText:SetJustifyH("LEFT")
+        -- reminderText:SetPoint("TOPLEFT", reminderItem.icon, 1, -3)
+        -- reminderText:SetText(reminder)
+
+        reminderItem:SetScript("OnClick", function(self)
+            debug("clicked - ")
+        end)
+        offset = offset + 20
+    end
+end
 
 function Reminders:OnEvent()
     debug('Reminder Loaded')
