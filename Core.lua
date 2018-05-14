@@ -183,7 +183,7 @@ function Reminders:CloseFrame(widget, event)
     self.frameShown = false
 end
 
-function Reminders:SaveReminder(widget, event, text)
+function Reminders:SaveReminder(text)
     debug("saving - "..text)
     table.insert(self.db.global.reminders, text)
 end
@@ -206,6 +206,12 @@ function Reminders:CreateUI()
         insets = { left = 8, right = 8, top = 24, bottom = 8 }
     }
 
+    local EditBoxBackdrop = {
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        tile = true, edgeSize = 1, tileSize = 5,
+    }
+
     gui = CreateFrame("Frame", frameName, UIParent)
     gui:Hide()
 
@@ -216,7 +222,7 @@ function Reminders:CreateUI()
     gui:SetSize(800, 600)
     -- gui:SetBackdrop(FrameBackdrop)
 
-    gui:SetScript("OnShow", function(self) debug("it should be showing 2") end)
+    gui:SetScript("OnShow", function(self) debug("it should be showing") end)
     -- tinsert(UISpecialFrames, frameName)
 
     local titlebg = gui:CreateTexture(nil, "BORDER")
@@ -225,7 +231,7 @@ function Reminders:CreateUI()
     titlebg:SetPoint("BOTTOMRIGHT", gui, "TOPRIGHT", 0, -24)
 
 
-    local reminderList = CreateFrame("Frame", frameName.."List", gui)
+    reminderList = CreateFrame("Frame", frameName.."List", gui)
     reminderList:SetPoint("LEFT", gui)
     reminderList:SetSize(210, 600)
     reminderList:SetBackdrop(FrameBackdrop)
@@ -236,15 +242,38 @@ function Reminders:CreateUI()
     reminderAction:SetSize(600, 600)
     reminderAction:SetBackdrop(FrameBackdrop)
 
+    local editbox = CreateFrame("EditBox", frameName.."EditBox", reminderAction)
+    -- editbox:SetLabel("Insert text:")
+    editbox:SetPoint("TOPLEFT", reminderAction, 50, -50)
+    editbox:SetScript("OnEnterPressed", function(self)
+        local reminderText = self:GetText()
+        reminderText = reminderText:trim()
 
-    local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
-    closeButton:SetScript("OnClick", function(self)
-        gui:Hide()
+        if not reminderText or reminderText == "" then
+            return
+        end
+
+        Reminders:SaveReminder(reminderText)
+        self:SetText("")
+        self:ClearFocus()
+        -- MainPanel.list_frame:Update(nil, false)
     end)
+    editbox:SetFontObject(GameFontHighlightSmall)
+    editbox:SetWidth(500)
+    editbox:SetHeight(25)
+    editbox:EnableMouse(true)
+    editbox:SetBackdrop(EditBoxBackdrop)
+    editbox:SetBackdropColor (0, 0, 0, 0.5)
+    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+
+
+    local closeButton = CreateFrame("Button", frameName.."Close", reminderAction, "UIPanelButtonTemplate")
+    closeButton:SetScript("OnClick", function(self) gui:Hide() end)
     closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
     closeButton:SetHeight(20)
     closeButton:SetWidth(100)
     closeButton:SetText("Close")
+
 
 
     -- gui:SetPoint("CENTER",0,0)
