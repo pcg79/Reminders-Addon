@@ -20,6 +20,8 @@ end
 
 debug("We're in")
 
+debug(_G._VERSION)
+
 function Reminders:CommandProcessor(input)
     debug(input)
     if input == "" or input == "open" or input == "show" then
