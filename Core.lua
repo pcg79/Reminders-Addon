@@ -138,7 +138,9 @@ function Reminders:EvaluateReminders()
         debug("m = "..m)
     end
 
-    message(table.concat(reminderMessages, "\n"))
+    if next(reminderMessages) ~= nil then
+        message(table.concat(reminderMessages, "\n"))
+    end
 end
 
 function Reminders:LoadReminders()
