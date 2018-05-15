@@ -108,11 +108,11 @@ function Reminders:EvaluateReminders()
                         local count = 0
                         if token == R_NAME then
                             count = count + 1
-                            operation = tokens[i+count]
+                            local operation = tokens[i+count]
                             count = count + 1
-                            name = tokens[i+count]
+                            local name = tokens[i+count]
 
-                            debug("operation = "..operation)
+                            debug("(name) operation = "..operation)
                             debug("name = "..name)
 
                             local playerName = UnitName("player")
