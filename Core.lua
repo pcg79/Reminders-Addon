@@ -87,10 +87,10 @@ function Reminders:EvaluateReminders()
                 tinsert(reminderMessages, msg)
             else
                 -- Go through each condition
+                -- name
+                -- level
                 -- class
                 -- profession
-                -- level
-                -- name
                 local tokens = {}
                 local tokenCount = 0
                 for token in string.gmatch(condition, "[^ ]+") do
@@ -150,9 +150,25 @@ function Reminders:EvaluateReminders()
                             if result then
                                 tinsert(reminderMessages, msg)
                             end
+                        elseif token == R_CLASS then
+                            count = count + 1
+                            local operation = tokens[i+count]
+                            count = count + 1
+                            local class = tokens[i+count]
 
+                            debug("(class) operation = "..operation)
+                            debug("class = "..class)
 
+                            local playerClass = UnitClass("player")
+
+                            debug("playerClass = "..playerClass)
+
+                            if playerClass == class then
+                                tinsert(reminderMessages, msg)
+                            end
                         end
+
+
                         toSkip = count
                     else
                         toSkip = toSkip - 1
