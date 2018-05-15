@@ -105,7 +105,7 @@ function Reminders:EvaluateReminders()
                     debug("i = "..i)
 
                     if toSkip <= 0 then
-                        local token = tokens[i]
+                        local token = tokens[i]:lower()
                         debug("token = "..token)
                         local count = 0
                         if token == R_NAME then
@@ -166,6 +166,36 @@ function Reminders:EvaluateReminders()
                             if playerClass == class then
                                 tinsert(reminderMessages, msg)
                             end
+                        elseif token == R_PROFESSION then
+                            count = count + 1
+                            local operation = tokens[i+count]
+                            count = count + 1
+                            local profession = tokens[i+count]:lower()
+
+                            debug("(profession) operation = "..operation)
+                            debug("profession = "..profession)
+
+                            local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+
+                            local prof1Name = GetProfessionNameByIndex(prof1) or ""
+                            local prof2Name = GetProfessionNameByIndex(prof2) or ""
+
+
+                            debug("prof1Name = "..prof1Name)
+                            debug("prof2Name = "..(prof2Name or "nil"))
+                            debug("archaeology = "..(archaeology or "false"))
+                            debug("fishing = "..(fishing or "nil"))
+                            debug("cooking = "..(cooking))
+                            debug("firstAid = "..(firstAid or "nil"))
+
+                            if (profession == prof1Name:lower() or profession == prof2Name:lower()) or
+                               (profession == "archaeology" and archaeology ~= nil) or
+                               (profession == "fishing" and fishing ~= nil) or
+                               (profession == "cooking" and cooking ~= nil) or
+                               (profession == "firstaid" and firstAid ~= nil) then
+
+                               tinsert(reminderMessages, msg)
+                           end
                         end
 
 
@@ -187,6 +217,14 @@ function Reminders:EvaluateReminders()
     if next(reminderMessages) ~= nil then
         message(table.concat(reminderMessages, "\n"))
     end
+end
+
+function GetProfessionNameByIndex(profIndex)
+    if profIndex == nil or profIndex == "" then
+        return
+    end
+    local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(profIndex)
+    return name
 end
 
 function Reminders:LoadReminders()
