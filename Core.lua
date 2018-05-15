@@ -102,7 +102,7 @@ function Reminders:EvaluateReminders()
                 for i=1, tokenCount do
                     debug("i = "..i)
 
-                    if toSkip == 0 then
+                    if toSkip <= 0 then
                         local token = tokens[i]
                         debug("token = "..token)
                         local count = 0
