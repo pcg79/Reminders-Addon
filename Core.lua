@@ -122,6 +122,34 @@ function Reminders:EvaluateReminders()
                             if playerName == name then
                                 tinsert(reminderMessages, msg)
                             end
+                        elseif token == R_LEVEL then
+                            count = count + 1
+                            local operation = tokens[i+count]
+
+                            if operation == "=" then
+                                operation = "=="
+                            end
+                            count = count + 1
+                            local level = tokens[i+count]
+
+                            debug("(level) operation = "..operation)
+                            debug("level = "..level)
+
+                            local playerLevel = UnitLevel("player")
+                            local levelStmt = "return "..playerLevel..operation..level
+
+                            debug("stmt: "..levelStmt)
+
+                            local levelFunc = assert(loadstring(levelStmt))
+                            local result, errorMsg = levelFunc();
+
+                            debug("sum = "..tostring(result))
+
+                            if result then
+                                tinsert(reminderMessages, msg)
+                            end
+
+
                         end
                         toSkip = count
                     else
