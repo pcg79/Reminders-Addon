@@ -8,13 +8,13 @@ local R_LEVEL      = "level"
 local R_NAME       = "name"
 
 local function chatMessage(message)
-    RemindersConsole:Print(message)
+    RemindersConsole:Print("Reminder: "..message)
 end
 
 local function debug(message)
   --if addon.db.profile.debug then
   if true then
-     chatMessage("Reminder debug: "..message)
+     chatMessage("[debug] "..message)
   end
 end
 
@@ -70,9 +70,9 @@ function Reminders:EvaluateReminders()
             tinsert(array, token:trim())
         end
 
-        -- for k,v in pairs(array) do
-        --     debug(k.." = "..v)
-        -- end
+        for k,v in pairs(array) do
+            debug(k.." = "..v)
+        end
 
         local msg = array[1]
         local condition = array[2]
