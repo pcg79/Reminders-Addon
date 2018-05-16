@@ -69,7 +69,7 @@ function Reminders:EvaluateReminders()
     local reminderMessages = {}
 
     for _, reminder in pairs(reminders) do
-        local message = ProcessReminder(reminder)
+        local message = Reminders:ProcessReminder(reminder)
 
         if message ~= nil and message ~= "" then
             tinsert(reminderMessages, message)
@@ -85,7 +85,7 @@ function Reminders:EvaluateReminders()
     end
 end
 
-function ProcessReminder(reminder)
+function Reminders:ProcessReminder(reminder)
     array = {}
     debug("reminder = "..reminder)
     for token in string.gmatch(reminder, "[^,]+") do
@@ -102,13 +102,13 @@ function ProcessReminder(reminder)
     debug("message = "..message)
     debug("condition string = "..condition)
 
-    if type(condition) == "string" and EvaluateCondition(condition) then
+    if type(condition) == "string" and Reminders:EvaluateCondition(condition) then
         return message
     else
     end
 end
 
-function EvaluateCondition(condition)
+function Reminders:EvaluateCondition(condition)
     if string.match(condition, "\*") then
         return true
     end
