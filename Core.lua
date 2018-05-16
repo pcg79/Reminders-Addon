@@ -108,115 +108,120 @@ end
 function EvaluateCondition(condition)
     if string.match(condition, "\*") then
         return true
-    else
-        -- Go through each condition
-        -- name
-        -- level
-        -- class
-        -- profession
-        local tokens = {}
-        local tokenCount = 0
-        for token in string.gmatch(condition, "[^ ]+") do
-            tokenCount = tokenCount + 1
-            tokens[tokenCount] = token
-        end
+    end
 
-        debug("tokenCount = "..tokenCount)
+    -- Go through each condition
+    -- name
+    -- level
+    -- class
+    -- profession
+    local evalString = ""
+    local tokens = {}
+    local tokenCount = 0
+    for token in string.gmatch(condition, "%w+") do
+        tokenCount = tokenCount + 1
+        tokens[tokenCount] = token
+    end
 
-        local toSkip = 0
-        for i=1, tokenCount do
-            debug("i = "..i)
+    debug("tokenCount = "..tokenCount)
 
-            if toSkip <= 0 then
-                local token = tokens[i]:lower()
-                debug("token = "..token)
-                local count = 0
-                if token == R_NAME then
-                    count = count + 1
-                    local operation = tokens[i+count]
-                    count = count + 1
-                    local name = tokens[i+count]
+    local toSkip = 0
+    for i=1, tokenCount do
+        debug("i = "..i)
 
-                    debug("(name) operation = "..operation)
-                    debug("name = "..name)
+        if toSkip <= 0 then
+            local token = tokens[i]:lower()
+            debug("token = "..token)
+            local count = 0
 
-                    local playerName = UnitName("player")
+            if token == R_NAME then
+                count = count + 1
+                local operation = tokens[i+count]
+                count = count + 1
+                local name = tokens[i+count]
 
-                    debug("playerName = "..playerName)
+                debug("(name) operation = "..operation)
+                debug("name = "..name)
 
-                    return playerName == name
-                elseif token == R_LEVEL then
-                    count = count + 1
-                    local operation = tokens[i+count]
-                    count = count + 1
-                    local level = tokens[i+count]
+                local playerName = UnitName("player")
 
-                    if operation == "=" then
-                        operation = "=="
-                    end
+                debug("playerName = "..playerName)
 
-                    debug("(level) operation = "..operation)
-                    debug("level = "..level)
+                return playerName == name
 
-                    local playerLevel = UnitLevel("player")
-                    local levelStmt = "return "..playerLevel..operation..level
+            elseif token == R_LEVEL then
+                count = count + 1
+                local operation = tokens[i+count]
+                count = count + 1
+                local level = tokens[i+count]
 
-                    debug("stmt: "..levelStmt)
-
-                    local levelFunc = assert(loadstring(levelStmt))
-                    local result, errorMsg = levelFunc();
-
-                    debug("sum = "..tostring(result))
-
-                    return result
-                elseif token == R_CLASS then
-                    count = count + 1
-                    local operation = tokens[i+count]
-                    count = count + 1
-                    local class = tokens[i+count]
-
-                    debug("(class) operation = "..operation)
-                    debug("class = "..class)
-
-                    local playerClass = UnitClass("player")
-
-                    debug("playerClass = "..playerClass)
-
-                    return playerClass == class
-                elseif token == R_PROFESSION then
-                    count = count + 1
-                    local operation = tokens[i+count]
-                    count = count + 1
-                    local profession = tokens[i+count]:lower()
-
-                    debug("(profession) operation = "..operation)
-                    debug("profession = "..profession)
-
-                    local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
-
-                    local prof1Name = GetProfessionNameByIndex(prof1) or ""
-                    local prof2Name = GetProfessionNameByIndex(prof2) or ""
-
-
-                    debug("prof1Name = "..prof1Name)
-                    debug("prof2Name = "..(prof2Name or "nil"))
-                    debug("archaeology = "..(archaeology or "false"))
-                    debug("fishing = "..(fishing or "nil"))
-                    debug("cooking = "..(cooking))
-                    debug("firstAid = "..(firstAid or "nil"))
-
-                    return (profession == prof1Name:lower() or profession == prof2Name:lower()) or
-                       (profession == "archaeology" and archaeology ~= nil) or
-                       (profession == "fishing" and fishing ~= nil) or
-                       (profession == "cooking" and cooking ~= nil) or
-                       (profession == "firstaid" and firstAid ~= nil)
+                if operation == "=" then
+                    operation = "=="
                 end
 
+                debug("(level) operation = "..operation)
+                debug("level = "..level)
 
-                toSkip = count
-            else
-                toSkip = toSkip - 1
+                local playerLevel = UnitLevel("player")
+                local levelStmt = "return "..playerLevel..operation..level
+
+                debug("stmt: "..levelStmt)
+
+                local levelFunc = assert(loadstring(levelStmt))
+                local result, errorMsg = levelFunc();
+
+                debug("sum = "..tostring(result))
+
+                return result
+
+            elseif token == R_CLASS then
+                count = count + 1
+                local operation = tokens[i+count]
+                count = count + 1
+                local class = tokens[i+count]
+
+                debug("(class) operation = "..operation)
+                debug("class = "..class)
+
+                local playerClass = UnitClass("player")
+
+                debug("playerClass = "..playerClass)
+
+                return playerClass == class
+
+            elseif token == R_PROFESSION then
+                count = count + 1
+                local operation = tokens[i+count]
+                count = count + 1
+                local profession = tokens[i+count]:lower()
+
+                debug("(profession) operation = "..operation)
+                debug("profession = "..profession)
+
+                local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+
+                local prof1Name = GetProfessionNameByIndex(prof1) or ""
+                local prof2Name = GetProfessionNameByIndex(prof2) or ""
+
+
+                debug("prof1Name = "..prof1Name)
+                debug("prof2Name = "..(prof2Name or "nil"))
+                debug("archaeology = "..(archaeology or "false"))
+                debug("fishing = "..(fishing or "nil"))
+                debug("cooking = "..(cooking))
+                debug("firstAid = "..(firstAid or "nil"))
+
+                return (profession == prof1Name:lower() or profession == prof2Name:lower()) or
+                   (profession == "archaeology" and archaeology ~= nil) or
+                   (profession == "fishing" and fishing ~= nil) or
+                   (profession == "cooking" and cooking ~= nil) or
+                   (profession == "firstaid" and firstAid ~= nil)
             end
+
+
+            toSkip = count
+        else
+            toSkip = toSkip - 1
         end
     end
 
