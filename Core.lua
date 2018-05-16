@@ -227,7 +227,6 @@ function EvaluateCondition(condition)
                 evalString = evalString.." or"
             end
 
-
             toSkip = count
         else
             toSkip = toSkip - 1
