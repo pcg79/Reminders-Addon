@@ -66,148 +66,11 @@ function Reminders:EvaluateReminders()
     local reminderMessages = {}
 
     for _, reminder in pairs(reminders) do
-        array = {}
-        debug("reminder = "..reminder)
-        for token in string.gmatch(reminder, "[^,]+") do
-            tinsert(array, token:trim())
+        local message = ProcessReminder(reminder)
+
+        if message ~= nil and message ~= "" then
+            tinsert(reminderMessages, message)
         end
-
-        for k,v in pairs(array) do
-            debug(k.." = "..v)
-        end
-
-        local msg = array[1]
-        local condition = array[2]
-
-        debug("msg = "..msg)
-        debug("condition string = "..condition)
-
-        if type(condition) == "string" then
-            if string.match(condition, "\*") then
-                tinsert(reminderMessages, msg)
-            else
-                -- Go through each condition
-                -- name
-                -- level
-                -- class
-                -- profession
-                local tokens = {}
-                local tokenCount = 0
-                for token in string.gmatch(condition, "[^ ]+") do
-                    tokenCount = tokenCount + 1
-                    tokens[tokenCount] = token
-                end
-
-                debug("tokenCount = "..tokenCount)
-
-                local toSkip = 0
-                for i=1, tokenCount do
-                    debug("i = "..i)
-
-                    if toSkip <= 0 then
-                        local token = tokens[i]:lower()
-                        debug("token = "..token)
-                        local count = 0
-                        if token == R_NAME then
-                            count = count + 1
-                            local operation = tokens[i+count]
-                            count = count + 1
-                            local name = tokens[i+count]
-
-                            debug("(name) operation = "..operation)
-                            debug("name = "..name)
-
-                            local playerName = UnitName("player")
-
-                            debug("playerName = "..playerName)
-
-                            if playerName == name then
-                                tinsert(reminderMessages, msg)
-                            end
-                        elseif token == R_LEVEL then
-                            count = count + 1
-                            local operation = tokens[i+count]
-
-                            if operation == "=" then
-                                operation = "=="
-                            end
-                            count = count + 1
-                            local level = tokens[i+count]
-
-                            debug("(level) operation = "..operation)
-                            debug("level = "..level)
-
-                            local playerLevel = UnitLevel("player")
-                            local levelStmt = "return "..playerLevel..operation..level
-
-                            debug("stmt: "..levelStmt)
-
-                            local levelFunc = assert(loadstring(levelStmt))
-                            local result, errorMsg = levelFunc();
-
-                            debug("sum = "..tostring(result))
-
-                            if result then
-                                tinsert(reminderMessages, msg)
-                            end
-                        elseif token == R_CLASS then
-                            count = count + 1
-                            local operation = tokens[i+count]
-                            count = count + 1
-                            local class = tokens[i+count]
-
-                            debug("(class) operation = "..operation)
-                            debug("class = "..class)
-
-                            local playerClass = UnitClass("player")
-
-                            debug("playerClass = "..playerClass)
-
-                            if playerClass == class then
-                                tinsert(reminderMessages, msg)
-                            end
-                        elseif token == R_PROFESSION then
-                            count = count + 1
-                            local operation = tokens[i+count]
-                            count = count + 1
-                            local profession = tokens[i+count]:lower()
-
-                            debug("(profession) operation = "..operation)
-                            debug("profession = "..profession)
-
-                            local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
-
-                            local prof1Name = GetProfessionNameByIndex(prof1) or ""
-                            local prof2Name = GetProfessionNameByIndex(prof2) or ""
-
-
-                            debug("prof1Name = "..prof1Name)
-                            debug("prof2Name = "..(prof2Name or "nil"))
-                            debug("archaeology = "..(archaeology or "false"))
-                            debug("fishing = "..(fishing or "nil"))
-                            debug("cooking = "..(cooking))
-                            debug("firstAid = "..(firstAid or "nil"))
-
-                            if (profession == prof1Name:lower() or profession == prof2Name:lower()) or
-                               (profession == "archaeology" and archaeology ~= nil) or
-                               (profession == "fishing" and fishing ~= nil) or
-                               (profession == "cooking" and cooking ~= nil) or
-                               (profession == "firstaid" and firstAid ~= nil) then
-
-                               tinsert(reminderMessages, msg)
-                           end
-                        end
-
-
-                        toSkip = count
-                    else
-                        toSkip = toSkip - 1
-                    end
-                end
-            end
-        else
-        end
-
     end
 
     for _, m in pairs(reminderMessages) do
@@ -218,6 +81,148 @@ function Reminders:EvaluateReminders()
         message(table.concat(reminderMessages, "\n"))
     end
 end
+
+function ProcessReminder(reminder)
+    array = {}
+    debug("reminder = "..reminder)
+    for token in string.gmatch(reminder, "[^,]+") do
+        tinsert(array, token:trim())
+    end
+
+    for k,v in pairs(array) do
+        debug(k.." = "..v)
+    end
+
+    local message   = array[1]
+    local condition = array[2]
+
+    debug("message = "..message)
+    debug("condition string = "..condition)
+
+    if type(condition) == "string" and EvaluateCondition(condition) then
+        return message
+    else
+    end
+end
+
+function EvaluateCondition(condition)
+    if string.match(condition, "\*") then
+        return true
+    else
+        -- Go through each condition
+        -- name
+        -- level
+        -- class
+        -- profession
+        local tokens = {}
+        local tokenCount = 0
+        for token in string.gmatch(condition, "[^ ]+") do
+            tokenCount = tokenCount + 1
+            tokens[tokenCount] = token
+        end
+
+        debug("tokenCount = "..tokenCount)
+
+        local toSkip = 0
+        for i=1, tokenCount do
+            debug("i = "..i)
+
+            if toSkip <= 0 then
+                local token = tokens[i]:lower()
+                debug("token = "..token)
+                local count = 0
+                if token == R_NAME then
+                    count = count + 1
+                    local operation = tokens[i+count]
+                    count = count + 1
+                    local name = tokens[i+count]
+
+                    debug("(name) operation = "..operation)
+                    debug("name = "..name)
+
+                    local playerName = UnitName("player")
+
+                    debug("playerName = "..playerName)
+
+                    return playerName == name
+                elseif token == R_LEVEL then
+                    count = count + 1
+                    local operation = tokens[i+count]
+                    count = count + 1
+                    local level = tokens[i+count]
+
+                    if operation == "=" then
+                        operation = "=="
+                    end
+
+                    debug("(level) operation = "..operation)
+                    debug("level = "..level)
+
+                    local playerLevel = UnitLevel("player")
+                    local levelStmt = "return "..playerLevel..operation..level
+
+                    debug("stmt: "..levelStmt)
+
+                    local levelFunc = assert(loadstring(levelStmt))
+                    local result, errorMsg = levelFunc();
+
+                    debug("sum = "..tostring(result))
+
+                    return result
+                elseif token == R_CLASS then
+                    count = count + 1
+                    local operation = tokens[i+count]
+                    count = count + 1
+                    local class = tokens[i+count]
+
+                    debug("(class) operation = "..operation)
+                    debug("class = "..class)
+
+                    local playerClass = UnitClass("player")
+
+                    debug("playerClass = "..playerClass)
+
+                    return playerClass == class
+                elseif token == R_PROFESSION then
+                    count = count + 1
+                    local operation = tokens[i+count]
+                    count = count + 1
+                    local profession = tokens[i+count]:lower()
+
+                    debug("(profession) operation = "..operation)
+                    debug("profession = "..profession)
+
+                    local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+
+                    local prof1Name = GetProfessionNameByIndex(prof1) or ""
+                    local prof2Name = GetProfessionNameByIndex(prof2) or ""
+
+
+                    debug("prof1Name = "..prof1Name)
+                    debug("prof2Name = "..(prof2Name or "nil"))
+                    debug("archaeology = "..(archaeology or "false"))
+                    debug("fishing = "..(fishing or "nil"))
+                    debug("cooking = "..(cooking))
+                    debug("firstAid = "..(firstAid or "nil"))
+
+                    return (profession == prof1Name:lower() or profession == prof2Name:lower()) or
+                       (profession == "archaeology" and archaeology ~= nil) or
+                       (profession == "fishing" and fishing ~= nil) or
+                       (profession == "cooking" and cooking ~= nil) or
+                       (profession == "firstaid" and firstAid ~= nil)
+                end
+
+
+                toSkip = count
+            else
+                toSkip = toSkip - 1
+            end
+        end
+    end
+
+    return false
+end
+
 
 function GetProfessionNameByIndex(profIndex)
     if profIndex == nil or profIndex == "" then
