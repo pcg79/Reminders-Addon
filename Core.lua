@@ -118,7 +118,7 @@ function EvaluateCondition(condition)
     local evalString = ""
     local tokens = {}
     local tokenCount = 0
-    for token in string.gmatch(condition, "%w+") do
+    for token in string.gmatch(condition, "[^ ]+") do
         tokenCount = tokenCount + 1
         tokens[tokenCount] = token
     end
