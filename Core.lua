@@ -7,6 +7,9 @@ local R_PROFESSION = "profession"
 local R_LEVEL      = "level"
 local R_NAME       = "name"
 
+local R_AND = "and"
+local R_OR  = "or"
+
 local function chatMessage(message)
     RemindersConsole:Print("Reminder: "..message)
 end
@@ -147,7 +150,7 @@ function EvaluateCondition(condition)
 
                 debug("playerName = "..playerName)
 
-                return playerName == name
+                evalString = evalString.." "..tostring(playerName == name)
 
             elseif token == R_LEVEL then
                 count = count + 1
@@ -172,7 +175,7 @@ function EvaluateCondition(condition)
 
                 debug("sum = "..tostring(result))
 
-                return result
+                evalString = evalString.." "..tostring(result)
 
             elseif token == R_CLASS then
                 count = count + 1
@@ -187,7 +190,7 @@ function EvaluateCondition(condition)
 
                 debug("playerClass = "..playerClass)
 
-                return playerClass == class
+                evalString = evalString.." "..tostring(playerClass == class)
 
             elseif token == R_PROFESSION then
                 count = count + 1
@@ -211,11 +214,17 @@ function EvaluateCondition(condition)
                 debug("cooking = "..(cooking))
                 debug("firstAid = "..(firstAid or "nil"))
 
-                return (profession == prof1Name:lower() or profession == prof2Name:lower()) or
+                local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
                    (profession == "archaeology" and archaeology ~= nil) or
                    (profession == "fishing" and fishing ~= nil) or
                    (profession == "cooking" and cooking ~= nil) or
                    (profession == "firstaid" and firstAid ~= nil)
+
+                evalString = evalString.." "..tostring(profResult)
+            elseif token == R_AND then
+                evalString = evalString.." and"
+            elseif token == R_OR then
+                evalString = evalString.." or"
             end
 
 
@@ -225,7 +234,20 @@ function EvaluateCondition(condition)
         end
     end
 
-    return false
+    if evalString == "" then
+        return false
+    else
+        evalString = "return "..evalString
+
+        debug("evalString: "..evalString)
+
+        local evalFunc = assert(loadstring(evalString))
+        local result, errorMsg = evalFunc();
+
+        debug("end result = "..tostring(result))
+
+        return result
+    end
 end
 
 
