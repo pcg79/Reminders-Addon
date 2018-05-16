@@ -16,11 +16,14 @@ where `*` applies to every character you have.  `*` should not be paired with ot
 
 Examples of `condition`:
 
-*
+    *
 
-class = "Warrior"
+    class = Warrior
 
-profession = "Engineering" and level > 101
+    profession = Engineering and level > 101
+
+
+class, profession, and name only support equals.  level supports equal, less than, greater than, less than or equal to, and great than or equal to.
 
 TODO:
 
