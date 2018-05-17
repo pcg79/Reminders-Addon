@@ -90,24 +90,12 @@ end
 
 function Reminders:ProcessReminder(reminder)
     array = {}
-    debug("reminder = "..reminder)
-    for token in string.gmatch(reminder, "[^,]+") do
-        tinsert(array, token:trim())
-    end
 
-    for k,v in pairs(array) do
-        debug(k.." = "..v)
-    end
+    debug("message = "..reminder.message)
+    debug("condition string = "..reminder.condition)
 
-    local message   = array[1]
-    local condition = array[2]
-
-    debug("message = "..message)
-    debug("condition string = "..condition)
-
-    if type(condition) == "string" and Reminders:EvaluateCondition(condition) then
-        return message
-    else
+    if Reminders:EvaluateCondition(reminder.condition) then
+        return reminder.message
     end
 end
 
@@ -265,13 +253,46 @@ end
 
 function Reminders:SaveReminder(text)
     debug("saving - "..text)
-    table.insert(self.db.global.reminders, text)
+    local message, condition = ParseReminder(text)
+
+    if message == nil or message == "" or condition == nil or condition == "" then
+        -- TODO:  Print out "empty params" msg somewhere
+        debug("message or condition was empty or nil")
+        return
+    end
+
+    -- Don't save reminders where the message and reminder already exist
+    for i, reminder in ipairs(self.db.global.reminders) do
+        debug("i = "..i)
+        debug("reminder = "..reminder)
+
+        if reminder.message:lower() == message:lower() and data.condition:lower() == condition:lower() then
+            debug("Reminder with text '"..message.."' and condition '"..condition .."' already exists")
+            -- TODO:  Print out "already added" msg somewhere
+            return
+        end
+    end
+
+    tinsert(self.db.global.reminders, { message = message, condition = condition })
+end
+
+function ParseReminder(text)
+    local array = {}
+    for token in string.gmatch(text, "[^,]+") do
+        tinsert(array, token:trim())
+    end
+
+    for k,v in pairs(array) do
+        debug(k.." = "..v)
+    end
+
+    return array[1], array[2]
 end
 
 function Reminders:DebugPrintReminders()
     reminders = self.db.global.reminders
     for _, reminder in pairs(reminders) do
-        chatMessage(reminder)
+        chatMessage(reminder.message .. " -> " .. reminder.condition)
     end
 end
 
