@@ -172,20 +172,13 @@ function Reminders:LoadReminders()
         reminderItem:SetHeight(20)
         reminderItem:SetWidth(100)
 
-        reminderItem.text = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
-        reminderItem.text:SetSize(100, 10)
+        reminderItem.text = reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
+        reminderItem.text:SetSize(150, 10)
         reminderItem.text:SetJustifyH("LEFT")
         reminderItem.text:SetPoint("TOPLEFT", 5, -3)
-        reminderItem.text:SetText(reminder)
+        reminderItem.text:SetText(reminder.message .. " -> " .. reminder.condition)
 
         -- reminderItem.text:SetTextColor(0.67, 0.83, 0.48)
-
-
-        -- reminderText = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
-        -- reminderText:SetSize(29, 10)
-        -- reminderText:SetJustifyH("LEFT")
-        -- reminderText:SetPoint("TOPLEFT", reminderItem.icon, 1, -3)
-        -- reminderText:SetText(reminder)
 
         reminderItem:SetScript("OnClick", function(self)
             debug("clicked - ")
