@@ -55,8 +55,7 @@ function Reminders:OnInitialize()
 
     self.frameShown = false
 
-    Reminders:PrintReminders()
-
+    Reminders:DebugPrintReminders()
 
     if not gui then Reminders:CreateUI() end
 
@@ -308,7 +307,7 @@ function Reminders:SaveReminder(text)
     table.insert(self.db.global.reminders, text)
 end
 
-function Reminders:PrintReminders()
+function Reminders:DebugPrintReminders()
     reminders = self.db.global.reminders
     for _, reminder in pairs(reminders) do
         chatMessage(reminder)
