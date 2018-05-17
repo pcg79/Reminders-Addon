@@ -251,55 +251,12 @@ function Reminders:EvaluateCondition(condition)
     end
 end
 
-
 function GetProfessionNameByIndex(profIndex)
     if profIndex == nil or profIndex == "" then
         return
     end
     local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(profIndex)
     return name
-end
-
-function Reminders:LoadReminders()
-    offset = 0
-    for _, reminder in pairs(self.db.global.reminders) do
-        local reminderItem = CreateFrame("Button", nil, reminderList)
-
-        -- reminderItem:SetText(reminder)
-        reminderItem:SetPoint("TOPLEFT", 10, -(25 + offset))
-        reminderItem:SetHeight(20)
-        reminderItem:SetWidth(100)
-
-        reminderItem.text = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
-        reminderItem.text:SetSize(100, 10)
-        reminderItem.text:SetJustifyH("LEFT")
-        reminderItem.text:SetPoint("TOPLEFT", 5, -3)
-        reminderItem.text:SetText(reminder)
-
-        -- reminderItem.text:SetTextColor(0.67, 0.83, 0.48)
-
-
-        -- reminderText = reminderItem:CreateFontString(reminder.."Text", "ARTWORK", "NumberFontNormalSmall")
-        -- reminderText:SetSize(29, 10)
-        -- reminderText:SetJustifyH("LEFT")
-        -- reminderText:SetPoint("TOPLEFT", reminderItem.icon, 1, -3)
-        -- reminderText:SetText(reminder)
-
-        reminderItem:SetScript("OnClick", function(self)
-            debug("clicked - ")
-        end)
-        offset = offset + 20
-    end
-end
-
-function Reminders:OnEvent()
-    debug('Reminder Loaded')
-end
-
-function Reminders:CloseFrame(widget, event)
-    debug("closing")
-    AceGUI:Release(widget)
-    self.frameShown = false
 end
 
 function Reminders:SaveReminder(text)
