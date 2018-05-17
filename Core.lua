@@ -82,6 +82,7 @@ function Reminders:EvaluateReminders()
         debug("m = "..m)
     end
 
+    -- If reminderMessages has at least one message, display them
     if next(reminderMessages) ~= nil then
         message(table.concat(reminderMessages, "\n"))
     end
@@ -110,6 +111,8 @@ function Reminders:ProcessReminder(reminder)
     end
 end
 
+-- We build up a string to evaluate based on any conditions we find
+-- then we evaluate the string as a whole.
 function Reminders:EvaluateCondition(condition)
     if string.match(condition, "\*") then
         return true
@@ -209,11 +212,11 @@ function Reminders:EvaluateCondition(condition)
                 local prof2Name = GetProfessionNameByIndex(prof2) or ""
 
 
-                debug("prof1Name = "..prof1Name)
+                debug("prof1Name = "..(prof1Name or "nil"))
                 debug("prof2Name = "..(prof2Name or "nil"))
-                debug("archaeology = "..(archaeology or "false"))
+                debug("archaeology = "..(archaeology or "nil"))
                 debug("fishing = "..(fishing or "nil"))
-                debug("cooking = "..(cooking))
+                debug("cooking = "..(cooking or "nil"))
                 debug("firstAid = "..(firstAid or "nil"))
 
                 local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
@@ -223,6 +226,7 @@ function Reminders:EvaluateCondition(condition)
                    (profession == "firstaid" and firstAid ~= nil)
 
                 evalString = evalString.." "..tostring(profResult)
+
             elseif token == R_AND then
                 evalString = evalString.." and"
             elseif token == R_OR then
