@@ -128,6 +128,50 @@ function Reminders:CreateUI()
 
 end
 
+function Reminders:CreateUI2()
+    local frameName = "RemindersFrame"
+    local EditBoxBackdrop = {
+        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        tile = true, edgeSize = 1, tileSize = 5,
+    }
+
+    gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
+    gui:Hide()
+
+    gui:SetSize(1000, 600)
+    gui:SetPoint("CENTER")
+    gui:EnableMouse(true)
+    gui.Title:SetText("Reminders")
+
+    local editbox = CreateFrame("EditBox", frameName.."EditBox", gui)
+    -- editbox:SetLabel("Insert text:")
+    editbox:SetPoint("TOPLEFT", gui, 50, -50)
+    editbox:SetScript("OnEnterPressed", function(self)
+        local reminderText = self:GetText()
+        reminderText = reminderText:trim()
+
+        if not reminderText or reminderText == "" then
+            return
+        end
+
+        Reminders:SaveReminder(reminderText)
+        self:SetText("")
+        self:ClearFocus()
+        -- MainPanel.list_frame:Update(nil, false)
+    end)
+    editbox:SetFontObject(GameFontHighlightSmall)
+    editbox:SetWidth(500)
+    editbox:SetHeight(25)
+    editbox:EnableMouse(true)
+    editbox:SetBackdrop(EditBoxBackdrop)
+    editbox:SetBackdropColor (0, 0, 0, 0.5)
+    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+
+
+    Reminders:CreateScrollFrame(gui)
+end
+
 function Reminders:CloseOnClick(frame)
     debug("In on click")
     gui:Hide()
