@@ -64,30 +64,29 @@
 
 
 -- Try 2
-function Reminders:CreateScrollFrame()
-    local mainFrame = CreateFrame("Frame", "mainFrame ", UIParent, "UIPanelDialogTemplate")
-    mainFrame:SetSize(1000, 600)
-    mainFrame:SetPoint("CENTER")
-    mainFrame:EnableMouse(true)
-    mainFrame.Title:SetText("Reminders")
+function Reminders:CreateScrollFrame(mainFrame)
+    local scrollWidth = 1000
+    local scrollHeight = 300
 
     local scrollFrame = CreateFrame("ScrollFrame", "scrollFrame", mainFrame, "UIPanelScrollFrameTemplate")
-    scrollFrame:SetPoint("TOPLEFT", 8, -26)
-    scrollFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMLEFT", 410, 10)
+    scrollFrame:SetPoint("BOTTOMLEFT", 0, 10)
+    scrollFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMLEFT", scrollWidth - 30, 10)
 
     -- Not sure what this is even setting.  Changing it doesn't seem to do anything
     -- but the scrollbar won't show up w/o it.
-    scrollFrame:SetSize(300,300)
+    scrollFrame:SetSize(scrollWidth, scrollHeight)
 
     local scrollChild = CreateFrame("Frame", "scrollChild", scrollFrame)
-    scrollChild:SetSize(400, 3000)
+    scrollChild:SetSize(scrollWidth, scrollHeight)
     scrollChild:SetPoint("TOPLEFT", 0, 0)
 
     scrollFrame:SetScrollChild(scrollChild)
 
+    mainFrame.scrollList = scrollChild
+
     for i = 0, 100 do
         local childFrame = _G.CreateFrame("Button", "elementFrame"..i, scrollChild, "UIPanelButtonTemplate")
-        childFrame:SetSize(400, 50)
+        childFrame:SetSize(scrollWidth - 60, 50)
         childFrame:SetPoint("TOP", 0, -(50 * (i - 1)))
         childFrame:SetText("text - "..i)
     end
