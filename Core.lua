@@ -61,9 +61,9 @@ function Reminders:OnInitialize()
 
     Reminders:LoadReminders()
 
-    Reminders:EvaluateReminders()
+    -- Reminders:EvaluateReminders()
 
-    gui:Show()
+    if gui then gui:Show() end
 end
 
 function Reminders:EvaluateReminders()
@@ -264,7 +264,7 @@ function Reminders:SaveReminder(text)
     -- Don't save reminders where the message and reminder already exist
     for i, reminder in ipairs(self.db.global.reminders) do
         debug("i = "..i)
-        debug("reminder = "..reminder)
+        -- debug("reminder = "..reminder)
 
         if reminder.message:lower() == message:lower() and data.condition:lower() == condition:lower() then
             debug("Reminder with text '"..message.."' and condition '"..condition .."' already exists")
@@ -274,6 +274,7 @@ function Reminders:SaveReminder(text)
     end
 
     tinsert(self.db.global.reminders, { message = message, condition = condition })
+    Reminders:RefreshReminderList()
 end
 
 function ParseReminder(text)
