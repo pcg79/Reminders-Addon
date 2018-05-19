@@ -40,6 +40,13 @@ function Reminders:CreateUI()
 
 
     Reminders:CreateScrollFrame(gui)
+
+    local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
+    closeButton:SetScript("OnClick", function(self) gui:Hide() end)
+    closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
+    closeButton:SetHeight(20)
+    closeButton:SetWidth(100)
+    closeButton:SetText("Close")
 end
 
 function Reminders:CloseOnClick(frame)
