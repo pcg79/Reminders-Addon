@@ -68,11 +68,6 @@ function Reminders:LoadReminders()
     end
 end
 
-function Reminders:RefreshReminderList()
-  -- Not sure what to do here.  If I recreate all the buttons will they just appear over the existing ones?
-  -- Do I have to somehow "erase" the existing ones?
-end
-
 
 function Reminders:OnEvent()
     debug('Reminder Loaded')
