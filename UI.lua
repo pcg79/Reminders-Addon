@@ -77,3 +77,18 @@ function Reminders:CloseFrame(widget, event)
     AceGUI:Release(widget)
     self.frameShown = false
 end
+
+
+StaticPopupDialogs["REMINDERS_REMOVE_ALL_CONFIRM"] = {
+    preferredIndex = STATICPOPUPS_NUMDIALOGS,
+    text = "Are you sure you would like to remove ALL Reminders?",
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        Reminders:ResetAll()
+    end,
+    timeout = 30,
+    whileDead = 1,
+    hideOnEscape = 1,
+}
+
