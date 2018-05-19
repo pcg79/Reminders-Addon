@@ -29,18 +29,18 @@ debug("We're in")
 debug(_G._VERSION)
 
 function Reminders:CommandProcessor(input)
-    debug(input)
+    debug("Command = "..input)
     if input == "" or input == "open" or input == "show" then
         gui:Show()
     elseif input == "reset" then
-        debug("resetting")
-        Reminders:ResetAll()
+        StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
     else
         OutputLog("Usage:")
     end
 end
 
 function Reminders:ResetAll()
+    debug("resetting all")
     self.db:ResetDB()
 end
 
