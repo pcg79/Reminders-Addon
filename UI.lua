@@ -38,7 +38,6 @@ function Reminders:CreateUI()
     editbox:SetBackdropColor (0, 0, 0, 0.5)
     editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
 
-
     Reminders:CreateScrollFrame(gui)
 
     local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
