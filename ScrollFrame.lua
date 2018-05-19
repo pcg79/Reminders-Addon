@@ -13,6 +13,11 @@ function Reminders:CreateScrollFrame(mainFrame)
     -- but the scrollbar won't show up w/o it.
     scrollFrame:SetSize(SCROLLWIDTH, SCROLLHEIGHT)
 
+    -- Make sure scrolling overflow doesn't make Close button unclickable
+    -- Using SetClipsChildren(true) causes the scroll bar to disappear
+    -- From: http://www.wowinterface.com/forums/showpost.php?p=326605&postcount=5
+    scrollFrame:SetToplevel(true)
+
     local scrollChild = CreateFrame("Frame", "scrollChild", scrollFrame)
     scrollChild:SetSize(SCROLLWIDTH, SCROLLHEIGHT)
     scrollChild:SetPoint("TOPLEFT", 0, 0)
