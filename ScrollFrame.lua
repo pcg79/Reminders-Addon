@@ -1,3 +1,9 @@
+-- GLOBALS
+
+SCROLLWIDTH = 1000
+SCROLLHEIGHT = 300
+
+
 -- function Reminders:CreateScrollFrame()
 
 --     -- create the frame that will hold all other frames/objects:
@@ -65,31 +71,28 @@
 
 -- Try 2
 function Reminders:CreateScrollFrame(mainFrame)
-    local scrollWidth = 1000
-    local scrollHeight = 300
-
     local scrollFrame = CreateFrame("ScrollFrame", "scrollFrame", mainFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("BOTTOMLEFT", 0, 10)
-    scrollFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMLEFT", scrollWidth - 30, 10)
+    scrollFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMLEFT", SCROLLWIDTH - 30, 10)
 
     -- Not sure what this is even setting.  Changing it doesn't seem to do anything
     -- but the scrollbar won't show up w/o it.
-    scrollFrame:SetSize(scrollWidth, scrollHeight)
+    scrollFrame:SetSize(SCROLLWIDTH, SCROLLHEIGHT)
 
     local scrollChild = CreateFrame("Frame", "scrollChild", scrollFrame)
-    scrollChild:SetSize(scrollWidth, scrollHeight)
+    scrollChild:SetSize(SCROLLWIDTH, SCROLLHEIGHT)
     scrollChild:SetPoint("TOPLEFT", 0, 0)
 
     scrollFrame:SetScrollChild(scrollChild)
 
     mainFrame.scrollList = scrollChild
 
-    for i = 0, 100 do
-        local childFrame = _G.CreateFrame("Button", "elementFrame"..i, scrollChild, "UIPanelButtonTemplate")
-        childFrame:SetSize(scrollWidth - 60, 50)
-        childFrame:SetPoint("TOP", 0, -(50 * (i - 1)))
-        childFrame:SetText("text - "..i)
-    end
+    -- for i = 0, 100 do
+    --     local childFrame = _G.CreateFrame("Button", "elementFrame"..i, scrollChild, "UIPanelButtonTemplate")
+    --     childFrame:SetSize(scrollWidth - 60, 50)
+    --     childFrame:SetPoint("TOP", 0, -(50 * (i - 1)))
+    --     childFrame:SetText("text - "..i)
+    -- end
 end
 
 -- -- Try 3
