@@ -274,7 +274,7 @@ function Reminders:SaveReminder(text)
     end
 
     tinsert(self.db.global.reminders, { message = message, condition = condition })
-    Reminders:RefreshReminderList()
+    Reminders:LoadReminders()
 end
 
 function ParseReminder(text)
