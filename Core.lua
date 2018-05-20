@@ -253,7 +253,12 @@ end
 
 function Reminders:SaveReminder(text)
     debug("saving - "..text)
-    local message, condition = ParseReminder(text)
+    local message, condition, interval = ParseReminder(text)
+    interval = interval or "daily"
+
+    debug("message = "..message)
+    debug("condition = "..condition)
+    debug("interval = "..interval)
 
     if message == nil or message == "" or condition == nil or condition == "" then
         -- TODO:  Print out "empty params" msg somewhere
@@ -263,18 +268,50 @@ function Reminders:SaveReminder(text)
 
     -- Don't save reminders where the message and reminder already exist
     for i, reminder in ipairs(self.db.global.reminders) do
-        debug("i = "..i)
-        -- debug("reminder = "..reminder)
-
-        if reminder.message:lower() == message:lower() and data.condition:lower() == condition:lower() then
-            debug("Reminder with text '"..message.."' and condition '"..condition .."' already exists")
+        if reminder.message:lower() == message:lower() and
+            reminder.condition:lower() == condition:lower()
+            and reminder.interval:lower() == interval:lower() then
+            debug("Reminder with text '"..message.."' and condition '"..condition .."' and interval '"..interval.."' already exists")
             -- TODO:  Print out "already added" msg somewhere
             return
         end
     end
 
-    tinsert(self.db.global.reminders, { message = message, condition = condition })
+    local nextRemindAt = Reminders:CalculateNextRemindAt(interval)
+
+    debug("nextRemindAt = "..nextRemindAt)
+
+    tinsert(self.db.global.reminders, { message = message, condition = condition, interval = interval, nextRemindAt = nextRemindAt })
     Reminders:LoadReminders()
+end
+
+function Reminders:CalculateNextRemindAt(interval)
+    local secondsInADay = 24 * 60 * 60
+    local timeNow = time()
+    local nextRemindAt = nil
+
+    if interval == "daily" then
+        nextRemindAt = timeNow + Reminders:GetQuestResetTime()
+    elseif interval == "weekly" then
+        local nextQuestResetTime = timeNow + Reminders:GetQuestResetTime()
+        local nextQuestResetTimeWDay = date("%w", nextQuestResetTime)
+
+        -- We'll have to change this if server resets stop being on Tuesday.
+        -- Also not sure how this'll handle internationalization.  I'm guessing poorly.
+        -- Might have to change local time to PST, calculate time distance, then
+        -- change back to local time.
+        local numDaysUntilTuesday = 7 - ((5 + nextQuestResetTimeWDay) % 7) % 7
+
+        nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
+    end
+
+    return nextRemindAt
+end
+
+function Reminders:GetQuestResetTime()
+    -- It seems GetQuestResetTime() gives you one second before the actual reset.
+    -- So add 1 to get the actual reset.
+    return GetQuestResetTime() + 1
 end
 
 function ParseReminder(text)
@@ -287,7 +324,7 @@ function ParseReminder(text)
         debug(k.." = "..v)
     end
 
-    return array[1], array[2]
+    return array[1], array[2], array[3]
 end
 
 function Reminders:DebugPrintReminders()
