@@ -3,6 +3,8 @@ local R_CLASS      = "class"
 local R_PROFESSION = "profession"
 local R_LEVEL      = "level"
 local R_NAME       = "name"
+local R_ILVL       = "ilvl"
+local R_ILEVEL     = "ilevel"
 
 local R_AND = "and"
 local R_OR  = "or"
@@ -188,7 +190,7 @@ function EvaluateCondition(self)
                 local levelFunc = assert(loadstring(levelStmt))
                 local result, errorMsg = levelFunc();
 
-                debug("sum = "..tostring(result))
+                debug("level result = "..tostring(result))
 
                 evalString = evalString.." "..tostring(result)
 
@@ -236,6 +238,28 @@ function EvaluateCondition(self)
                    (profession == "firstaid" and firstAid ~= nil)
 
                 evalString = evalString.." "..tostring(profResult)
+
+            elseif token == R_ILEVEL or token == R_ILVL then
+                count = count + 1
+                local operation = tokens[i+count]
+                count = count + 1
+                local ilevel = tokens[i+count]
+
+                debug("(ilevel) operation = "..operation)
+                debug("ilevel = "..ilevel)
+
+                local playerILevel = GetAverageItemLevel()
+
+                local ilevelStmt = "return "..playerILevel..operation..ilevel
+
+                debug("stmt: "..ilevelStmt)
+
+                local ilevelFunc = assert(loadstring(ilevelStmt))
+                local result, errorMsg = ilevelFunc();
+
+                debug("ilevel result = "..tostring(result))
+
+                evalString = evalString.." "..tostring(result)
 
             elseif token == R_AND then
                 evalString = evalString.." and"
