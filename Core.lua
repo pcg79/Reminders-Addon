@@ -61,7 +61,7 @@ function Reminders:OnInitialize()
 
     Reminders:LoadReminders()
 
-    -- Reminders:EvaluateReminders()
+    Reminders:EvaluateReminders()
 
     if gui then gui:Show() end
 end
@@ -69,12 +69,23 @@ end
 function Reminders:EvaluateReminders()
     local reminders = self.db.global.reminders
     local reminderMessages = {}
+    local timeNow = time()
 
     for _, reminder in pairs(reminders) do
-        local message = Reminders:ProcessReminder(reminder)
+        debug("time = "..timeNow)
+        debug("reminder.nextRemindAt = "..reminder.nextRemindAt)
+        if timeNow >= reminder.nextRemindAt then
+            local message = Reminders:ProcessReminder(reminder)
 
-        if message ~= nil and message ~= "" then
-            tinsert(reminderMessages, message)
+            if message ~= nil and message ~= "" then
+                tinsert(reminderMessages, message)
+
+                -- We're showing this one so don't show it again until the next interval
+                -- BUG: This isn't great. This means if you have > 1 toon this reminder
+                -- would pertain to, you're only going to see it on the first to log in.
+                -- Not sure how I'll go about fixing this.
+                reminder.nextRemindAt = Reminders:CalculateNextRemindAt(reminder.interval)
+            end
         end
     end
 
@@ -285,9 +296,12 @@ function Reminders:CalculateNextRemindAt(interval)
     local timeNow = time()
     local nextRemindAt = nil
 
+    debug("[CalculateNextRemindAt] interval = "..interval)
     if interval == "daily" then
+        debug("it's daily")
         nextRemindAt = timeNow + Reminders:GetQuestResetTime()
     elseif interval == "weekly" then
+        debug("it's weekly")
         local nextQuestResetTime = timeNow + Reminders:GetQuestResetTime()
         local nextQuestResetTimeWDay = date("%w", nextQuestResetTime)
 
@@ -298,6 +312,9 @@ function Reminders:CalculateNextRemindAt(interval)
         local numDaysUntilTuesday = 7 - ((5 + nextQuestResetTimeWDay) % 7) % 7
 
         nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
+    elseif interval == "now" then -- for debugging only (for now)
+        debug("it's now now")
+        nextRemindAt = timeNow
     end
 
     return nextRemindAt
