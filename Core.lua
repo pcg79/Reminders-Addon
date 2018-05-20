@@ -286,7 +286,7 @@ function Reminders:SaveReminder(text)
         end
     end
 
-    newReminder.nextRemindAt = Reminders:CalculateNextRemindAt(interval)
+    newReminder.nextRemindAt = Reminders:CalculateNextRemindAt(newReminder.interval)
     tinsert(self.db.global.reminders, newReminder)
     Reminders:LoadReminders()
 end
