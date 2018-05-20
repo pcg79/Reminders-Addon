@@ -63,7 +63,7 @@ function Reminders:LoadReminders()
         reminderItem.text:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem.text:SetJustifyH("LEFT")
         reminderItem.text:SetPoint("TOPLEFT", 10, 0)
-        reminderItem.text:SetText(reminder.message .. " -> " .. reminder.condition)
+        reminderItem.text:SetText(reminder.message .. " -> " .. reminder.condition .. " -> " .. reminder.interval)
     end
 end
 

@@ -253,35 +253,30 @@ end
 
 function Reminders:SaveReminder(text)
     debug("saving - "..text)
-    local message, condition, interval = ParseReminder(text)
+    local newReminder = ParseReminder(text)
     interval = interval or "daily"
 
-    debug("message = "..message)
-    debug("condition = "..condition)
-    debug("interval = "..interval)
+    debug("message = "..(newReminder.message or "nil"))
+    debug("condition = "..(newReminder.condition or "nil"))
+    debug("interval = "..(newReminder.interval or "nil"))
 
-    if message == nil or message == "" or condition == nil or condition == "" then
+    if not Reminders:ValidReminder(newReminder) then
         -- TODO:  Print out "empty params" msg somewhere
-        debug("message or condition was empty or nil")
+        debug("Not a valid reminder")
         return
     end
 
     -- Don't save reminders where the message and reminder already exist
     for i, reminder in ipairs(self.db.global.reminders) do
-        if reminder.message:lower() == message:lower() and
-            reminder.condition:lower() == condition:lower()
-            and reminder.interval:lower() == interval:lower() then
-            debug("Reminder with text '"..message.."' and condition '"..condition .."' and interval '"..interval.."' already exists")
+        if Reminders:IsEqual(newReminder, reminder) then
+            debug("Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
             -- TODO:  Print out "already added" msg somewhere
             return
         end
     end
 
-    local nextRemindAt = Reminders:CalculateNextRemindAt(interval)
-
-    debug("nextRemindAt = "..nextRemindAt)
-
-    tinsert(self.db.global.reminders, { message = message, condition = condition, interval = interval, nextRemindAt = nextRemindAt })
+    newReminder.nextRemindAt = Reminders:CalculateNextRemindAt(interval)
+    tinsert(self.db.global.reminders, newReminder)
     Reminders:LoadReminders()
 end
 
@@ -324,14 +319,27 @@ function ParseReminder(text)
         debug(k.." = "..v)
     end
 
-    return array[1], array[2], array[3]
+    return { message = array[1], condition = array[2], interval = array[3] or "daily" }
 end
 
 function Reminders:DebugPrintReminders()
     reminders = self.db.global.reminders
     for _, reminder in pairs(reminders) do
-        chatMessage(reminder.message .. " -> " .. reminder.condition)
+        chatMessage(reminder.message .. " -> " .. reminder.condition .. " -> " .. reminder.interval)
     end
+end
+
+function Reminders:IsEqual(reminder1, reminder2)
+    return reminder1.message:lower() == reminder2.message:lower() and
+        reminder1.condition:lower() == reminder2.condition:lower() and
+        reminder1.interval:lower() == reminder2.interval:lower()
+end
+
+-- TODO: Add additional validations here like are condition and interval valid
+function Reminders:ValidReminder(reminder)
+    return reminder.message ~= nil and reminder.message ~= "" and
+        reminder.condition ~= nil and reminder.condition ~= "" and
+        reminder.interval ~= nil and reminder.interval ~= ""
 end
 
 function dbDefaults()
