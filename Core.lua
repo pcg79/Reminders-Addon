@@ -265,7 +265,7 @@ end
 function Reminders:SaveReminder(text)
     debug("saving - "..text)
     local newReminder = ParseReminder(text)
-    interval = interval or "daily"
+    newReminder = Reminders:MergeDefaults(newReminder)
 
     debug("message = "..(newReminder.message or "nil"))
     debug("condition = "..(newReminder.condition or "nil"))
@@ -357,6 +357,18 @@ function Reminders:ValidReminder(reminder)
     return reminder.message ~= nil and reminder.message ~= "" and
         reminder.condition ~= nil and reminder.condition ~= "" and
         reminder.interval ~= nil and reminder.interval ~= ""
+end
+
+function Reminders:MergeDefaults(reminder)
+    local reminderDefaults = {
+        interval = "daily"
+    }
+
+    for key, value in pairs(reminderDefaults) do
+        reminder[key] = reminder[key] or value
+    end
+
+    return reminder
 end
 
 function dbDefaults()
