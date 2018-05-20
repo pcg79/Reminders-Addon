@@ -6,6 +6,7 @@
 
 embeds.xml
 
-Core.lua
-UI.lua
-ScrollFrame.lua
+RemindersCore.lua
+RemindersReminder.lua
+RemindersUI.lua
+RemindersScrollFrame.lua
