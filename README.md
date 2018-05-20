@@ -32,11 +32,11 @@ class, profession, and name only support equals.  level supports equal, less tha
 
 TODO:
 
+* Better frame to display reminders
 * Daily and weekly times to remind
 * Better UI
 * Allow specific recipes/spells condition
 * Allow profession level condition
 * A snooze
 * Deleting reminders
-* Separate UI and logic code
 * Escape to close
