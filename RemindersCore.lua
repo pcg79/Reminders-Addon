@@ -56,7 +56,7 @@ function Reminders:OnInitialize()
 
     Reminders:EvaluateReminders()
 
-    if gui then gui:Show() end
+    -- if gui then gui:Show() end
 end
 
 function Reminders:EvaluateReminders()
