@@ -25,6 +25,8 @@ function Reminders:CommandProcessor(input)
         gui:Show()
     elseif input == "reset" then
         StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
+    elseif input == "eval" then
+        Reminders:EvaluateReminders()
     else
         OutputLog("Usage:")
     end
