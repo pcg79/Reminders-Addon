@@ -58,7 +58,7 @@ function ToString(self)
 end
 
 function SetNextRemindAt(self)
-    self.nextRemindAt = self:CalculateNextRemindAt(self.interval)
+    self.nextRemindAt = self:CalculateNextRemindAt()
 end
 
 function Process(self)
