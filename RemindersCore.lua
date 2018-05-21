@@ -1,12 +1,11 @@
 Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
-RemindersConsole = LibStub("AceConsole-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
 gui = nil
 
 function chatMessage(message)
-    RemindersConsole:Print("Reminder: "..message)
+    print("Reminder: "..message)
 end
 
 function debug(message)

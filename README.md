@@ -52,3 +52,5 @@ TODO:
 * A snooze
 * Deleting reminders
 * Escape to close
+* Add debug logging setting
+* Not do anything until PLAYER_LOGGED_IN event (so that debug logging will be printed if you have an addon that adds chat history scrollback)
