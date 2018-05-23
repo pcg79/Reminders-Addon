@@ -47,19 +47,22 @@ function Reminders:CreateUI()
     closeButton:SetText("Close")
 end
 
+reminderItems = {}
+
 function Reminders:LoadReminders()
     offset = 0
+
     for i, reminder in pairs(RemindersDB.global.reminders) do
         local reminder = Reminders:CreateReminder(reminder)
-        local reminderItem = _G.CreateFrame("Button", "elementFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
+        local reminderItem = reminderItems[i] or _G.CreateFrame("Button", "reminderItemFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
-        reminderItem.text = reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
+        reminderItem.text = reminderItem.text or reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
         reminderItem.text:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem.text:SetJustifyH("LEFT")
         reminderItem.text:SetPoint("TOPLEFT", 10, 0)
         reminderItem.text:SetText(reminder:ToString())
-        reminderItem:SetScript("OnClick", function(self, btn)
+        reminderItem:SetScript("OnClick", function(self, button)
             if IsAltKeyDown() then
                 -- reminder:Delete()
                 -- reminderItem:Hide()
@@ -75,6 +78,17 @@ function Reminders:LoadReminders()
                 end
             end
         end)
+
+        reminderItem:Show()
+        reminderItems[i] = reminderItem
+    end
+
+    local remindersCount = #RemindersDB.global.reminders
+    local reminderButtonsCount = #reminderItems
+    if  remindersCount < reminderButtonsCount then
+        for i=remindersCount+1, reminderButtonsCount do
+            reminderItems[i]:Hide()
+        end
     end
 end
 
