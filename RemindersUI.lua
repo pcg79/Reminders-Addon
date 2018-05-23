@@ -64,8 +64,8 @@ function Reminders:LoadReminders()
         reminderItem.text:SetText(reminder:ToString())
         reminderItem:SetScript("OnClick", function(self, button)
             if IsAltKeyDown() then
-                -- reminder:Delete()
-                -- reminderItem:Hide()
+                reminder:Delete()
+                Reminders:LoadReminders()
             else
                 debug("i = "..i.." for reminder '" .. reminder.message .."'")
 
