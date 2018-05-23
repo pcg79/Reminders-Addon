@@ -3,6 +3,7 @@ Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
 gui = nil
+RemindersDB = nil
 
 function chatMessage(message)
     print("Reminder: "..message)
@@ -34,19 +35,21 @@ end
 
 function Reminders:ResetAll()
     debug("resetting all")
-    self.db:ResetDB()
+    RemindersDB:ResetDB()
 end
 
 function Reminders:OnInitialize()
     debug("OnInit")
 
-    self.db = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults(), true)
-    self.db:RegisterDefaults(dbDefaults())
+    RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults(), true)
+    RemindersDB:RegisterDefaults(dbDefaults())
 
     AceGUI = LibStub("AceGUI-3.0")
 end
 
 function Reminders:OnEnable()
+    debug("OnEnable")
+
     Reminders:DebugPrintReminders()
     Reminders:EvaluateReminders()
 
@@ -60,7 +63,7 @@ end
 function Reminders:EvaluateReminders()
     local reminderMessages = {}
 
-    for i, reminder in pairs(self.db.global.reminders) do
+    for i, reminder in pairs(RemindersDB.global.reminders) do
         local reminder = Reminders:CreateReminder(reminder)
         local message  = reminder:Process()
 
@@ -69,7 +72,7 @@ function Reminders:EvaluateReminders()
         if message ~= nil and message ~= "" then
             tinsert(reminderMessages, message)
 
-            self.db.global.reminders[i] = reminder
+            RemindersDB.global.reminders[i] = reminder
         end
     end
 
@@ -94,7 +97,7 @@ function Reminders:SaveReminder(text)
     end
 
     -- Don't save reminders where the message and reminder already exist
-    for _, reminder in ipairs(self.db.global.reminders) do
+    for _, reminder in ipairs(RemindersDB.global.reminders) do
         local reminder = Reminders:CreateReminder(reminder)
         if reminder:IsEqual(newReminder) then
             debug("Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
@@ -103,7 +106,7 @@ function Reminders:SaveReminder(text)
         end
     end
 
-    tinsert(self.db.global.reminders, newReminder)
+    tinsert(RemindersDB.global.reminders, newReminder)
     Reminders:LoadReminders()
 end
 
@@ -114,15 +117,16 @@ function ParseReminder(text)
         tinsert(array, token:trim())
     end
 
-    for k,v in pairs(array) do
-        debug(k.." = "..v)
-    end
+    -- for k,v in pairs(array) do
+    --     debug(k.." = "..v)
+    -- end
 
     return { message = array[1], condition = array[2], interval = array[3] }
 end
 
 function Reminders:DebugPrintReminders()
-    reminders = self.db.global.reminders
+    debug("Printing reminders:")
+    reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
         local reminder = Reminders:CreateReminder(reminder)
         chatMessage(reminder:ToString())
