@@ -92,16 +92,6 @@ function Reminders:LoadReminders()
     end
 end
 
-function Reminders:OnEvent()
-    debug('Reminder Loaded')
-end
-
-function Reminders:CloseFrame(widget, event)
-    debug("closing")
-    AceGUI:Release(widget)
-end
-
-
 StaticPopupDialogs["REMINDERS_REMOVE_ALL_CONFIRM"] = {
     preferredIndex = STATICPOPUPS_NUMDIALOGS,
     text = "Are you sure you would like to remove ALL Reminders?",
