@@ -60,27 +60,24 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:EvaluateReminders()
-    local reminders = {}
     local reminderMessages = {}
 
-    for _, reminder in pairs(self.db.global.reminders) do
+    for i, reminder in pairs(self.db.global.reminders) do
         local reminder = Reminders:CreateReminder(reminder)
         local message  = reminder:Process()
 
+        -- If Process returned a message, that means the reminder triggered.
+        -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
         if message ~= nil and message ~= "" then
             tinsert(reminderMessages, message)
-        end
 
-        tinsert(reminders, reminder)
+            self.db.global.reminders[i] = reminder
+        end
     end
 
     -- If reminderMessages has at least one message, display them
-    -- And that means the nextRemindAt changed on at least one
-    -- so we need to save that to the DB
     if next(reminderMessages) ~= nil then
         message(table.concat(reminderMessages, "\n"))
-
-        self.db.global.reminders = reminders
     end
 end
 
