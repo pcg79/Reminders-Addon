@@ -30,7 +30,8 @@ function CalculateNextRemindAt(self)
         -- Also not sure how this'll handle internationalization.  I'm guessing poorly.
         -- Might have to change local time to PST, calculate time distance, then
         -- change back to local time.
-        local numDaysUntilTuesday = 7 - ((5 + nextQuestResetTimeWDay) % 7) % 7
+        local tuesdayIndex = 2
+        local numDaysUntilTuesday = (tuesdayIndex - nextQuestResetTimeWDay) % 7
 
         nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
     elseif interval == "now" then -- for debugging only (for now)
