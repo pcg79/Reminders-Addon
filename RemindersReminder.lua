@@ -92,7 +92,7 @@ function Save(self)
     debug("Saving")
     for i, reminder in pairs(RemindersDB.global.reminders) do
         if self:IsEqual(reminder) then
-            RemindersDB[i] = self
+            RemindersDB.global.reminders[i] = self
             return
         end
     end

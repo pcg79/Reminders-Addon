@@ -28,7 +28,6 @@ function Reminders:CreateUI()
         Reminders:SaveReminder(reminderText)
         self:SetText("")
         self:ClearFocus()
-        -- MainPanel.list_frame:Update(nil, false)
     end)
     editbox:SetFontObject(GameFontHighlightSmall)
     editbox:SetWidth(500)
@@ -46,11 +45,6 @@ function Reminders:CreateUI()
     closeButton:SetHeight(20)
     closeButton:SetWidth(100)
     closeButton:SetText("Close")
-end
-
-function Reminders:CloseOnClick(frame)
-    debug("In on click")
-    gui:Hide()
 end
 
 function Reminders:LoadReminders()
@@ -83,7 +77,6 @@ function Reminders:LoadReminders()
         end)
     end
 end
-
 
 function Reminders:OnEvent()
     debug('Reminder Loaded')
