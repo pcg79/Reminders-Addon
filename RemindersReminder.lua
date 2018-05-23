@@ -55,7 +55,7 @@ function IsValid(self)
 end
 
 function ToString(self)
-    return self.message .. " -> " .. self.condition .. " -> " .. self.interval
+    return self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. date("%x %X", self.nextRemindAt)
 end
 
 function SetNextRemindAt(self)
