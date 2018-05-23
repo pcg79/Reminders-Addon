@@ -54,3 +54,4 @@ TODO:
 * Escape to close
 * Add debug logging setting
 * Not do anything until PLAYER_LOGGED_IN event (so that debug logging will be printed if you have an addon that adds chat history scrollback)
+* Come up with a good format for a key so we can easily check for duplicates and remove from the reminders table
