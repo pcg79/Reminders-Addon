@@ -107,6 +107,8 @@ function Reminders:SaveNewReminder(text)
         end
     end
 
+    newReminder:SetNextRemindAt()
+
     tinsert(RemindersDB.global.reminders, newReminder)
     Reminders:LoadReminders()
 end
