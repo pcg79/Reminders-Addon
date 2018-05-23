@@ -76,7 +76,6 @@ end
 function Reminders:CloseFrame(widget, event)
     debug("closing")
     AceGUI:Release(widget)
-    self.frameShown = false
 end
 
 
