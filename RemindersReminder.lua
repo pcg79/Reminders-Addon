@@ -98,6 +98,16 @@ function Save(self)
     end
 end
 
+function Delete(self)
+    debug("Deleting")
+    for i, reminder in pairs(RemindersDB.global.reminders) do
+        if self:IsEqual(reminder) then
+            tremove(RemindersDB.global.reminders, i)
+            return
+        end
+    end
+end
+
 function Reminders:CreateReminder(params)
     local self = {}
     self.message = params.message
@@ -113,6 +123,7 @@ function Reminders:CreateReminder(params)
     self.Process = Process
     self.EvaluateCondition = EvaluateCondition
     self.Save = Save
+    self.Delete = Delete
 
     if self.nextRemindAt == nil then
         self:SetNextRemindAt()
