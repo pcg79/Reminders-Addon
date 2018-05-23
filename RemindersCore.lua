@@ -134,9 +134,9 @@ end
 
 function dbDefaults()
     return  {
-      global = {
-        reminders = {},
-        remindersCount = 0,
-      }
+        global = {
+            reminders = {},
+            remindersCount = 0,
+        }
     }
 end
