@@ -65,6 +65,22 @@ function Reminders:LoadReminders()
         reminderItem.text:SetJustifyH("LEFT")
         reminderItem.text:SetPoint("TOPLEFT", 10, 0)
         reminderItem.text:SetText(reminder:ToString())
+        reminderItem:SetScript("OnClick", function(self, btn)
+            if IsAltKeyDown() then
+                -- reminder:Delete()
+                -- reminderItem:Hide()
+            else
+                debug("i = "..i.." for reminder '" .. reminder.message .."'")
+
+                local reminderMessage = reminder:Process()
+
+                if reminderMessage ~= nil and reminderMessage ~= "" then
+                    message(reminderMessage)
+                    reminder:Save()
+                    self.text:SetText(reminder:ToString())
+                end
+            end
+        end)
     end
 end
 
