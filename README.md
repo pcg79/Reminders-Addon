@@ -53,4 +53,3 @@ TODO:
 * A snooze
 * Escape to close
 * Add debug logging setting
-* Come up with a good format for a key so we can easily check for duplicates and remove from the reminders table
