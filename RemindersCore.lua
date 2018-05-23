@@ -85,7 +85,7 @@ function Reminders:EvaluateReminders()
     end
 end
 
-function Reminders:SaveReminder(text)
+function Reminders:SaveNewReminder(text)
     debug("saving - "..text)
     local newReminder = Reminders:CreateReminder(ParseReminder(text))
 

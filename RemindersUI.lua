@@ -25,7 +25,7 @@ function Reminders:CreateUI()
             return
         end
 
-        Reminders:SaveReminder(reminderText)
+        Reminders:SaveNewReminder(reminderText)
         self:SetText("")
         self:ClearFocus()
     end)
