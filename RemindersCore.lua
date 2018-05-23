@@ -43,8 +43,6 @@ function Reminders:OnInitialize()
 
     RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults(), true)
     RemindersDB:RegisterDefaults(dbDefaults())
-
-    AceGUI = LibStub("AceGUI-3.0")
 end
 
 function Reminders:OnEnable()
