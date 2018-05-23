@@ -37,7 +37,6 @@ function Reminders:ResetAll()
     self.db:ResetDB()
 end
 
-
 function Reminders:OnInitialize()
     debug("OnInit")
 
@@ -45,18 +44,17 @@ function Reminders:OnInitialize()
     self.db:RegisterDefaults(dbDefaults())
 
     AceGUI = LibStub("AceGUI-3.0")
+end
 
-    self.frameShown = false
-
+function Reminders:OnEnable()
     Reminders:DebugPrintReminders()
+    Reminders:EvaluateReminders()
 
     if not gui then Reminders:CreateUI() end
 
     Reminders:LoadReminders()
 
-    Reminders:EvaluateReminders()
-
-    -- if gui then gui:Show() end
+    if gui then gui:Show() end
 end
 
 function Reminders:EvaluateReminders()
