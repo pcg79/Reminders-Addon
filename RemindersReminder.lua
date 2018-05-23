@@ -16,10 +16,13 @@ function CalculateNextRemindAt(self)
     local nextRemindAt = nil
     local interval = self.interval
 
-    debug("[CalculateNextRemindAt] interval = "..interval)
+    debug("[CalculateNextRemindAt] message = "..self.message..", interval = "..interval)
 
     if interval == "daily" then
         debug("it's daily")
+        debug("Reminders:GetQuestResetTime() = "..Reminders:GetQuestResetTime())
+        debug("timeNow = "..timeNow)
+        debug("timeNow + Reminders:GetQuestResetTime() = "..timeNow + Reminders:GetQuestResetTime())
         nextRemindAt = timeNow + Reminders:GetQuestResetTime()
     elseif interval == "weekly" then
         debug("it's weekly")
@@ -34,9 +37,9 @@ function CalculateNextRemindAt(self)
         local numDaysUntilTuesday = (tuesdayIndex - nextQuestResetTimeWDay) % 7
 
         nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
-    elseif interval == "now" then -- for debugging only (for now)
-        debug("it's now now")
-        nextRemindAt = timeNow
+    elseif interval == "debug" then -- for debugging only (for now)
+        debug("it's debugging time")
+        nextRemindAt = timeNow + 30
     end
 
     return nextRemindAt
@@ -67,6 +70,9 @@ function Process(self)
 
     debug("message = "..self.message)
     debug("condition string = "..self.condition)
+
+    debug("[Process] timeNow = "..timeNow)
+    debug("[Process] self.nextRemindAt = "..self.nextRemindAt)
 
     debug("timeNow >= self.nextRemindAt -> "..tostring(timeNow >= self.nextRemindAt))
     debug("self:EvaluateCondition() => "..tostring(self:EvaluateCondition()))
@@ -143,15 +149,15 @@ function EvaluateCondition(self)
         tokens[tokenCount] = token
     end
 
-    debug("tokenCount = "..tokenCount)
+    -- debug("tokenCount = "..tokenCount)
 
     local toSkip = 0
     for i=1, tokenCount do
-        debug("i = "..i)
+        -- debug("i = "..i)
 
         if toSkip <= 0 then
             local token = tokens[i]:lower()
-            debug("token = "..token)
+            -- debug("token = "..token)
             local count = 0
 
             if token == R_NAME then
@@ -160,12 +166,12 @@ function EvaluateCondition(self)
                 count = count + 1
                 local name = tokens[i+count]
 
-                debug("(name) operation = "..operation)
-                debug("name = "..name)
+                -- debug("(name) operation = "..operation)
+                -- debug("name = "..name)
 
                 local playerName = UnitName("player")
 
-                debug("playerName = "..playerName)
+                -- debug("playerName = "..playerName)
 
                 evalString = evalString.." "..tostring(playerName == name)
 
@@ -179,18 +185,18 @@ function EvaluateCondition(self)
                     operation = "=="
                 end
 
-                debug("(level) operation = "..operation)
-                debug("level = "..level)
+                -- debug("(level) operation = "..operation)
+                -- debug("level = "..level)
 
                 local playerLevel = UnitLevel("player")
                 local levelStmt = "return "..playerLevel..operation..level
 
-                debug("stmt: "..levelStmt)
+                -- debug("stmt: "..levelStmt)
 
                 local levelFunc = assert(loadstring(levelStmt))
                 local result, errorMsg = levelFunc();
 
-                debug("level result = "..tostring(result))
+                -- debug("level result = "..tostring(result))
 
                 evalString = evalString.." "..tostring(result)
 
@@ -200,12 +206,12 @@ function EvaluateCondition(self)
                 count = count + 1
                 local class = tokens[i+count]
 
-                debug("(class) operation = "..operation)
-                debug("class = "..class)
+                -- debug("(class) operation = "..operation)
+                -- debug("class = "..class)
 
                 local playerClass = UnitClass("player")
 
-                debug("playerClass = "..playerClass)
+                -- debug("playerClass = "..playerClass)
 
                 evalString = evalString.." "..tostring(playerClass == class)
 
@@ -215,8 +221,8 @@ function EvaluateCondition(self)
                 count = count + 1
                 local profession = tokens[i+count]:lower()
 
-                debug("(profession) operation = "..operation)
-                debug("profession = "..profession)
+                -- debug("(profession) operation = "..operation)
+                -- debug("profession = "..profession)
 
                 local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
 
@@ -224,12 +230,12 @@ function EvaluateCondition(self)
                 local prof2Name = GetProfessionNameByIndex(prof2) or ""
 
 
-                debug("prof1Name = "..(prof1Name or "nil"))
-                debug("prof2Name = "..(prof2Name or "nil"))
-                debug("archaeology = "..(archaeology or "nil"))
-                debug("fishing = "..(fishing or "nil"))
-                debug("cooking = "..(cooking or "nil"))
-                debug("firstAid = "..(firstAid or "nil"))
+                -- debug("prof1Name = "..(prof1Name or "nil"))
+                -- debug("prof2Name = "..(prof2Name or "nil"))
+                -- debug("archaeology = "..(archaeology or "nil"))
+                -- debug("fishing = "..(fishing or "nil"))
+                -- debug("cooking = "..(cooking or "nil"))
+                -- debug("firstAid = "..(firstAid or "nil"))
 
                 local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
                    (profession == "archaeology" and archaeology ~= nil) or
@@ -245,19 +251,19 @@ function EvaluateCondition(self)
                 count = count + 1
                 local ilevel = tokens[i+count]
 
-                debug("(ilevel) operation = "..operation)
-                debug("ilevel = "..ilevel)
+                -- debug("(ilevel) operation = "..operation)
+                -- debug("ilevel = "..ilevel)
 
                 local playerILevel = GetAverageItemLevel()
 
                 local ilevelStmt = "return "..playerILevel..operation..ilevel
 
-                debug("stmt: "..ilevelStmt)
+                -- debug("stmt: "..ilevelStmt)
 
                 local ilevelFunc = assert(loadstring(ilevelStmt))
                 local result, errorMsg = ilevelFunc();
 
-                debug("ilevel result = "..tostring(result))
+                -- debug("ilevel result = "..tostring(result))
 
                 evalString = evalString.." "..tostring(result)
 
@@ -278,12 +284,12 @@ function EvaluateCondition(self)
     else
         evalString = "return "..evalString
 
-        debug("evalString: "..evalString)
+        -- debug("evalString: "..evalString)
 
         local evalFunc = assert(loadstring(evalString))
         local result, errorMsg = evalFunc();
 
-        debug("end result = "..tostring(result))
+        -- debug("end result = "..tostring(result))
 
         return result
     end
