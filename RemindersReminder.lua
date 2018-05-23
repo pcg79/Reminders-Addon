@@ -88,6 +88,16 @@ function Process(self)
     end
 end
 
+function Save(self)
+    debug("Saving")
+    for i, reminder in pairs(RemindersDB.global.reminders) do
+        if self:IsEqual(reminder) then
+            RemindersDB[i] = self
+            return
+        end
+    end
+end
+
 function Reminders:CreateReminder(params)
     local self = {}
     self.message = params.message
@@ -102,6 +112,7 @@ function Reminders:CreateReminder(params)
     self.CalculateNextRemindAt = CalculateNextRemindAt
     self.Process = Process
     self.EvaluateCondition = EvaluateCondition
+    self.Save = Save
 
     if self.nextRemindAt == nil then
         self:SetNextRemindAt()
