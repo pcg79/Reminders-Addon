@@ -40,7 +40,7 @@ KNOWN ISSUES:
   to, the first character that sees the reminder will end up resetting the reminder to the next time it should show. Meaning
   any other characters that should see the reminder won't.
 
-  * I wonder if, to fix this, I can set a "has seen" flag for each character.  I'd have to reset it somehow, though.
+  * The reminders can be global but the nextRemindAt can be per user.
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally
 
