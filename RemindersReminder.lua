@@ -106,7 +106,6 @@ end
 
 
 function Reminders:GetQuestResetTime()
-    debug("[GetQuestResetTime] mine")
     -- It seems GetQuestResetTime() gives you one second before the actual reset.
     -- So add 1 to get the actual reset.
     return _G.GetQuestResetTime() + 1

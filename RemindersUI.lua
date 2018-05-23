@@ -55,7 +55,7 @@ end
 
 function Reminders:LoadReminders()
     offset = 0
-    for i, reminder in pairs(self.db.global.reminders) do
+    for i, reminder in pairs(RemindersDB.global.reminders) do
         local reminder = Reminders:CreateReminder(reminder)
         local reminderItem = _G.CreateFrame("Button", "elementFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
