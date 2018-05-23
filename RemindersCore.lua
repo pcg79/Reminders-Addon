@@ -69,11 +69,7 @@ function Reminders:EvaluateReminders()
         -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
         if message ~= nil and message ~= "" then
             tinsert(reminderMessages, message)
-
-            -- TODO: Should I call reminder:Save() here?  Here we already know the index to
-            -- replace so not having to do that loop again is good but not calling Save()
-            -- feels dirty
-            RemindersDB.global.reminders[i] = reminder
+            reminder:Save()
         end
     end
 
@@ -109,7 +105,7 @@ function Reminders:SaveNewReminder(text)
 
     newReminder:SetNextRemindAt()
 
-    tinsert(RemindersDB.global.reminders, newReminder)
+    newReminder:Save()
     Reminders:LoadReminders()
 end
 
@@ -140,6 +136,7 @@ function dbDefaults()
     return  {
       global = {
         reminders = {},
+        remindersCount = 0,
       }
     }
 end

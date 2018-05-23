@@ -58,7 +58,7 @@ function IsValid(self)
 end
 
 function ToString(self)
-    return self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. date("%x %X", self.nextRemindAt)
+    return self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. date("%x %X", self.nextRemindAt)
 end
 
 function SetNextRemindAt(self)
@@ -89,12 +89,19 @@ function Process(self)
 end
 
 function Save(self)
-    debug("Saving")
-    for i, reminder in pairs(RemindersDB.global.reminders) do
-        if self:IsEqual(reminder) then
-            RemindersDB.global.reminders[i] = self
-            return
+    debug("Saving id " .. (self.id or "nil"))
+
+    if self.id then
+        for i, reminder in pairs(RemindersDB.global.reminders) do
+            if self.id == reminder.id then
+                RemindersDB.global.reminders[i] = self
+                return
+            end
         end
+    else
+        RemindersDB.global.remindersCount = RemindersDB.global.remindersCount + 1
+        self.id = RemindersDB.global.remindersCount
+        tinsert(RemindersDB.global.reminders, self)
     end
 end
 
@@ -114,6 +121,7 @@ function Reminders:CreateReminder(params)
     self.condition = params.condition
     self.interval = (params.interval or "daily")
     self.nextRemindAt = params.nextRemindAt
+    self.id = params.id
 
     self.IsEqual = IsEqual
     self.IsValid = IsValid
