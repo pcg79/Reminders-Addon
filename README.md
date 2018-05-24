@@ -53,3 +53,4 @@ TODO:
 * A snooze
 * Escape to close
 * Add debug logging setting
+* Remove need for AceDB
