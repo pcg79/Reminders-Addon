@@ -91,21 +91,17 @@ end
 function Save(self)
     if not self.id then
         RemindersDB.global.remindersCount = RemindersDB.global.remindersCount + 1
-        self.id = RemindersDB.global.remindersCount
+        self.id = "r"..RemindersDB.global.remindersCount
     end
 
-    debug("Saving id " .. self.id .. " with db key = " ..self:DBKey())
+    debug("Saving id " .. self.id)
 
-    RemindersDB.global.reminders[self:DBKey()] = self
+    RemindersDB.global.reminders[self.id] = self
 end
 
 function Delete(self)
     debug("Deleting")
-    RemindersDB.global.reminders[self:DBKey()] = nil
-end
-
-function DBKey(self)
-    return "r"..self.id
+    RemindersDB.global.reminders[self.id] = nil
 end
 
 function Reminders:BuildReminder(params)
@@ -125,7 +121,6 @@ function Reminders:BuildReminder(params)
     self.EvaluateCondition = EvaluateCondition
     self.Save = Save
     self.Delete = Delete
-    self.DBKey = DBKey
 
     if self.nextRemindAt == nil then
         self:SetNextRemindAt()
