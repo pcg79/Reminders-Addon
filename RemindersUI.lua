@@ -57,7 +57,7 @@ function Reminders:LoadReminders(gui)
         i = i + 1
         debug("[LoadReminders] i = " .. i)
         debug("[LoadReminders] key = " .. key)
-        local reminder = Reminders:CreateReminder(reminder)
+        local reminder = Reminders:BuildReminder(reminder)
         debug("[LoadReminders] reminder.id = " .. reminder.id)
         local reminderItem = reminderItems[i] or _G.CreateFrame("Button", "reminderItemFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
