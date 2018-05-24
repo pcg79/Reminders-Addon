@@ -108,7 +108,7 @@ function DBKey(self)
     return "r"..self.id
 end
 
-function Reminders:CreateReminder(params)
+function Reminders:BuildReminder(params)
     local self = {}
     self.message = params.message
     self.condition = params.condition

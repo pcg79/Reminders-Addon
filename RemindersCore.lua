@@ -64,7 +64,7 @@ function Reminders:EvaluateReminders()
     local reminderMessages = {}
 
     for i, reminder in pairs(RemindersDB.global.reminders) do
-        local reminder = Reminders:CreateReminder(reminder)
+        local reminder = Reminders:BuildReminder(reminder)
         local message  = reminder:Process()
 
         -- If Process returned a message, that means the reminder triggered.
@@ -82,7 +82,7 @@ function Reminders:EvaluateReminders()
 end
 
 function Reminders:AddReminder(text)
-    local newReminder = Reminders:CreateReminder(ParseReminder(text))
+    local newReminder = Reminders:BuildReminder(ParseReminder(text))
 
     if not newReminder:IsValid() then
         -- TODO:  Print out "empty params" msg somewhere
@@ -93,7 +93,7 @@ function Reminders:AddReminder(text)
     -- Don't save reminders where the message and reminder already exist
     for key, reminder in pairs(RemindersDB.global.reminders) do
         debug("[AddReminder] looping...")
-        local reminder = Reminders:CreateReminder(reminder)
+        local reminder = Reminders:BuildReminder(reminder)
         if reminder:IsEqual(newReminder) then
             debug("Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
             -- TODO:  Print out "already added" msg somewhere
@@ -125,7 +125,7 @@ function Reminders:DebugPrintReminders()
     debug("Printing reminders:")
     reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
-        local reminder = Reminders:CreateReminder(reminder)
+        local reminder = Reminders:BuildReminder(reminder)
         chatMessage(reminder:ToString())
     end
 end
