@@ -22,7 +22,9 @@ debug(_G._VERSION)
 
 function Reminders:CommandProcessor(input)
     debug("Command = "..input)
-    if input == "" or input == "open" or input == "show" then
+    if input == "" or input == "toggle" then
+        if gui:IsVisible() then gui:Hide() else gui:Show() end
+    elseif input == "open" or input == "show" then
         gui:Show()
     elseif input == "reset" then
         StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
