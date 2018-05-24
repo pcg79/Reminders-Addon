@@ -16,16 +16,9 @@ function CalculateNextRemindAt(self)
     local nextRemindAt = nil
     local interval = self.interval
 
-    debug("[CalculateNextRemindAt] message = "..self.message..", interval = "..interval)
-
     if interval == "daily" then
-        debug("it's daily")
-        debug("Reminders:GetQuestResetTime() = "..Reminders:GetQuestResetTime())
-        debug("timeNow = "..timeNow)
-        debug("timeNow + Reminders:GetQuestResetTime() = "..timeNow + Reminders:GetQuestResetTime())
         nextRemindAt = timeNow + Reminders:GetQuestResetTime()
     elseif interval == "weekly" then
-        debug("it's weekly")
         local nextQuestResetTime = timeNow + Reminders:GetQuestResetTime()
         local nextQuestResetTimeWDay = date("%w", nextQuestResetTime)
 
@@ -38,7 +31,6 @@ function CalculateNextRemindAt(self)
 
         nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
     elseif interval == "debug" then -- for debugging only (for now)
-        debug("it's debugging time")
         nextRemindAt = timeNow + 30
     end
 
@@ -58,33 +50,52 @@ function IsValid(self)
 end
 
 function ToString(self)
-    return self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. date("%x %X", self.nextRemindAt)
+    local nextRemindAt = Reminders:GetPlayerReminder(self.id)
+    debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
+    if nextRemindAt then
+        nextRemindAt = date("%x %X", nextRemindAt)
+    else
+        nextRemindAt = "nil"
+    end
+    return self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. nextRemindAt
 end
 
 function SetNextRemindAt(self)
-    self.nextRemindAt = self:CalculateNextRemindAt()
+    Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
 end
 
+-- Does this toon qualify for this reminder?
+--     If they do, does this toon already have this reminder?
+--         If they do, we'll check their own personal next remind at and remind (and resave) if required
+--         If they don't, we'll remind and save this reminder to their personal DB.
+--     If they don't qualify for this reminder, do they already have the reminder in their personal DB?
+--         If they do, delete it from their personal DB.
+--         If they don't, that's ok, do nothing.
 function Process(self)
     local timeNow = time()
+    local playerReminder = RemindersDB.profile.reminders[self.id]
+    local shouldRemind = false
 
-    debug("message = "..self.message)
-    debug("condition string = "..self.condition)
+    if self:EvaluateCondition() then
+        debug("[Process] eval true for "..self.id)
+        if playerReminder then
+            debug("[Process] player has reminder already")
+            if timeNow >= playerReminder.nextRemindAt then
+                shouldRemind = true
+            end
+        else -- This toon has never seen this reminder but they quality for it
+            -- We could make this a config setting.  "Remind first time immediately"
+            debug("[Process] player does NOT have reminder already")
+            shouldRemind = true
+        end
 
-    debug("[Process] timeNow = "..timeNow)
-    debug("[Process] self.nextRemindAt = "..self.nextRemindAt)
-
-    debug("timeNow >= self.nextRemindAt -> "..tostring(timeNow >= self.nextRemindAt))
-    debug("self:EvaluateCondition() => "..tostring(self:EvaluateCondition()))
-    if timeNow >= self.nextRemindAt and self:EvaluateCondition() then
-        debug("[Process] here")
-        -- We're showing this one so don't show it again until the next interval
-        -- BUG: This isn't great. This means if you have > 1 toon this reminder
-        -- would pertain to, you're only going to see it on the first to log in.
-        -- Not sure how I'll go about fixing this.
-        self:SetNextRemindAt()
-
-        return self.message
+        if shouldRemind then
+            self:SetNextRemindAt()
+            return self.message
+        end
+    elseif playerReminder then
+        -- The toon once qualified for this reminder but doesn't any more so let's delete it
+        Reminders:DeletePlayerReminder(self.id)
     end
 end
 
@@ -109,7 +120,6 @@ function Reminders:BuildReminder(params)
     self.message = params.message
     self.condition = params.condition
     self.interval = (params.interval or "daily")
-    self.nextRemindAt = params.nextRemindAt
     self.id = params.id
 
     self.IsEqual = IsEqual
@@ -121,10 +131,7 @@ function Reminders:BuildReminder(params)
     self.EvaluateCondition = EvaluateCondition
     self.Save = Save
     self.Delete = Delete
-
-    if self.nextRemindAt == nil then
-        self:SetNextRemindAt()
-    end
+    self.DeletePlayerReminder = DeletePlayerReminder
 
     return self
 end

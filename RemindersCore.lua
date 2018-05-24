@@ -43,7 +43,7 @@ end
 function Reminders:OnInitialize()
     debug("OnInit")
 
-    RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults(), true)
+    RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults())
     RemindersDB:RegisterDefaults(dbDefaults())
 end
 
@@ -51,6 +51,7 @@ function Reminders:OnEnable()
     debug("OnEnable")
 
     Reminders:DebugPrintReminders()
+    -- Reminders:CleanUpPlayerReminders()
     Reminders:EvaluateReminders()
 
     if not GUI then GUI = Reminders:CreateUI() end
@@ -101,10 +102,26 @@ function Reminders:AddReminder(text)
         end
     end
 
+    newReminder:Save()
     newReminder:SetNextRemindAt()
 
-    newReminder:Save()
     Reminders:LoadReminders(GUI)
+end
+
+function Reminders:GetPlayerReminder(reminder_id)
+    return RemindersDB.profile.reminders[reminder_id]
+end
+
+function Reminders:SetPlayerReminder(reminder_id, value)
+    debug("[SetPlayerReminder] reminder_id = "..reminder_id)
+    debug("[SetPlayerReminder] value = "..(value or "nil"))
+    RemindersDB.profile.reminders[reminder_id] = value
+
+    Reminders:DebugPrintReminders()
+end
+
+function Reminders:DeletePlayerReminder(reminder_id)
+    Reminders:SetPlayerReminder(reminder_id, nil)
 end
 
 
@@ -122,11 +139,17 @@ function ParseReminder(text)
 end
 
 function Reminders:DebugPrintReminders()
-    debug("Printing reminders:")
-    reminders = RemindersDB.global.reminders
+    debug("Printing global reminders:")
+    local reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
         local reminder = Reminders:BuildReminder(reminder)
         chatMessage(reminder:ToString())
+    end
+
+    debug("Printing profile reminders:")
+    reminders = RemindersDB.profile.reminders
+    for key, remindAt in pairs(reminders) do
+        chatMessage("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
 end
 
@@ -135,6 +158,9 @@ function dbDefaults()
         global = {
             reminders = {},
             remindersCount = 0,
+        },
+        profile = {
+            reminders = {},
         }
     }
 end
