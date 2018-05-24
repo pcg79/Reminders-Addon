@@ -89,30 +89,23 @@ function Process(self)
 end
 
 function Save(self)
-    debug("Saving id " .. (self.id or "nil"))
-
-    if self.id then
-        for i, reminder in pairs(RemindersDB.global.reminders) do
-            if self.id == reminder.id then
-                RemindersDB.global.reminders[i] = self
-                return
-            end
-        end
-    else
+    if not self.id then
         RemindersDB.global.remindersCount = RemindersDB.global.remindersCount + 1
         self.id = RemindersDB.global.remindersCount
-        tinsert(RemindersDB.global.reminders, self)
     end
+
+    debug("Saving id " .. self.id .. " with db key = " ..self:DBKey())
+
+    RemindersDB.global.reminders[self:DBKey()] = self
 end
 
 function Delete(self)
     debug("Deleting")
-    for i, reminder in pairs(RemindersDB.global.reminders) do
-        if self:IsEqual(reminder) then
-            tremove(RemindersDB.global.reminders, i)
-            return
-        end
-    end
+    RemindersDB.global.reminders[self:DBKey()] = nil
+end
+
+function DBKey(self)
+    return "r"..self.id
 end
 
 function Reminders:CreateReminder(params)
@@ -132,6 +125,7 @@ function Reminders:CreateReminder(params)
     self.EvaluateCondition = EvaluateCondition
     self.Save = Save
     self.Delete = Delete
+    self.DBKey = DBKey
 
     if self.nextRemindAt == nil then
         self:SetNextRemindAt()
@@ -139,7 +133,6 @@ function Reminders:CreateReminder(params)
 
     return self
 end
-
 
 function Reminders:GetQuestResetTime()
     -- It seems GetQuestResetTime() gives you one second before the actual reset.

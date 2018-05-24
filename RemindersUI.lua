@@ -50,8 +50,13 @@ end
 reminderItems = {}
 
 function Reminders:LoadReminders()
-    for i, reminder in pairs(RemindersDB.global.reminders) do
+    local i = 0
+    for key, reminder in pairs(RemindersDB.global.reminders) do
+        i = i + 1
+        debug("[LoadReminders] i = " .. i)
+        debug("[LoadReminders] key = " .. key)
         local reminder = Reminders:CreateReminder(reminder)
+        debug("[LoadReminders] reminder.id = " .. reminder.id)
         local reminderItem = reminderItems[i] or _G.CreateFrame("Button", "reminderItemFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
@@ -76,12 +81,11 @@ function Reminders:LoadReminders()
                 end
             end
         end)
-
         reminderItem:Show()
         reminderItems[i] = reminderItem
     end
 
-    local remindersCount = #RemindersDB.global.reminders
+    local remindersCount = i
     local reminderButtonsCount = #reminderItems
     if  remindersCount < reminderButtonsCount then
         for i=remindersCount+1, reminderButtonsCount do
