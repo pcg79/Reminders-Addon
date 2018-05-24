@@ -82,12 +82,7 @@ function Reminders:EvaluateReminders()
 end
 
 function Reminders:AddReminder(text)
-    debug("saving - "..text)
     local newReminder = Reminders:CreateReminder(ParseReminder(text))
-
-    debug("message = "..(newReminder.message or "nil"))
-    debug("condition = "..(newReminder.condition or "nil"))
-    debug("interval = "..(newReminder.interval or "nil"))
 
     if not newReminder:IsValid() then
         -- TODO:  Print out "empty params" msg somewhere
@@ -96,7 +91,8 @@ function Reminders:AddReminder(text)
     end
 
     -- Don't save reminders where the message and reminder already exist
-    for _, reminder in ipairs(RemindersDB.global.reminders) do
+    for key, reminder in pairs(RemindersDB.global.reminders) do
+        debug("[AddReminder] looping...")
         local reminder = Reminders:CreateReminder(reminder)
         if reminder:IsEqual(newReminder) then
             debug("Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
