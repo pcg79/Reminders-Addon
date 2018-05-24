@@ -2,7 +2,7 @@ Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "Ace
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
-gui = nil
+GUI = nil
 RemindersDB = nil
 
 function chatMessage(message)
@@ -23,9 +23,9 @@ debug(_G._VERSION)
 function Reminders:CommandProcessor(input)
     debug("Command = "..input)
     if input == "" or input == "toggle" then
-        if gui:IsVisible() then gui:Hide() else gui:Show() end
+        if GUI:IsVisible() then GUI:Hide() else GUI:Show() end
     elseif input == "open" or input == "show" then
-        gui:Show()
+        GUI:Show()
     elseif input == "reset" then
         StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
     elseif input == "eval" then
@@ -53,11 +53,11 @@ function Reminders:OnEnable()
     Reminders:DebugPrintReminders()
     Reminders:EvaluateReminders()
 
-    if not gui then Reminders:CreateUI() end
+    if not GUI then GUI = Reminders:CreateUI() end
 
-    Reminders:LoadReminders()
+    Reminders:LoadReminders(GUI)
 
-    if gui then gui:Show() end
+    if GUI then GUI:Show() end
 end
 
 function Reminders:EvaluateReminders()
@@ -108,7 +108,7 @@ function Reminders:SaveNewReminder(text)
     newReminder:SetNextRemindAt()
 
     newReminder:Save()
-    Reminders:LoadReminders()
+    Reminders:LoadReminders(GUI)
 end
 
 

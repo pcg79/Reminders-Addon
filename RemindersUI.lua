@@ -6,7 +6,7 @@ function Reminders:CreateUI()
         tile = true, edgeSize = 1, tileSize = 5,
     }
 
-    gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
+    local gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
     gui:Hide()
 
     gui:SetSize(1000, 600)
@@ -45,11 +45,13 @@ function Reminders:CreateUI()
     closeButton:SetHeight(20)
     closeButton:SetWidth(100)
     closeButton:SetText("Close")
+
+    return gui
 end
 
 reminderItems = {}
 
-function Reminders:LoadReminders()
+function Reminders:LoadReminders(gui)
     local i = 0
     for key, reminder in pairs(RemindersDB.global.reminders) do
         i = i + 1
@@ -68,7 +70,7 @@ function Reminders:LoadReminders()
         reminderItem:SetScript("OnClick", function(self, button)
             if IsAltKeyDown() then
                 reminder:Delete()
-                Reminders:LoadReminders()
+                Reminders:LoadReminders(gui)
             else
                 debug("i = "..i.." for reminder '" .. reminder.message .."'")
 
