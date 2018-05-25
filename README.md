@@ -52,5 +52,4 @@ TODO:
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
 * A snooze
 * Escape to close
-* Add debug logging setting
 * Remove need for AceDB
