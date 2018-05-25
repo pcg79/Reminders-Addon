@@ -10,15 +10,10 @@ function chatMessage(message)
 end
 
 function debug(message)
-  --if addon.db.profile.debug then
-  if true then
+  if RemindersDB.profile.debug then
      chatMessage("[debug] "..message)
   end
 end
-
-debug("We're in")
-
-debug(_G._VERSION)
 
 function Reminders:CommandProcessor(input)
     debug("Command = "..input)
@@ -30,6 +25,8 @@ function Reminders:CommandProcessor(input)
         StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
     elseif input == "eval" then
         Reminders:EvaluateReminders()
+    elseif input == "debug" then
+        RemindersDB.profile.debug = not RemindersDB.profile.debug
     else
         OutputLog("Usage:")
     end
@@ -41,8 +38,6 @@ function Reminders:ResetAll()
 end
 
 function Reminders:OnInitialize()
-    debug("OnInit")
-
     RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults())
     RemindersDB:RegisterDefaults(dbDefaults())
 end
@@ -58,7 +53,7 @@ function Reminders:OnEnable()
 
     Reminders:LoadReminders(GUI)
 
-    if GUI then GUI:Show() end
+    -- if GUI then GUI:Show() end
 end
 
 function Reminders:EvaluateReminders()
@@ -161,6 +156,7 @@ function dbDefaults()
         },
         profile = {
             reminders = {},
+            debug = false,
         }
     }
 end
