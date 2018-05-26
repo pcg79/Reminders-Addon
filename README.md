@@ -46,6 +46,7 @@ KNOWN ISSUES:
 
 TODO:
 
+* When "enter" is hit, reset all the drop downs and text
 * Implement "not equal to" operation
 * Implement "self" operation that just does "name = <current player name>"
 * Better frame to display reminders
