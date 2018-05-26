@@ -78,10 +78,13 @@ end
 
 local function ConditionDropDownOnClick(self, arg1, arg2, checked)
     local conditionDropDown = self.owner
+
     UIDropDownMenu_EnableDropDown(conditionDropDown.operationDropDown)
+    conditionDropDown.valueEditBox:Enable()
 
     if self:GetText() == "Everyone" then
         UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
+        conditionDropDown.valueEditBox:Disable()
     end
     UIDropDownMenu_SetText(conditionDropDown, self:GetText())
 end
@@ -133,8 +136,6 @@ function Reminders:CreateConditionFrame(parentFrame)
     UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
     operationDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 175, 0)
 
-    conditionDropDown.operationDropDown = operationDropDown
-
     local valueEditBox = CreateFrame("EditBox", "valueEditBox", conditionFrame)
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
@@ -157,7 +158,8 @@ function Reminders:CreateConditionFrame(parentFrame)
     --     self:ClearFocus()
     -- end)
 
-
+    conditionDropDown.operationDropDown = operationDropDown
+    conditionDropDown.valueEditBox = valueEditBox
 end
 
 function Reminders:LoadReminders(parentFrame)
