@@ -8,6 +8,7 @@ CONDITION_LIST = {
     iLevel     = "ilevel",
     Profession = "profession",
 }
+
 OPERATION_LIST = { }
 OPERATION_LIST["Equals"] = "="
 -- OPERATION_LIST["Not Equals"] = "~="
@@ -15,6 +16,12 @@ OPERATION_LIST["Greater Than"] = ">"
 OPERATION_LIST["Greater Than Or Equal To"] = ">="
 OPERATION_LIST["Less Than"] = "<"
 OPERATION_LIST["Less Than Or Equal To"] = "<="
+
+INTERVAL_LIST = {
+    Debug = "debug",
+    Daily = "daily",
+    Weekly = "weekly"
+}
 
 PROFESSION_LIST = {
 
@@ -61,6 +68,8 @@ function Reminders:CreateUI()
 
     Reminders:CreateScrollFrame(gui)
 
+    CreateIntervalDropDown(gui)
+
     local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
     closeButton:SetScript("OnClick", function(self) gui:Hide() end)
     closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
@@ -98,6 +107,31 @@ function CreateMessageEditBox(parentFrame)
     MESSAGE_EDIT_BOX = editbox
 end
 
+local function IntervalDropDownOnClick(self, arg1, arg2, checked)
+    UIDropDownMenu_SetText(self.owner, self:GetText())
+end
+
+local function PopulateIntervalList(self, level)
+    for k, v in pairsByKeys(INTERVAL_LIST, SortAlphabetically) do
+        local info = UIDropDownMenu_CreateInfo()
+        info.owner = self
+        info.arg1 = v
+        info.text = k
+        info.func = IntervalDropDownOnClick
+
+        UIDropDownMenu_AddButton(info)
+    end
+end
+
+function CreateIntervalDropDown(parentFrame)
+    local intervalDropDown = CreateFrame("Frame", "IntervalDropDown", parentFrame, "UIDropDownMenuTemplate")
+    UIDropDownMenu_SetWidth(intervalDropDown, 160)
+    UIDropDownMenu_SetText(intervalDropDown, "Inteval")
+    UIDropDownMenu_Initialize(intervalDropDown, PopulateIntervalList)
+
+    intervalDropDown:SetPoint("TOPLEFT", parentFrame, 550, -48)
+end
+
 function BuildReminderText()
     local reminderText = MESSAGE_EDIT_BOX:GetText() .. ","
 
@@ -116,6 +150,9 @@ function BuildReminderText()
         if conditionFrame.valueEditBox:IsEnabled() then
             reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
         end
+
+        local intervalText = UIDropDownMenu_GetText(IntervalDropDown)
+        reminderText = reminderText .. "," .. INTERVAL_LIST[intervalText]
     end
 
     return reminderText
