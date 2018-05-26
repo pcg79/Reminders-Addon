@@ -93,8 +93,7 @@ function CreateMessageEditBox(parentFrame)
         end
 
         Reminders:AddReminder(reminderText)
-        self:SetText("")
-        self:ClearFocus()
+        Reminders:ResetInputUI()
     end)
     editbox:SetFontObject(GameFontHighlightSmall)
     editbox:SetWidth(500)
@@ -220,7 +219,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
     operationDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 175, 0)
 
-    local valueEditBox = CreateFrame("EditBox", "valueEditBox", conditionFrame)
+    local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame)
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
     valueEditBox:SetWidth(100)
@@ -237,8 +236,7 @@ function Reminders:CreateConditionFrame(parentFrame)
         end
 
         Reminders:AddReminder(reminderText)
-        self:SetText("")
-        self:ClearFocus()
+        Reminders:ResetInputUI()
     end)
 
     conditionFrame.conditionDropDown = conditionDropDown
@@ -296,6 +294,20 @@ function Reminders:LoadReminders(parentFrame)
     if  remindersCount < reminderButtonsCount then
         for i=remindersCount+1, reminderButtonsCount do
             REMINDER_ITEMS[i]:Hide()
+        end
+    end
+end
+
+function Reminders:ResetInputUI()
+    MessageEditBox:SetText("")
+    UIDropDownMenu_SetText(IntervalDropDown, "Interval")
+
+    for i, conditionFrame in pairs(CONDITION_FRAMES) do
+        UIDropDownMenu_SetText(conditionFrame.conditionDropDown, "Condition")
+        UIDropDownMenu_SetText(conditionFrame.operationDropDown, "Operation")
+        conditionFrame.valueEditBox:SetText("")
+        if i > 1 then
+            conditionFrame:Hide()
         end
     end
 end
