@@ -1,10 +1,32 @@
+-- Globals
+REMINDER_ITEMS = {}
+
+CONDITION_LIST = {
+    { text = "Everyone",   condition = "*" },
+    { text = "Name",       condition = "name" },
+    { text = "Level",      condition = "level" },
+    { text = "iLevel",     condition = "ilevel" },
+    { text = "Profession", condition = "profession" },
+}
+OPERATION_LIST = {
+    { text = "Equals",                   operation = "=" },
+    -- { text = "Not Equals",               operation = "~=" },
+    { text = "Greater Than",             operation = ">" },
+    { text = "Greater Than Or Equal To", operation = ">=" },
+    { text = "Less Than",                operation = "<" },
+    { text = "Less Than Or Equal To",    operation = "<=" },
+}
+PROFESSION_LIST = {
+
+}
+EDIT_BOX_BACKDROP = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    tile = true, edgeSize = 1, tileSize = 5,
+}
+
 function Reminders:CreateUI()
     local frameName = "RemindersFrame"
-    local EditBoxBackdrop = {
-        bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-        edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
-        tile = true, edgeSize = 1, tileSize = 5,
-    }
 
     local gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
     gui:Hide()
@@ -14,28 +36,9 @@ function Reminders:CreateUI()
     gui:EnableMouse(true)
     gui.Title:SetText("Reminders")
 
-    local editbox = CreateFrame("EditBox", frameName.."EditBox", gui)
-    -- editbox:SetLabel("Insert text:")
-    editbox:SetPoint("TOPLEFT", gui, 50, -50)
-    editbox:SetScript("OnEnterPressed", function(self)
-        local reminderText = self:GetText()
-        reminderText = reminderText:trim()
+    CreateMessageEditBox(gui)
 
-        if not reminderText or reminderText == "" then
-            return
-        end
-
-        Reminders:AddReminder(reminderText)
-        self:SetText("")
-        self:ClearFocus()
-    end)
-    editbox:SetFontObject(GameFontHighlightSmall)
-    editbox:SetWidth(500)
-    editbox:SetHeight(25)
-    editbox:EnableMouse(true)
-    editbox:SetBackdrop(EditBoxBackdrop)
-    editbox:SetBackdropColor (0, 0, 0, 0.5)
-    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+    Reminders:CreateConditionFrame(gui)
 
     Reminders:CreateScrollFrame(gui)
 
@@ -49,9 +52,109 @@ function Reminders:CreateUI()
     return gui
 end
 
-reminderItems = {}
+function CreateMessageEditBox(parentFrame)
+    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
+    editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
+    editbox:SetScript("OnEnterPressed", function(self)
+        -- local reminderText = self:GetText()
+        -- reminderText = reminderText:trim()
 
-function Reminders:LoadReminders(gui)
+        -- if not reminderText or reminderText == "" then
+        --     return
+        -- end
+
+        -- Reminders:AddReminder(reminderText)
+        -- self:SetText("")
+        -- self:ClearFocus()
+    end)
+    editbox:SetFontObject(GameFontHighlightSmall)
+    editbox:SetWidth(500)
+    editbox:SetHeight(25)
+    editbox:EnableMouse(true)
+    editbox:SetBackdrop(EDIT_BOX_BACKDROP)
+    editbox:SetBackdropColor (0, 0, 0, 0.5)
+    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+end
+
+local function ConditionDropDownOnClick(self, arg1, arg2, checked)
+    UIDropDownMenu_SetText(self.owner, self:GetText())
+end
+
+local function OperationDropDownOnClick(self, arg1, arg2, checked)
+    UIDropDownMenu_SetText(self.owner, self:GetText())
+end
+
+local function PopulateConditionList(self, level)
+    debug("[PopulateConditionList] here")
+    for i=1, #CONDITION_LIST do
+        local info = UIDropDownMenu_CreateInfo()
+        info.owner = self
+        info.arg1 = i
+        info.text = CONDITION_LIST[i].text
+        info.func = ConditionDropDownOnClick
+
+        UIDropDownMenu_AddButton(info)
+    end
+end
+
+local function PopulateOperationList(self, level, menuList)
+    debug("[PopulateOperationList] here")
+    for i=1, #OPERATION_LIST do
+        local info = UIDropDownMenu_CreateInfo()
+        info.owner = self
+        info.arg1 = i
+        info.text = OPERATION_LIST[i].text
+        info.func = OperationDropDownOnClick
+
+        UIDropDownMenu_AddButton(info)
+    end
+end
+
+function Reminders:CreateConditionFrame(parentFrame)
+    debug("[CreateConditionFrame] here")
+    -- Name should include an id and we should put these into a reusable pool
+    local conditionFrame = CreateFrame("Frame", "ConditionFrame", parentFrame)
+    conditionFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 0, -100)
+    conditionFrame:SetSize(1000, 100)
+
+    local conditionDropDown = CreateFrame("Frame", "ConditionDropDown", conditionFrame, "UIDropDownMenuTemplate")
+    UIDropDownMenu_SetWidth(conditionDropDown, 90)
+    UIDropDownMenu_SetText(conditionDropDown, "Condition")
+    UIDropDownMenu_Initialize(conditionDropDown, PopulateConditionList)
+    conditionDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 0, 0)
+
+    local operationDropDown = CreateFrame("Frame", "OperationDropDown", conditionFrame, "UIDropDownMenuTemplate")
+    UIDropDownMenu_SetWidth(operationDropDown, 160)
+    UIDropDownMenu_SetText(operationDropDown, "Operation")
+    UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
+    operationDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 175, 0)
+
+    local valueEditBox = CreateFrame("EditBox", "valueEditBox", conditionFrame)
+    valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
+    valueEditBox:SetFontObject(GameFontHighlightSmall)
+    valueEditBox:SetWidth(100)
+    valueEditBox:SetHeight(25)
+    valueEditBox:EnableMouse(true)
+    valueEditBox:SetBackdrop(EDIT_BOX_BACKDROP)
+    valueEditBox:SetBackdropColor (0, 0, 0, 0.5)
+    valueEditBox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+    -- valueEditBox:SetScript("OnEnterPressed", function(self)
+    --     local reminderText = self:GetText()
+    --     reminderText = reminderText:trim()
+
+    --     if not reminderText or reminderText == "" then
+    --         return
+    --     end
+
+    --     Reminders:AddReminder(reminderText)
+    --     self:SetText("")
+    --     self:ClearFocus()
+    -- end)
+
+
+end
+
+function Reminders:LoadReminders(parentFrame)
     local i = 0
     for key, reminder in pairs(RemindersDB.global.reminders) do
         i = i + 1
@@ -59,7 +162,7 @@ function Reminders:LoadReminders(gui)
         debug("[LoadReminders] key = " .. key)
         local reminder = Reminders:BuildReminder(reminder)
         debug("[LoadReminders] reminder.id = " .. reminder.id)
-        local reminderItem = reminderItems[i] or _G.CreateFrame("Button", "reminderItemFrame"..i, gui.scrollList, "UIPanelButtonTemplate")
+        local reminderItem = REMINDER_ITEMS[i] or CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
         reminderItem.text = reminderItem.text or reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
@@ -70,7 +173,7 @@ function Reminders:LoadReminders(gui)
         reminderItem:SetScript("OnClick", function(self, button)
             if IsAltKeyDown() then
                 reminder:Delete()
-                Reminders:LoadReminders(gui)
+                Reminders:LoadReminders(parentFrame)
             else
                 debug("i = "..i.." for reminder '" .. reminder.message .."'")
 
@@ -84,14 +187,16 @@ function Reminders:LoadReminders(gui)
             end
         end)
         reminderItem:Show()
-        reminderItems[i] = reminderItem
+        REMINDER_ITEMS[i] = reminderItem
     end
 
     local remindersCount = i
-    local reminderButtonsCount = #reminderItems
+    local reminderButtonsCount = #REMINDER_ITEMS
+
+    -- Hide any created buttons that are unused
     if  remindersCount < reminderButtonsCount then
         for i=remindersCount+1, reminderButtonsCount do
-            reminderItems[i]:Hide()
+            REMINDER_ITEMS[i]:Hide()
         end
     end
 end
