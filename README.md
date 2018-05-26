@@ -36,17 +36,10 @@ class, profession, and name only support equals.  level supports equal, less tha
 
 KNOWN ISSUES:
 
-* The time to remind is reset when the reminder is first seen.  So if you have more than one character that a condition applies
-  to, the first character that sees the reminder will end up resetting the reminder to the next time it should show. Meaning
-  any other characters that should see the reminder won't.
-
-  * The reminders can be global but the nextRemindAt can be per user.
-
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally
 
 TODO:
 
-* When "enter" is hit, reset all the drop downs and text
 * Implement "not equal to" operation
 * Implement "self" operation that just does "name = <current player name>"
 * Better frame to display reminders
