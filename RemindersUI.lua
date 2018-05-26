@@ -77,7 +77,13 @@ function CreateMessageEditBox(parentFrame)
 end
 
 local function ConditionDropDownOnClick(self, arg1, arg2, checked)
-    UIDropDownMenu_SetText(self.owner, self:GetText())
+    local conditionDropDown = self.owner
+    UIDropDownMenu_EnableDropDown(conditionDropDown.operationDropDown)
+
+    if self:GetText() == "Everyone" then
+        UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
+    end
+    UIDropDownMenu_SetText(conditionDropDown, self:GetText())
 end
 
 local function OperationDropDownOnClick(self, arg1, arg2, checked)
@@ -85,7 +91,6 @@ local function OperationDropDownOnClick(self, arg1, arg2, checked)
 end
 
 local function PopulateConditionList(self, level)
-    debug("[PopulateConditionList] here")
     for i=1, #CONDITION_LIST do
         local info = UIDropDownMenu_CreateInfo()
         info.owner = self
@@ -98,7 +103,6 @@ local function PopulateConditionList(self, level)
 end
 
 local function PopulateOperationList(self, level, menuList)
-    debug("[PopulateOperationList] here")
     for i=1, #OPERATION_LIST do
         local info = UIDropDownMenu_CreateInfo()
         info.owner = self
@@ -128,6 +132,8 @@ function Reminders:CreateConditionFrame(parentFrame)
     UIDropDownMenu_SetText(operationDropDown, "Operation")
     UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
     operationDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 175, 0)
+
+    conditionDropDown.operationDropDown = operationDropDown
 
     local valueEditBox = CreateFrame("EditBox", "valueEditBox", conditionFrame)
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
