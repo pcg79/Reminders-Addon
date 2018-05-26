@@ -47,6 +47,7 @@ KNOWN ISSUES:
 TODO:
 
 * Implement "not equal to" operation
+* Implement "self" operation that just does "name = <current player name>"
 * Better frame to display reminders
 * Better UI
 * Allow specific recipes/spells condition
