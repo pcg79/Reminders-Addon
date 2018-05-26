@@ -3,20 +3,21 @@ Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
 GUI = nil
-RemindersDB = nil
+RemindersDB = {}
 
 function chatMessage(message)
     print("Reminder: "..message)
 end
 
 function debug(message)
-  if RemindersDB.profile.debug then
+  if RemindersDB.char.debug then
      chatMessage("[debug] "..message)
   end
 end
 
 function Reminders:CommandProcessor(input)
-    debug("Command = "..input)
+    chatMessage("Command = "..input)
+
     if input == "" or input == "toggle" then
         if GUI:IsVisible() then GUI:Hide() else GUI:Show() end
     elseif input == "open" or input == "show" then
@@ -26,7 +27,12 @@ function Reminders:CommandProcessor(input)
     elseif input == "eval" then
         Reminders:EvaluateReminders()
     elseif input == "debug" then
-        RemindersDB.profile.debug = not RemindersDB.profile.debug
+        RemindersDB.char.debug = not RemindersDB.char.debug
+        local str = "off"
+        if RemindersDB.char.debug then
+            str = "on"
+        end
+        chatMessage("Debug logging is now " .. str)
     else
         OutputLog("Usage:")
     end
@@ -34,12 +40,26 @@ end
 
 function Reminders:ResetAll()
     debug("resetting all")
-    RemindersDB:ResetDB()
+    RemindersDB.global = GlobalDefaults()
+    RemindersDB.char = PerCharacterDefaults()
 end
 
 function Reminders:OnInitialize()
-    RemindersDB = LibStub("AceDB-3.0"):New("RemindersDB", dbDefaults())
-    RemindersDB:RegisterDefaults(dbDefaults())
+    local RemindersDBG = _G["RemindersDBG"]
+    local RemindersDBPC = _G["RemindersDBPC"]
+
+    if not RemindersDBG then
+        RemindersDBG = GlobalDefaults()
+        _G["RemindersDBG"] = RemindersDBG
+    end
+
+    if not RemindersDBPC then
+        RemindersDBPC = PerCharacterDefaults()
+        _G["RemindersDBPC"] = RemindersDBPC
+    end
+
+    RemindersDB.global = RemindersDBG
+    RemindersDB.char   = RemindersDBPC
 end
 
 function Reminders:OnEnable()
@@ -53,7 +73,7 @@ function Reminders:OnEnable()
 
     Reminders:LoadReminders(GUI)
 
-    -- if GUI then GUI:Show() end
+    if GUI then GUI:Show() end
 end
 
 function Reminders:EvaluateReminders()
@@ -104,13 +124,13 @@ function Reminders:AddReminder(text)
 end
 
 function Reminders:GetPlayerReminder(reminder_id)
-    return RemindersDB.profile.reminders[reminder_id]
+    return RemindersDB.char.reminders[reminder_id]
 end
 
 function Reminders:SetPlayerReminder(reminder_id, value)
     debug("[SetPlayerReminder] reminder_id = "..reminder_id)
     debug("[SetPlayerReminder] value = "..(value or "nil"))
-    RemindersDB.profile.reminders[reminder_id] = value
+    RemindersDB.char.reminders[reminder_id] = value
 
     Reminders:DebugPrintReminders()
 end
@@ -142,21 +162,22 @@ function Reminders:DebugPrintReminders()
     end
 
     debug("Printing profile reminders:")
-    reminders = RemindersDB.profile.reminders
+    reminders = RemindersDB.char.reminders
     for key, remindAt in pairs(reminders) do
         chatMessage("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
 end
 
-function dbDefaults()
-    return  {
-        global = {
-            reminders = {},
-            remindersCount = 0,
-        },
-        profile = {
-            reminders = {},
-            debug = false,
-        }
+function GlobalDefaults()
+    return {
+        reminders = {},
+        remindersCount = 0,
+    }
+end
+
+function PerCharacterDefaults()
+    return {
+        reminders = {},
+        debug = false,
     }
 end

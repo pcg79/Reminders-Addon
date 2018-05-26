@@ -2,9 +2,8 @@
 ## Title: Reminders
 ## Author: pcg79
 ## OptionalDeps: Ace3
-## SavedVariables: RemindersDB
-
-embeds.xml
+## SavedVariables: RemindersDBG
+## SavedVariablesPerCharacter: RemindersDBPC
 
 RemindersCore.lua
 RemindersReminder.lua
