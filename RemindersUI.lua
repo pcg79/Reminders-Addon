@@ -232,7 +232,6 @@ function Reminders:CreateConditionFrame(parentFrame)
     valueEditBox:SetScript("OnEnterPressed", function(self)
         local reminderText = BuildReminderText()
 
-        debug("[valueEditBox OnEnterPressed] reminderText = "..reminderText)
         if not reminderText or reminderText == "" then
             return
         end

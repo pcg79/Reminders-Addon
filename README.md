@@ -50,9 +50,9 @@ TODO:
 * Implement "not equal to" operation
 * Implement "self" operation that just does "name = <current player name>"
 * Better frame to display reminders
-* Better UI
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
 * A snooze
 * Escape to close
-* Remove need for AceDB
+* Add ability to sort reminder list
+* Error checking (like missing value)
