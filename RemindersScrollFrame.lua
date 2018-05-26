@@ -4,10 +4,10 @@ SCROLLWIDTH = 1000
 SCROLLHEIGHT = 300
 
 
-function Reminders:CreateScrollFrame(mainFrame)
-    local scrollFrame = CreateFrame("ScrollFrame", "scrollFrame", mainFrame, "UIPanelScrollFrameTemplate")
+function Reminders:CreateScrollFrame(parentFrame)
+    local scrollFrame = CreateFrame("ScrollFrame", "scrollFrame", parentFrame, "UIPanelScrollFrameTemplate")
     scrollFrame:SetPoint("BOTTOMLEFT", -10, 50)
-    scrollFrame:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMLEFT", SCROLLWIDTH - 30, 10)
+    scrollFrame:SetPoint("BOTTOMRIGHT", parentFrame, "BOTTOMLEFT", SCROLLWIDTH - 30, 10)
 
     -- Not sure what this is even setting.  Changing it doesn't seem to do anything
     -- but the scrollbar won't show up w/o it.
@@ -24,5 +24,5 @@ function Reminders:CreateScrollFrame(mainFrame)
 
     scrollFrame:SetScrollChild(scrollChild)
 
-    mainFrame.scrollList = scrollChild
+    parentFrame.scrollList = scrollChild
 end
