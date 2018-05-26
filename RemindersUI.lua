@@ -166,7 +166,10 @@ local function ConditionDropDownOnClick(self, arg1, arg2, checked)
     if self:GetText() == "Everyone" then
         UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
         conditionDropDown.valueEditBox:Disable()
+    elseif self:GetText() == "Name" then
+        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "Equals")
     end
+
     UIDropDownMenu_SetText(conditionDropDown, self:GetText())
 end
 
@@ -186,15 +189,18 @@ local function PopulateConditionList(self, level)
     end
 end
 
+-- If the Condition chosen is "Name", the only operation allowed is "Equals"
 local function PopulateOperationList(self, level, menuList)
-    for k, v in pairsByKeys(OPERATION_LIST, SortAlphabetically) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.owner = self
-        info.arg1 = v
-        info.text = k
-        info.func = OperationDropDownOnClick
+    if UIDropDownMenu_GetText(self.conditionDropDown) ~= "Name" then
+        for k, v in pairsByKeys(OPERATION_LIST, SortAlphabetically) do
+            local info = UIDropDownMenu_CreateInfo()
+            info.owner = self
+            info.arg1 = v
+            info.text = k
+            info.func = OperationDropDownOnClick
 
-        UIDropDownMenu_AddButton(info)
+            UIDropDownMenu_AddButton(info)
+        end
     end
 end
 
@@ -214,6 +220,9 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 0, 0)
 
     local operationDropDown = CreateFrame("Frame", "OperationDropDown", conditionFrame, "UIDropDownMenuTemplate")
+
+    operationDropDown.conditionDropDown = conditionDropDown
+
     UIDropDownMenu_SetWidth(operationDropDown, 160)
     UIDropDownMenu_SetText(operationDropDown, "Operation")
     UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
