@@ -60,6 +60,15 @@ function ToString(self)
     return self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. nextRemindAt
 end
 
+function Serialize(self)
+    return {
+        id = self.id,
+        condition = self.condition,
+        message = self.message,
+        interval = self.interval
+    }
+end
+
 function SetNextRemindAt(self)
     Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
 end
@@ -73,14 +82,14 @@ end
 --         If they don't, that's ok, do nothing.
 function Process(self)
     local timeNow = time()
-    local playerReminder = RemindersDB.profile.reminders[self.id]
+    local playerReminder = RemindersDB.char.reminders[self.id]
     local shouldRemind = false
 
     if self:EvaluateCondition() then
         debug("[Process] eval true for "..self.id)
         if playerReminder then
             debug("[Process] player has reminder already")
-            if timeNow >= playerReminder.nextRemindAt then
+            if timeNow >= playerReminder then
                 shouldRemind = true
             end
         else -- This toon has never seen this reminder but they quality for it
@@ -107,7 +116,7 @@ function Save(self)
 
     debug("Saving id " .. self.id)
 
-    RemindersDB.global.reminders[self.id] = self
+    RemindersDB.global.reminders[self.id] = self:Serialize()
 end
 
 function Delete(self)
@@ -132,6 +141,7 @@ function Reminders:BuildReminder(params)
     self.Save = Save
     self.Delete = Delete
     self.DeletePlayerReminder = DeletePlayerReminder
+    self.Serialize = Serialize
 
     return self
 end
