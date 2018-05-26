@@ -40,26 +40,24 @@ end
 
 function Reminders:ResetAll()
     debug("resetting all")
-    RemindersDB.global = GlobalDefaults()
-    RemindersDB.char = PerCharacterDefaults()
+    _G["RemindersDBG"] = GlobalDefaults()
+    _G["RemindersDBPC"] = PerCharacterDefaults()
+
+    RemindersDB.global = _G["RemindersDBG"]
+    RemindersDB.char   = _G["RemindersDBPC"]
 end
 
 function Reminders:OnInitialize()
-    local RemindersDBG = _G["RemindersDBG"]
-    local RemindersDBPC = _G["RemindersDBPC"]
-
-    if not RemindersDBG then
-        RemindersDBG = GlobalDefaults()
-        _G["RemindersDBG"] = RemindersDBG
+    if not _G["RemindersDBG"] then
+        _G["RemindersDBG"] = GlobalDefaults()
     end
 
     if not RemindersDBPC then
-        RemindersDBPC = PerCharacterDefaults()
-        _G["RemindersDBPC"] = RemindersDBPC
+        _G["RemindersDBPC"] = PerCharacterDefaults()
     end
 
-    RemindersDB.global = RemindersDBG
-    RemindersDB.char   = RemindersDBPC
+    RemindersDB.global = _G["RemindersDBG"]
+    RemindersDB.char   = _G["RemindersDBPC"]
 end
 
 function Reminders:OnEnable()
