@@ -46,6 +46,7 @@ KNOWN ISSUES:
 
 TODO:
 
+* Implement "not equal to" operation
 * Better frame to display reminders
 * Better UI
 * Allow specific recipes/spells condition
