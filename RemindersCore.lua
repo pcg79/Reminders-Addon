@@ -71,7 +71,7 @@ function Reminders:OnEnable()
 
     Reminders:LoadReminders(GUI)
 
-    if GUI then GUI:Show() end
+    if RemindersDB.char.debug then GUI:Show() end
 end
 
 function Reminders:EvaluateReminders()
