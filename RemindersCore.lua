@@ -34,7 +34,7 @@ function Reminders:CommandProcessor(input)
         end
         chatMessage("Debug logging is now " .. str)
     else
-        OutputLog("Usage:")
+        chatMessage("Usage:")
     end
 end
 
