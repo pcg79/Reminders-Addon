@@ -57,7 +57,21 @@ function ToString(self)
     else
         nextRemindAt = "nil"
     end
-    return self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. nextRemindAt
+
+    local reminderMessage = ""
+    if RemindersDB.char.debug then
+        reminderMessage = self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. nextRemindAt
+    else
+        reminderMessage = "Reminding "
+        if self.condition == "Everyone" then
+            reminderMessage = reminderMessage .. "all characters "
+        else
+            reminderMessage = reminderMessage .. "characters where " .. self.condition .. " "
+        end
+        reminderMessage = reminderMessage .. " to " .. self.message
+    end
+
+    return reminderMessage
 end
 
 function Serialize(self)
