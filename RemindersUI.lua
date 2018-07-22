@@ -1,3 +1,5 @@
+local AceGUI = LibStub("AceGUI-3.0")
+
 -- Globals
 REMINDER_ITEMS = {}
 CONDITION_FRAMES = {}
@@ -37,18 +39,12 @@ local function SortAlphabetically(a, b)
     return a:lower() < b:lower()
 end
 
-local function pairsByKeys(t, f)
-  local a = {}
-  for n in pairs(t) do table.insert(a, n) end
-  table.sort(a, f)
-  local i = 0      -- iterator variable
-  local iter = function ()   -- iterator function
-    i = i + 1
-    if a[i] == nil then return nil
-    else return a[i], t[a[i]]
-    end
-  end
-  return iter
+local function AlphabeticallySortedList(list)
+    local a = {}
+    for n in pairs(list) do table.insert(a, n) end
+    table.sort(a, SortAlphabetically)
+
+    return a
 end
 
 function Reminders:CreateUI()
@@ -105,29 +101,15 @@ function CreateMessageEditBox(parentFrame)
     MESSAGE_EDIT_BOX = editbox
 end
 
-local function IntervalDropDownOnClick(self, arg1, arg2, checked)
-    UIDropDownMenu_SetText(self.owner, self:GetText())
-end
-
-local function PopulateIntervalList(self, level)
-    for k, v in pairsByKeys(INTERVAL_LIST, SortAlphabetically) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.owner = self
-        info.arg1 = v
-        info.text = k
-        info.func = IntervalDropDownOnClick
-
-        UIDropDownMenu_AddButton(info)
-    end
-end
-
 function CreateIntervalDropDown(parentFrame)
-    local intervalDropDown = CreateFrame("Frame", "IntervalDropDown", parentFrame, "UIDropDownMenuTemplate")
-    UIDropDownMenu_SetWidth(intervalDropDown, 160)
-    UIDropDownMenu_SetText(intervalDropDown, "Inteval")
-    UIDropDownMenu_Initialize(intervalDropDown, PopulateIntervalList)
-
-    intervalDropDown:SetPoint("TOPLEFT", parentFrame, 550, -48)
+    IntervalDropDown = AceGUI:Create("Dropdown")
+    IntervalDropDown.frame:SetParent(parentFrame)
+    IntervalDropDown.frame:SetPoint("TOPLEFT", 560, -48)
+    IntervalDropDown.frame:Show()
+    IntervalDropDown:SetLabel("")
+    IntervalDropDown:SetWidth(100)
+    IntervalDropDown:SetText("Interval")
+    IntervalDropDown:SetList(AlphabeticallySortedList(INTERVAL_LIST))
 end
 
 function BuildReminderText()
@@ -141,9 +123,9 @@ function BuildReminderText()
 
     for _, conditionFrame in pairs(CONDITION_FRAMES) do
 
-        local conditionText = GetDropDownText(conditionFrame.conditionDropDown)
+        local conditionText = conditionFrame.conditionDropDown.text:GetText()
         if conditionText == "Condition" then
-            -- TODO: Print a friendly error message that the uesr didn't choose a condition here.
+            -- TODO: Print a friendly error message that the user didn't choose a condition here.
             return
         end
 
@@ -153,9 +135,9 @@ function BuildReminderText()
         -- Apparently there's no "IsEnabled()" on UIDropDownMenus so we'll just check
         -- for the condition(s) that doesn't use an operation
         if conditionText ~= "Everyone" then
-            local operationText = GetDropDownText(conditionFrame.operationDropDown)
+            local operationText = conditionFrame.operationDropDown.text:GetText()
             if operationText == "Operation" then
-                -- TODO: Print a friendly error message that the uesr didn't choose an operation here.
+                -- TODO: Print a friendly error message that the user didn't choose an operation here.
                 return
             end
             reminderText = reminderText .. " " .. OPERATION_LIST[operationText]
@@ -164,67 +146,45 @@ function BuildReminderText()
         if conditionFrame.valueEditBox:IsEnabled() then
             local value = conditionFrame.valueEditBox:GetText()
             if not value or value == "" then
-                -- TODO: Print a friendly error message that the uesr didn't type a value here.
+                -- TODO: Print a friendly error message that the user didn't type a value here.
                 return
             end
             reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
         end
 
-        local intervalText = GetDropDownText(IntervalDropDown)
+        local intervalText = IntervalDropDown.text:GetText()
         reminderText = reminderText .. "," .. INTERVAL_LIST[intervalText]
     end
 
     return reminderText
 end
 
-local function ConditionDropDownOnClick(self, arg1, arg2, checked)
-    local conditionDropDown = self.owner
+local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
+    for k,v in pairs(conditionDropDown) do
+        debug("k = " .. k)
+    end
 
-    UIDropDownMenu_EnableDropDown(conditionDropDown.operationDropDown)
+    local conditionText = conditionDropDown.text:GetText()
+    local operationDropDown = conditionDropDown.operationDropDown
+
+    operationDropDown:SetDisabled(false)
+
+    debug("conditionText = " .. conditionText)
+    debug("event = " .. event)
+    debug("value = " .. value)
+    debug("operationDropDown.text:GetText() = " .. (operationDropDown.text:GetText() or ""))
+
     conditionDropDown.valueEditBox:Enable()
 
-    if self:GetText() == "Everyone" then
-        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "")
-        UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
+    if conditionText == "Everyone" then
+        operationDropDown:SetText("")
+        operationDropDown:SetDisabled(true)
         conditionDropDown.valueEditBox:Disable()
-    elseif self:GetText() == "Name" or self:GetText() == "Profession" then
-        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "Equals")
-        UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
+    elseif conditionText == "Name" or conditionText == "Profession" then
+        operationDropDown:SetText("Equals")
+        operationDropDown:SetDisabled(true)
     else
-        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "Operation")
-    end
-
-    UIDropDownMenu_SetText(conditionDropDown, self:GetText())
-end
-
-local function OperationDropDownOnClick(self, arg1, arg2, checked)
-    UIDropDownMenu_SetText(self.owner, self:GetText())
-end
-
-local function PopulateConditionList(self, level)
-    for k, v in pairsByKeys(CONDITION_LIST, SortAlphabetically) do
-        local info = UIDropDownMenu_CreateInfo()
-        info.owner = self
-        info.arg1 = v
-        info.text = k
-        info.func = ConditionDropDownOnClick
-
-        UIDropDownMenu_AddButton(info)
-    end
-end
-
--- If the Condition chosen is "Name", the only operation allowed is "Equals"
-local function PopulateOperationList(self, level, menuList)
-    if GetDropDownText(self.conditionDropDown) ~= "Name" then
-        for k, v in pairsByKeys(OPERATION_LIST, SortAlphabetically) do
-            local info = UIDropDownMenu_CreateInfo()
-            info.owner = self
-            info.arg1 = v
-            info.text = k
-            info.func = OperationDropDownOnClick
-
-            UIDropDownMenu_AddButton(info)
-        end
+        operationDropDown:SetText("Operation")
     end
 end
 
@@ -237,20 +197,27 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 0, -100)
     conditionFrame:SetSize(1000, 100)
 
-    local conditionDropDown = CreateFrame("Frame", "ConditionDropDown", conditionFrame, "UIDropDownMenuTemplate")
-    UIDropDownMenu_SetWidth(conditionDropDown, 90)
-    UIDropDownMenu_SetText(conditionDropDown, "Condition")
-    UIDropDownMenu_Initialize(conditionDropDown, PopulateConditionList)
-    conditionDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 0, 0)
+    local conditionDropDown = AceGUI:Create("Dropdown")
+    conditionDropDown.frame:SetParent(conditionFrame)
+    conditionDropDown.frame:SetPoint("TOPLEFT", 46, 0)
+    conditionDropDown.frame:Show()
+    conditionDropDown:SetLabel("")
+    conditionDropDown:SetWidth(100)
+    conditionDropDown:SetText("Condition")
+    conditionDropDown:SetList(AlphabeticallySortedList(CONDITION_LIST))
+    conditionDropDown:SetCallback("OnValueChanged", ConditionDropDownOnValueChanged);
 
-    local operationDropDown = CreateFrame("Frame", "OperationDropDown", conditionFrame, "UIDropDownMenuTemplate")
+
+    local operationDropDown = AceGUI:Create("Dropdown")
+    operationDropDown.frame:SetParent(conditionFrame)
+    operationDropDown.frame:SetPoint("TOPLEFT", 200, 0)
+    operationDropDown.frame:Show()
+    operationDropDown:SetLabel("")
+    operationDropDown:SetWidth(180)
+    operationDropDown:SetText("Operation")
+    operationDropDown:SetList(AlphabeticallySortedList(OPERATION_LIST))
 
     operationDropDown.conditionDropDown = conditionDropDown
-
-    UIDropDownMenu_SetWidth(operationDropDown, 160)
-    UIDropDownMenu_SetText(operationDropDown, "Operation")
-    UIDropDownMenu_Initialize(operationDropDown, PopulateOperationList)
-    operationDropDown:SetPoint("TOPLEFT", conditionFrame, "TOPLEFT", 175, 0)
 
     local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame)
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
@@ -333,20 +300,20 @@ end
 
 function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
-    UIDropDownMenu_SetText(IntervalDropDown, "Interval")
+    IntervalDropDown:SetText("Interval")
 
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
-        UIDropDownMenu_SetText(conditionFrame.conditionDropDown, "Condition")
-        UIDropDownMenu_SetText(conditionFrame.operationDropDown, "Operation")
+        conditionFrame.conditionDropDown:SetValue(0)
+        conditionFrame.conditionDropDown:SetText("Condition")
+        conditionFrame.operationDropDown:SetDisabled(false)
+        conditionFrame.operationDropDown:SetValue(0)
+        conditionFrame.operationDropDown:SetText("Operation")
+        conditionFrame.valueEditBox:Enable()
         conditionFrame.valueEditBox:SetText("")
         if i > 1 then
             conditionFrame:Hide()
         end
     end
-end
-
-function GetDropDownText(dropdown)
-    return _G[dropdown:GetName() .. "Text"]:GetText()
 end
 
 StaticPopupDialogs["REMINDERS_REMOVE_ALL_CONFIRM"] = {
