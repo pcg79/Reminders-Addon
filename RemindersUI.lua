@@ -84,9 +84,8 @@ function CreateMessageEditBox(parentFrame)
     local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
     editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
     editbox:SetScript("OnEnterPressed", function(self)
+        -- TODO:  Move this block and the one for valueEditBox:SetScript("OnEnterPressed"... to a single method
         local reminderText = BuildReminderText()
-
-        debug("[editbox OnEnterPressed] reminderText = "..reminderText)
 
         if not reminderText or reminderText == "" then
             return
@@ -132,11 +131,22 @@ function CreateIntervalDropDown(parentFrame)
 end
 
 function BuildReminderText()
-    local reminderText = MESSAGE_EDIT_BOX:GetText() .. ","
+    local messageText = MESSAGE_EDIT_BOX:GetText()
+    if not messageText or messageText == "" then
+        -- TODO: Print a friendly error message that the uesr didn't type a message here.
+        return
+    end
+
+    local reminderText = messageText .. ","
 
     for _, conditionFrame in pairs(CONDITION_FRAMES) do
 
         local conditionText = GetDropDownText(conditionFrame.conditionDropDown)
+        if conditionText == "Condition" then
+            -- TODO: Print a friendly error message that the uesr didn't choose a condition here.
+            return
+        end
+
         debug("conditionText = " .. conditionText)
         reminderText = reminderText .. CONDITION_LIST[conditionText]
 
@@ -144,10 +154,19 @@ function BuildReminderText()
         -- for the condition(s) that doesn't use an operation
         if conditionText ~= "Everyone" then
             local operationText = GetDropDownText(conditionFrame.operationDropDown)
+            if operationText == "Operation" then
+                -- TODO: Print a friendly error message that the uesr didn't choose an operation here.
+                return
+            end
             reminderText = reminderText .. " " .. OPERATION_LIST[operationText]
         end
 
         if conditionFrame.valueEditBox:IsEnabled() then
+            local value = conditionFrame.valueEditBox:GetText()
+            if not value or value == "" then
+                -- TODO: Print a friendly error message that the uesr didn't type a value here.
+                return
+            end
             reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
         end
 
