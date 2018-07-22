@@ -283,6 +283,9 @@ function EvaluateCondition(self)
             elseif token == R_ILEVEL or token == R_ILVL then
                 count = count + 1
                 local operation = tokens[i+count]
+                if operation == "=" then
+                    operation = "=="
+                end
                 count = count + 1
                 local ilevel = tokens[i+count]
 
