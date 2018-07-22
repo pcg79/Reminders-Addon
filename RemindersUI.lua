@@ -136,13 +136,14 @@ function BuildReminderText()
 
     for _, conditionFrame in pairs(CONDITION_FRAMES) do
 
-        local conditionText = UIDropDownMenu_GetText(conditionFrame.conditionDropDown)
+        local conditionText = GetDropDownText(conditionFrame.conditionDropDown)
+        debug("conditionText = " .. conditionText)
         reminderText = reminderText .. CONDITION_LIST[conditionText]
 
         -- Apparently there's no "IsEnabled()" on UIDropDownMenus so we'll just check
         -- for the condition(s) that doesn't use an operation
         if conditionText ~= "Everyone" then
-            local operationText = UIDropDownMenu_GetText(conditionFrame.operationDropDown)
+            local operationText = GetDropDownText(conditionFrame.operationDropDown)
             reminderText = reminderText .. " " .. OPERATION_LIST[operationText]
         end
 
@@ -150,7 +151,7 @@ function BuildReminderText()
             reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
         end
 
-        local intervalText = UIDropDownMenu_GetText(IntervalDropDown)
+        local intervalText = GetDropDownText(IntervalDropDown)
         reminderText = reminderText .. "," .. INTERVAL_LIST[intervalText]
     end
 
@@ -191,7 +192,7 @@ end
 
 -- If the Condition chosen is "Name", the only operation allowed is "Equals"
 local function PopulateOperationList(self, level, menuList)
-    if UIDropDownMenu_GetText(self.conditionDropDown) ~= "Name" then
+    if GetDropDownText(self.conditionDropDown) ~= "Name" then
         for k, v in pairsByKeys(OPERATION_LIST, SortAlphabetically) do
             local info = UIDropDownMenu_CreateInfo()
             info.owner = self
@@ -319,6 +320,10 @@ function Reminders:ResetInputUI()
             conditionFrame:Hide()
         end
     end
+end
+
+function GetDropDownText(dropdown)
+    return _G[dropdown:GetName() .. "Text"]:GetText()
 end
 
 StaticPopupDialogs["REMINDERS_REMOVE_ALL_CONFIRM"] = {
