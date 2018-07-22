@@ -165,10 +165,14 @@ local function ConditionDropDownOnClick(self, arg1, arg2, checked)
     conditionDropDown.valueEditBox:Enable()
 
     if self:GetText() == "Everyone" then
+        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "")
         UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
         conditionDropDown.valueEditBox:Disable()
-    elseif self:GetText() == "Name" then
+    elseif self:GetText() == "Name" or self:GetText() == "Profession" then
         UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "Equals")
+        UIDropDownMenu_DisableDropDown(conditionDropDown.operationDropDown)
+    else
+        UIDropDownMenu_SetText(conditionDropDown.operationDropDown, "Operation")
     end
 
     UIDropDownMenu_SetText(conditionDropDown, self:GetText())
