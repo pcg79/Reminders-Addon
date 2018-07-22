@@ -45,6 +45,8 @@ function Reminders:ResetAll()
 
     RemindersDB.global = _G["RemindersDBG"]
     RemindersDB.char   = _G["RemindersDBPC"]
+
+    GUI = Reminders:CreateUI()
 end
 
 function Reminders:OnInitialize()
