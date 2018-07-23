@@ -27,8 +27,21 @@ INTERVAL_LIST = {
 }
 
 PROFESSION_LIST = {
-
+    Alchemy        = "Alchemy",
+    Blacksmithing  = "Blacksmithing",
+    Cooking        = "Cooking",
+    Enchanting     = "Enchanting",
+    Engineering    = "Engineering",
+    Fishing        = "Fishing",
+    Herbalism      = "Herbalism",
+    Inscription    = "Inscription",
+    Jewelcrafting  = "Jewelcrafting",
+    Leatherworking = "Leatherworking",
+    Mining         = "Mining",
+    Skinning       = "Skinning",
+    Tailoring      = "Tailoring",
 }
+
 EDIT_BOX_BACKDROP = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
     edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -141,6 +154,7 @@ function BuildReminderText()
             reminderText = reminderText .. " = " .. UnitName("player")
         elseif conditionText ~= "Everyone" then
             local operationText = conditionFrame.operationDropDown.text:GetText()
+            debug("operationText = " .. operationText)
             if operationText == "Operation" then
                 -- TODO: Print a friendly error message that the user didn't choose an operation here.
                 return
@@ -149,12 +163,21 @@ function BuildReminderText()
         end
 
         if conditionFrame.valueEditBox:IsEnabled() then
+            debug("is enabled")
             local value = conditionFrame.valueEditBox:GetText()
             if not value or value == "" then
                 -- TODO: Print a friendly error message that the user didn't type a value here.
                 return
             end
             reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
+        elseif conditionText == "Profession" then
+            local professionText = conditionFrame.professionDropDown.text:GetText()
+            debug("professionText = " .. professionText)
+            if professionText == "Profession" then
+                -- TODO: Print a friendly error message that the user didn't choose a profession here.
+                return
+            end
+            reminderText = reminderText .. " " .. professionText
         end
 
         local intervalText = IntervalDropDown.text:GetText()
@@ -171,6 +194,8 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 
     local conditionText = conditionDropDown.text:GetText()
     local operationDropDown = conditionDropDown.operationDropDown
+    local valueEditBox = conditionDropDown.valueEditBox
+    local professionDropDown = conditionDropDown.professionDropDown
 
     operationDropDown:SetDisabled(false)
 
@@ -179,15 +204,23 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     debug("value = " .. value)
     debug("operationDropDown.text:GetText() = " .. (operationDropDown.text:GetText() or ""))
 
-    conditionDropDown.valueEditBox:Enable()
+    valueEditBox:Enable()
+    valueEditBox:Show()
+    professionDropDown.frame:Hide()
 
     if conditionText == "Everyone" or conditionText == "Self" then
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
-        conditionDropDown.valueEditBox:Disable()
+        valueEditBox:Disable()
     elseif conditionText == "Name" or conditionText == "Profession" then
         operationDropDown:SetText("Equals")
         operationDropDown:SetDisabled(true)
+
+        if conditionText == "Profession" then
+            valueEditBox:Hide()
+            valueEditBox:Disable()
+            professionDropDown.frame:Show()
+        end
     else
         operationDropDown:SetText("Operation")
     end
@@ -224,6 +257,20 @@ function Reminders:CreateConditionFrame(parentFrame)
 
     operationDropDown.conditionDropDown = conditionDropDown
 
+
+    local professionDropDown = AceGUI:Create("Dropdown")
+    professionDropDown.frame:SetParent(conditionFrame)
+    professionDropDown.frame:SetPoint("TOPLEFT", 450, 0)
+    professionDropDown.frame:Show()
+    professionDropDown:SetLabel("")
+    professionDropDown:SetWidth(180)
+    professionDropDown:SetText("Profession")
+    professionDropDown:SetList(AlphabeticallySortedList(PROFESSION_LIST))
+
+    professionDropDown.conditionDropDown = conditionDropDown
+    professionDropDown.frame:Hide()
+
+
     local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame)
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
@@ -247,11 +294,13 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionFrame.conditionDropDown = conditionDropDown
     conditionFrame.operationDropDown = operationDropDown
     conditionFrame.valueEditBox      = valueEditBox
+    conditionFrame.professionDropDown = professionDropDown
 
     -- So I can reference these in ConditionDropDownOnClick
     -- Not sure if these's a better way to access them without making them global
     conditionDropDown.operationDropDown = operationDropDown
     conditionDropDown.valueEditBox = valueEditBox
+    conditionDropDown.professionDropDown = professionDropDown
 
     CONDITION_FRAMES[i] = conditionFrame
 end
@@ -315,6 +364,9 @@ function Reminders:ResetInputUI()
         conditionFrame.operationDropDown:SetText("Operation")
         conditionFrame.valueEditBox:Enable()
         conditionFrame.valueEditBox:SetText("")
+        conditionFrame.valueEditBox:Show()
+        conditionFrame.professionDropDown:SetText("Profession")
+        conditionFrame.professionDropDown.frame:Hide()
         if i > 1 then
             conditionFrame:Hide()
         end
