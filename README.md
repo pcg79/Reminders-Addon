@@ -40,7 +40,7 @@ COMMAND LINE:
 /reminders - Toggles the Reminders UI open or closed
 /reminders (show|open) - Opens the Reminders UI
 /reminders debug - Toggles debugging for the app
-/reminders reset - Deletes all your reminders.  Use with caution.  Not reversable.
+/reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
 
 
 KNOWN ISSUES:
@@ -59,3 +59,4 @@ TODO:
 * Escape to close
 * Add ability to sort reminder list
 * Better error reporting
+* Make a dropdown to choose the profession instead of typing it in
