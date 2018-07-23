@@ -96,7 +96,7 @@ end
 --         If they don't, that's ok, do nothing.
 function Process(self)
     local timeNow = time()
-    local playerReminder = RemindersDB.char.reminders[self.id]
+    local playerReminder = Reminders:GetPlayerReminder(self.id)
     local shouldRemind = false
 
     if self:EvaluateCondition() then
