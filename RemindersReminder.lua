@@ -1,4 +1,5 @@
 -- Globals
+local R_EVERYONE   = "*"
 local R_CLASS      = "class"
 local R_PROFESSION = "profession"
 local R_LEVEL      = "level"
@@ -181,15 +182,14 @@ function EvaluateCondition(self)
     local condition = self.condition
 
     debug("[EvaluateCondition] condition = "..condition)
-    if string.match(condition, "\*") then
-        return true
-    end
 
     -- Go through each condition
+    -- everyone
     -- name
     -- level
     -- class
     -- profession
+    -- ilevel
     local evalString = ""
     local tokens = {}
     local tokenCount = 0
@@ -209,7 +209,9 @@ function EvaluateCondition(self)
             -- debug("token = "..token)
             local count = 0
 
-            if token == R_NAME then
+            if token == R_EVERYONE then
+                return true
+            elseif token == R_NAME then
                 count = count + 1
                 local operation = tokens[i+count]
                 count = count + 1
