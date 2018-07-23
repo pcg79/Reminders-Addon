@@ -10,7 +10,9 @@ Format of the reminders:
 class
 profession
 level
+ilevel
 name
+self
 
 where `*` applies to every character you have.  `*` should not be paired with other conditionals and, in fact, any others _will_ be ignored.
 
@@ -31,21 +33,29 @@ Examples of `condition`:
     profession = Engineering and level > 101
 
 
-class, profession, and name only support equals.  level supports equal, less than, greater than, less than or equal to, and great than or equal to.
+class, profession, and name only support equals.  level and ilevel support equal, less than, greater than, less than or equal to, and great than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
+
+COMMAND LINE:
+
+/reminders - Toggles the Reminders UI open or closed
+/reminders (show|open) - Opens the Reminders UI
+/reminders debug - Toggles debugging for the app
+/reminders reset - Deletes all your reminders.  Use with caution.  Not reversable.
 
 
 KNOWN ISSUES:
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally
+* Using a comma in your reminder message causes reminder to not get run.  Need to either escape it or find another separator.
 
 TODO:
 
+* Add help command line msg
 * Implement "not equal to" operation
-* Implement "self" operation that just does "name = <current player name>"
 * Better frame to display reminders
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
 * A snooze
 * Escape to close
 * Add ability to sort reminder list
-* Error checking (like missing value)
+* Better error reporting
