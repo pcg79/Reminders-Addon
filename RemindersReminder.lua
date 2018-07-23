@@ -134,8 +134,16 @@ function Save(self)
 end
 
 function Delete(self)
-    debug("Deleting")
-    RemindersDB.global.reminders[self.id] = nil
+    local id = nil
+    debug("type(self) = " .. type(self))
+    if type(self) == "table" then
+        id = self.id
+    elseif type(self) == "string" then
+        id = self
+    end
+    debug("Deleting id " .. id)
+
+    RemindersDB.global.reminders[id] = nil
 end
 
 function Reminders:BuildReminder(params)
@@ -180,7 +188,7 @@ end
 function EvaluateCondition(self)
     local condition = self.condition
 
-    debug("[EvaluateCondition] condition = "..condition)
+    debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
 
     -- Go through each condition
     -- everyone

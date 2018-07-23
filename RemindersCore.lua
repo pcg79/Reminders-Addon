@@ -16,23 +16,37 @@ function debug(message)
 end
 
 function Reminders:CommandProcessor(input)
-    chatMessage("Command = "..input)
+    local commands = {}
+    debug("input = " .. input)
+    for token in input.gmatch(input, "[^ ]+") do
+        debug("token = " .. token)
+        tinsert(commands, token)
+    end
 
-    if input == "" or input == "toggle" then
+    local command = commands[1]
+
+    debug("command = " .. command)
+
+    if command == "" or command == "toggle" then
         if GUI:IsVisible() then GUI:Hide() else GUI:Show() end
-    elseif input == "open" or input == "show" then
+    elseif command == "open" or command == "show" then
         GUI:Show()
-    elseif input == "reset" then
+    elseif command == "reset" then
         StaticPopup_Show("REMINDERS_REMOVE_ALL_CONFIRM")
-    elseif input == "eval" then
+    elseif command == "eval" then
         Reminders:EvaluateReminders()
-    elseif input == "debug" then
+    elseif command == "debug" then
         RemindersDB.char.debug = not RemindersDB.char.debug
         local str = "off"
         if RemindersDB.char.debug then
             str = "on"
         end
         chatMessage("Debug logging is now " .. str)
+    elseif command == "delete" then
+        local id = commands[2]
+        debug("id = " .. id)
+
+        Delete(id)
     else
         chatMessage("Usage:")
     end
