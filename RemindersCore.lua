@@ -87,14 +87,21 @@ function Reminders:EvaluateReminders()
         -- If Process returned a message, that means the reminder triggered.
         -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
         if message ~= nil and message ~= "" then
-            tinsert(reminderMessages, message)
+            tinsert(reminderMessages, { text = message })
             reminder:Save()
         end
     end
 
     -- If reminderMessages has at least one message, display them
     if next(reminderMessages) ~= nil then
-        message(table.concat(reminderMessages, "\n"))
+        Reminders:DisplayReminders({
+            title = "Reminder!",
+            font = "Fonts\\FRIZQT__.TTF",
+            fontHeight = 16,
+            width = 552,
+            imageHeight = 256,
+            reminders = reminderMessages
+        })
     end
 end
 

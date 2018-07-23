@@ -175,9 +175,9 @@ local function GetProfessionNameByIndex(profIndex)
 end
 
 
-function EvaluateCondition(self)
 -- We build up a string to evaluate based on any conditions we find
 -- then we evaluate the string as a whole.
+function EvaluateCondition(self)
     local condition = self.condition
 
     debug("[EvaluateCondition] condition = "..condition)
