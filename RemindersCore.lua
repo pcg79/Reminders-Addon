@@ -66,8 +66,9 @@ function Reminders:OnEnable()
     debug("OnEnable")
 
     Reminders:DebugPrintReminders()
-    -- Reminders:CleanUpPlayerReminders()
+
     Reminders:EvaluateReminders()
+    Reminders:CleanUpPlayerReminders()
 
     if not GUI then GUI = Reminders:CreateUI() end
 
@@ -94,6 +95,21 @@ function Reminders:EvaluateReminders()
     -- If reminderMessages has at least one message, display them
     if next(reminderMessages) ~= nil then
         message(table.concat(reminderMessages, "\n"))
+    end
+end
+
+-- When a reminder is deleted we delete it from the global reminders but we can't go through
+-- all of the player's characters data and delete it.  So we'll just go through their reminders
+-- and delete those that don't exist in the global list.  Performance is going to suck on big
+-- lists, though.  Might have to revisit this.
+function Reminders:CleanUpPlayerReminders()
+    for id, _ in pairs(RemindersDB.char.reminders) do
+        local globalReminder = RemindersDB.global.reminders[id]
+
+        if globalReminder == nil then
+            debug("Reminder "..id.." doesn't exist in global list.  Deleting...")
+            RemindersDB.char.reminders[id] = nil
+        end
     end
 end
 
