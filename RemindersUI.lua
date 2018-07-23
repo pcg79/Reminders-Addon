@@ -9,6 +9,7 @@ CONDITION_LIST = {
     Level      = "level" ,
     iLevel     = "ilevel",
     Profession = "profession",
+    Self       = "name",
 }
 
 OPERATION_LIST = { }
@@ -121,6 +122,8 @@ function BuildReminderText()
 
     local reminderText = messageText .. ","
 
+    -- This is (bad) future-proofing for if I want to implement creating multiple conditions that you can
+    -- join via AND or OR.
     for _, conditionFrame in pairs(CONDITION_FRAMES) do
 
         local conditionText = conditionFrame.conditionDropDown.text:GetText()
@@ -134,7 +137,9 @@ function BuildReminderText()
 
         -- Apparently there's no "IsEnabled()" on UIDropDownMenus so we'll just check
         -- for the condition(s) that doesn't use an operation
-        if conditionText ~= "Everyone" then
+        if conditionText == "Self" then
+            reminderText = reminderText .. " = " .. UnitName("player")
+        elseif conditionText ~= "Everyone" then
             local operationText = conditionFrame.operationDropDown.text:GetText()
             if operationText == "Operation" then
                 -- TODO: Print a friendly error message that the user didn't choose an operation here.
@@ -176,7 +181,7 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 
     conditionDropDown.valueEditBox:Enable()
 
-    if conditionText == "Everyone" then
+    if conditionText == "Everyone" or conditionText == "Self" then
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
         conditionDropDown.valueEditBox:Disable()
