@@ -165,9 +165,9 @@ function BuildReminderText()
 end
 
 local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
-    for k,v in pairs(conditionDropDown) do
-        debug("k = " .. k)
-    end
+    -- for k,v in pairs(conditionDropDown) do
+    --     debug("k = " .. k)
+    -- end
 
     local conditionText = conditionDropDown.text:GetText()
     local operationDropDown = conditionDropDown.operationDropDown
