@@ -1,4 +1,4 @@
-Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0")
+Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
