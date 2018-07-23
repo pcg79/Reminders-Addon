@@ -102,7 +102,7 @@ function Reminders:AddReminder(text)
 
     if not newReminder:IsValid() then
         -- TODO:  Print out "empty params" msg somewhere
-        debug("Not a valid reminder")
+        debug("[Error] Not a valid reminder")
         return
     end
 
@@ -111,7 +111,7 @@ function Reminders:AddReminder(text)
         debug("[AddReminder] looping...")
         local reminder = Reminders:BuildReminder(reminder)
         if reminder:IsEqual(newReminder) then
-            debug("Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
+            debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
             -- TODO:  Print out "already added" msg somewhere
             return
         end
