@@ -4,7 +4,6 @@ local R_CLASS      = "class"
 local R_PROFESSION = "profession"
 local R_LEVEL      = "level"
 local R_NAME       = "name"
-local R_ILVL       = "ilvl"
 local R_ILEVEL     = "ilevel"
 
 local R_AND = "and"
@@ -296,7 +295,7 @@ function EvaluateCondition(self)
 
                 evalString = evalString.." "..tostring(profResult)
 
-            elseif token == R_ILEVEL or token == R_ILVL then
+            elseif token == R_ILEVEL then
                 count = count + 1
                 local operation = tokens[i+count]
                 if operation == "=" then
