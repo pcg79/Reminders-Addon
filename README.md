@@ -40,6 +40,7 @@ COMMAND LINE:
 /reminders - Toggles the Reminders UI open or closed
 /reminders (show|open) - Opens the Reminders UI
 /reminders debug - Toggles debugging for the app
+/reminders delete id - Deletes the reminder with the id.  Can get the id by turning on debugging.
 /reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
 
 
@@ -52,11 +53,9 @@ TODO:
 
 * Add help command line msg
 * Implement "not equal to" operation
-* Better frame to display reminders
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
 * A snooze
 * Escape to close
 * Add ability to sort reminder list
 * Better error reporting
-* Make a dropdown to choose the profession instead of typing it in
