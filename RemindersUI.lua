@@ -120,12 +120,42 @@ local function OnInputValueChanged(widget)
     end
 end
 
+local function AddReminder(newReminder)
+    -- Don't save reminders where the message, reminder, and interval already exist
+    for key, reminder in pairs(RemindersDB.global.reminders) do
+        debug("[AddReminder] looping...")
+        local reminder = Reminders:BuildReminder(reminder)
+        if reminder:IsEqual(newReminder) then
+            debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
+            -- TODO:  Print out "already added" msg somewhere
+            return
+        end
+    end
+
+    newReminder:Save()
+    newReminder:SetNextRemindAt()
+
+    Reminders:LoadReminders(GUI)
+end
+
+local function ParseReminder(text)
+    local array = {}
+    for token in string.gmatch(text, "[^,]+") do
+        tinsert(array, token:trim())
+    end
+
+    return { message = array[1], condition = array[2], interval = array[3] }
+end
+
 local function CreateReminder()
     if AreInputsValid() then
         local reminderText = BuildReminderText()
+        local newReminder = Reminders:BuildReminder(ParseReminder(reminderText))
 
-        Reminders:AddReminder(reminderText)
+        AddReminder(newReminder)
         Reminders:ResetInputUI()
+
+        chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
     end
 end
 

@@ -84,8 +84,6 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
-    debug("OnEnable")
-
     Reminders:DebugPrintReminders()
 
     Reminders:EvaluateReminders()
@@ -143,32 +141,6 @@ function Reminders:CleanUpPlayerReminders()
     end
 end
 
-function Reminders:AddReminder(text)
-    local newReminder = Reminders:BuildReminder(ParseReminder(text))
-
-    if not newReminder:IsValid() then
-        -- TODO:  Print out "empty params" msg somewhere
-        debug("[Error] Not a valid reminder")
-        return
-    end
-
-    -- Don't save reminders where the message and reminder already exist
-    for key, reminder in pairs(RemindersDB.global.reminders) do
-        debug("[AddReminder] looping...")
-        local reminder = Reminders:BuildReminder(reminder)
-        if reminder:IsEqual(newReminder) then
-            debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
-            -- TODO:  Print out "already added" msg somewhere
-            return
-        end
-    end
-
-    newReminder:Save()
-    newReminder:SetNextRemindAt()
-
-    Reminders:LoadReminders(GUI)
-end
-
 function Reminders:GetPlayerReminder(reminder_id)
     return RemindersDB.char.reminders[reminder_id]
 end
@@ -183,20 +155,6 @@ end
 
 function Reminders:DeletePlayerReminder(reminder_id)
     Reminders:SetPlayerReminder(reminder_id, nil)
-end
-
-
-function ParseReminder(text)
-    local array = {}
-    for token in string.gmatch(text, "[^,]+") do
-        tinsert(array, token:trim())
-    end
-
-    -- for k,v in pairs(array) do
-    --     debug(k.." = "..v)
-    -- end
-
-    return { message = array[1], condition = array[2], interval = array[3] }
 end
 
 function Reminders:DebugPrintReminders()
