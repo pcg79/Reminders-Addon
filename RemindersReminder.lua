@@ -87,6 +87,36 @@ function SetNextRemindAt(self)
     Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
 end
 
+function Evaluate(self)
+    local message = self:Process()
+    -- If Process returned a message, that means the reminder triggered.
+    -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
+    if message and message ~= "" then
+        self:Save()
+
+        return {
+            text = message,
+            textHeight = 100,
+            button = "Snooze",
+            buttonLeft = 400,
+            buttonBottom = -10,
+            buttonClick = function(this, button)
+                -- Because reminders are only checked on ui load, we'll just set the next
+                -- remind time for a few seconds in the future and then it'll popup again
+                -- on next reload.
+                -- TODO: If I ever implement a timer or event-based reminder checking,
+                -- change this to something like 5-10 minutes in the future.
+
+                local snooze = time() + 5
+                Reminders:SetPlayerReminder(self.id, snooze)
+                this:SetText("Snoozed!")
+                this:Disable()
+                chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. message .. "|r has been snoozed")
+            end
+        }
+    end
+end
+
 -- Does this toon qualify for this reminder?
 --     If they do, does this toon already have this reminder?
 --         If they do, we'll check their own personal next remind at and remind (and resave) if required
@@ -164,6 +194,7 @@ function Reminders:BuildReminder(params)
     self.Delete = Delete
     self.DeletePlayerReminder = DeletePlayerReminder
     self.Serialize = Serialize
+    self.Evaluate = Evaluate
 
     return self
 end
