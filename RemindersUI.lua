@@ -424,6 +424,7 @@ end
 
 function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
+    IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText("Interval")
 
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
