@@ -35,26 +35,28 @@ Examples of `condition`:
 
 class, profession, and name only support equals.  level and ilevel support equal, less than, greater than, less than or equal to, and great than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
 
-COMMAND LINE:
+### COMMAND LINE:
 
+```
 /reminders - Toggles the Reminders UI open or closed
 /reminders (show|open) - Opens the Reminders UI
 /reminders eval - Forces an evaluation of your reminders
 /reminders debug - Toggles debugging for the app
 /reminders delete id - Deletes the reminder with the id.  Can get the id by turning on debugging.
 /reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
+```
 
-
-KNOWN ISSUES:
+### KNOWN ISSUES:
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally
 
-CAVEATS:
+### CAVEATS:
 
-* Since comma is used as the separator, they are stripped out of your reminder message and value text
+* Since comma is used as the separator internally, they are stripped out of your reminder message and value text
 
-TODO:
+### TODO:
 
+* Improve reminder list UI
 * Implement "not equal to" operation
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
