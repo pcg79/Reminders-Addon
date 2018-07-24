@@ -66,9 +66,9 @@ function ToString(self)
         if self.condition == "Everyone" then
             reminderMessage = reminderMessage .. "all characters "
         else
-            reminderMessage = reminderMessage .. "characters where " .. self.condition .. " "
+            reminderMessage = reminderMessage .. "characters where " .. self.condition
         end
-        reminderMessage = reminderMessage .. " to " .. self.message
+        reminderMessage = reminderMessage .. " to " .. self.message .. " " .. self.interval
     end
 
     return reminderMessage
