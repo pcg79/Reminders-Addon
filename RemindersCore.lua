@@ -23,9 +23,7 @@ function Reminders:CommandProcessor(input)
         tinsert(commands, token)
     end
 
-    local command = commands[1]
-
-    debug("command = " .. command)
+    local command = commands[1] or ""
 
     if command == "" or command == "toggle" then
         if GUI:IsVisible() then GUI:Hide() else GUI:Show() end
