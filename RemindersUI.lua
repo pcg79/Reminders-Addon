@@ -374,15 +374,7 @@ function Reminders:LoadReminders(parentFrame)
                 reminder:Delete()
                 Reminders:LoadReminders(parentFrame)
             else
-                debug("i = "..i.." for reminder '" .. reminder.message .."'")
-
-                local reminderMessage = reminder:Process()
-
-                if reminderMessage ~= nil and reminderMessage ~= "" then
-                    message(reminderMessage)
-                    reminder:Save()
-                    self.text:SetText(reminder:ToString())
-                end
+                Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
             end
         end)
         reminderItem:Show()
