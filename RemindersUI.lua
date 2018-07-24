@@ -403,6 +403,7 @@ function Reminders:LoadReminders(parentFrame)
             if IsAltKeyDown() then
                 reminder:Delete()
                 Reminders:LoadReminders(parentFrame)
+                chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
             else
                 Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
             end
