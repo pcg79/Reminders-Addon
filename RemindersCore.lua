@@ -46,7 +46,16 @@ function Reminders:CommandProcessor(input)
 
         Delete(id)
     else
-        chatMessage("Usage:")
+        local usage = "|cffff0000Usage:|r\n\n"..
+            "|cffffcc00/reminders|r - Toggles the Reminders UI open or closed\n"..
+            "|cffffcc00/reminders (show|open)|r - Opens the Reminders UI\n"..
+            "|cffffcc00/reminders eval|r - Forces an evaluation of your reminders\n"..
+            "|cffffcc00/reminders debug|r - Toggles debugging for the app\n"..
+            "|cffffcc00/reminders delete id|r - Deletes the reminder with the id.  Can get the id by turning on debugging.\n"..
+            "|cffffcc00/reminders reset|r - Deletes all your reminders.  Use with caution.  Not reversible.\n"..
+            "|cffffcc00/reminders help|r - This message"
+
+        chatMessage(usage)
     end
 end
 
@@ -118,7 +127,7 @@ function Reminders:EvaluateReminders()
                     Reminders:SetPlayerReminder(reminder.id, snooze)
                     self:SetText("Snoozed!")
                     self:Disable()
-                    chatMessage("[Reminders] Reminder for '" .. message .. "'' has been snoozed")
+                    chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. message .. "|r has been snoozed")
                 end
              })
             reminder:Save()
