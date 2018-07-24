@@ -1,9 +1,9 @@
-## Interface: 70300
+## Interface: 80000
 ## Title: Reminders
 ## Author: pcg79
-## OptionalDeps: Ace3
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
+## Version: 8.0.0-7375fcd-alpha
 
 RemindersCore.lua
 RemindersReminder.lua
