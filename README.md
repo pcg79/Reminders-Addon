@@ -57,4 +57,3 @@ TODO:
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
 * Escape to close
 * Add ability to sort reminder list
-* Better error reporting

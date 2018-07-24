@@ -61,6 +61,75 @@ local function AlphabeticallySortedList(list)
     return a
 end
 
+local function AreInputsValid()
+    local messageText = MESSAGE_EDIT_BOX:GetText()
+    if not messageText or messageText == "" then
+        return false
+    end
+
+    -- This is (bad) future-proofing for if I want to implement creating multiple conditions that you can
+    -- join via AND or OR.
+    for _, conditionFrame in pairs(CONDITION_FRAMES) do
+
+        local conditionDropDown = conditionFrame.conditionDropDown
+        local operationDropDown = conditionFrame.operationDropDown
+        local valueEditBox      = conditionFrame.valueEditBox
+        local professionDropDown = conditionFrame.professionDropDown
+
+        local conditionText = conditionDropDown.text:GetText()
+        if conditionText == "Condition" then
+            return false
+        elseif conditionText ~= "Everyone" and conditionText ~= "Self" then
+            local operationText = operationDropDown.text:GetText()
+            if operationText == "Operation" then
+                return false
+            end
+        end
+
+        if valueEditBox:IsEnabled() then
+            local value = valueEditBox:GetText()
+
+            if conditionText == "iLevel" or conditionText == "Level" then
+                value = tonumber(value)
+            end
+
+            if not value or value == "" then
+                return false
+            end
+        elseif conditionText == "Profession" then
+            local professionText = professionDropDown.text:GetText()
+            if professionText == "Profession" then
+                return false
+            end
+        end
+
+        local intervalText = IntervalDropDown.text:GetText()
+        if intervalText == "Interval" then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function OnInputValueChanged(widget)
+    if AreInputsValid() then
+        CreateButton:Enable()
+    else
+        CreateButton:Disable()
+    end
+end
+
+local function CreateReminder()
+    if AreInputsValid() then
+        local reminderText = BuildReminderText()
+
+        Reminders:AddReminder(reminderText)
+        Reminders:ResetInputUI()
+    end
+end
+
+
 function Reminders:CreateUI()
     local frameName = "RemindersFrame"
 
@@ -80,6 +149,14 @@ function Reminders:CreateUI()
 
     CreateIntervalDropDown(gui)
 
+    CreateButton = CreateFrame("Button", frameName.."Create", gui, "UIPanelButtonTemplate")
+    CreateButton:SetScript("OnClick", CreateReminder)
+    CreateButton:SetPoint("TOPLEFT", 860, -48)
+    CreateButton:SetHeight(20)
+    CreateButton:SetWidth(100)
+    CreateButton:SetText("Create")
+    CreateButton:Disable()
+
     local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
     closeButton:SetScript("OnClick", function(self) gui:Hide() end)
     closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
@@ -93,17 +170,8 @@ end
 function CreateMessageEditBox(parentFrame)
     local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
     editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
-    editbox:SetScript("OnEnterPressed", function(self)
-        -- TODO:  Move this block and the one for valueEditBox:SetScript("OnEnterPressed"... to a single method
-        local reminderText = BuildReminderText()
-
-        if not reminderText or reminderText == "" then
-            return
-        end
-
-        Reminders:AddReminder(reminderText)
-        Reminders:ResetInputUI()
-    end)
+    editbox:SetScript("OnEnterPressed", CreateReminder)
+    editbox:SetScript("OnTextChanged", OnInputValueChanged)
     editbox:SetFontObject(GameFontHighlightSmall)
     editbox:SetWidth(500)
     editbox:SetHeight(25)
@@ -124,6 +192,8 @@ function CreateIntervalDropDown(parentFrame)
     IntervalDropDown:SetWidth(100)
     IntervalDropDown:SetText("Interval")
     IntervalDropDown:SetList(AlphabeticallySortedList(INTERVAL_LIST))
+    IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
+
 end
 
 function BuildReminderText()
@@ -224,6 +294,8 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     else
         operationDropDown:SetText("Operation")
     end
+
+    OnInputValueChanged()
 end
 
 function Reminders:CreateConditionFrame(parentFrame)
@@ -243,7 +315,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionDropDown:SetWidth(100)
     conditionDropDown:SetText("Condition")
     conditionDropDown:SetList(AlphabeticallySortedList(CONDITION_LIST))
-    conditionDropDown:SetCallback("OnValueChanged", ConditionDropDownOnValueChanged);
+    conditionDropDown:SetCallback("OnValueChanged", ConditionDropDownOnValueChanged)
 
 
     local operationDropDown = AceGUI:Create("Dropdown")
@@ -254,6 +326,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     operationDropDown:SetWidth(180)
     operationDropDown:SetText("Operation")
     operationDropDown:SetList(AlphabeticallySortedList(OPERATION_LIST))
+    operationDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 
     operationDropDown.conditionDropDown = conditionDropDown
 
@@ -266,6 +339,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     professionDropDown:SetWidth(180)
     professionDropDown:SetText("Profession")
     professionDropDown:SetList(AlphabeticallySortedList(PROFESSION_LIST))
+    professionDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 
     professionDropDown.conditionDropDown = conditionDropDown
     professionDropDown.frame:Hide()
@@ -280,16 +354,9 @@ function Reminders:CreateConditionFrame(parentFrame)
     valueEditBox:SetBackdrop(EDIT_BOX_BACKDROP)
     valueEditBox:SetBackdropColor (0, 0, 0, 0.5)
     valueEditBox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
-    valueEditBox:SetScript("OnEnterPressed", function(self)
-        local reminderText = BuildReminderText()
+    valueEditBox:SetScript("OnEnterPressed", CreateReminder)
+    valueEditBox:SetScript("OnTextChanged", OnInputValueChanged)
 
-        if not reminderText or reminderText == "" then
-            return
-        end
-
-        Reminders:AddReminder(reminderText)
-        Reminders:ResetInputUI()
-    end)
 
     conditionFrame.conditionDropDown = conditionDropDown
     conditionFrame.operationDropDown = operationDropDown
