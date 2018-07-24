@@ -43,12 +43,6 @@ function IsEqual(self, otherReminder)
         self.interval:lower()   == otherReminder.interval:lower()
 end
 
-function IsValid(self)
-    return self.message ~= nil and self.message ~= "" and
-        self.condition ~= nil and self.condition ~= "" and
-        self.interval ~= nil and self.interval ~= ""
-end
-
 function ToString(self)
     local nextRemindAt = Reminders:GetPlayerReminder(self.id)
     debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
@@ -181,7 +175,6 @@ function Reminders:BuildReminder(params)
     self.id = params.id
 
     self.IsEqual = IsEqual
-    self.IsValid = IsValid
     self.ToString = ToString
     self.SetNextRemindAt = SetNextRemindAt
     self.CalculateNextRemindAt = CalculateNextRemindAt
