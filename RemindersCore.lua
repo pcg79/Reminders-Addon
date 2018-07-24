@@ -99,7 +99,28 @@ function Reminders:EvaluateReminders()
         -- If Process returned a message, that means the reminder triggered.
         -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
         if message ~= nil and message ~= "" then
-            tinsert(reminderMessages, { text = message })
+            tinsert(reminderMessages, {
+                text = message,
+                textHeight = 100,
+                button = "Snooze",
+                buttonLeft = 400,
+                buttonBottom = -10,
+                buttonClick = function(self, button)
+                    -- Because reminders are only checked on ui load, we'll just set the next
+                    -- remind time for a few seconds in the future and then it'll popup again
+                    -- on next reload.
+                    -- TODO: If I ever implement a timer or event-based reminder checking,
+                    -- change this to something like 5-10 minutes in the future.
+                    local fiveSeconds =  5
+                    local timeNow = time()
+
+                    local snooze = timeNow + fiveSeconds
+                    Reminders:SetPlayerReminder(reminder.id, snooze)
+                    self:SetText("Snoozed!")
+                    self:Disable()
+                    chatMessage("[Reminders] Reminder for '" .. message .. "'' has been snoozed")
+                end
+             })
             reminder:Save()
         end
     end
@@ -112,7 +133,7 @@ function Reminders:EvaluateReminders()
             fontHeight = 16,
             width = 552,
             imageHeight = 256,
-            reminders = reminderMessages
+            reminders = reminderMessages,
         })
     end
 end

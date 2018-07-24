@@ -55,7 +55,6 @@ TODO:
 * Implement "not equal to" operation
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., profession = Engineering and Engineering Level > 750)
-* A snooze
 * Escape to close
 * Add ability to sort reminder list
 * Better error reporting
