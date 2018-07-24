@@ -193,65 +193,46 @@ function CreateIntervalDropDown(parentFrame)
     IntervalDropDown:SetText("Interval")
     IntervalDropDown:SetList(AlphabeticallySortedList(INTERVAL_LIST))
     IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
-
 end
 
 function BuildReminderText()
-    local messageText = MESSAGE_EDIT_BOX:GetText()
-    if not messageText or messageText == "" then
-        -- TODO: Print a friendly error message that the uesr didn't type a message here.
+    if not AreInputsValid() then
         return
     end
 
-    local reminderText = messageText .. ","
+    local separator = ","
+
+    local messageText = MESSAGE_EDIT_BOX:GetText():gsub(separator, "")
+
+    local reminderText = messageText .. separator
 
     -- This is (bad) future-proofing for if I want to implement creating multiple conditions that you can
     -- join via AND or OR.
     for _, conditionFrame in pairs(CONDITION_FRAMES) do
+        local conditionDropDown = conditionFrame.conditionDropDown
+        local operationDropDown = conditionFrame.operationDropDown
+        local valueEditBox      = conditionFrame.valueEditBox
+        local professionDropDown = conditionFrame.professionDropDown
 
-        local conditionText = conditionFrame.conditionDropDown.text:GetText()
-        if conditionText == "Condition" then
-            -- TODO: Print a friendly error message that the user didn't choose a condition here.
-            return
-        end
+        local conditionText = conditionDropDown.text:GetText()
 
-        debug("conditionText = " .. conditionText)
         reminderText = reminderText .. CONDITION_LIST[conditionText]
 
-        -- Apparently there's no "IsEnabled()" on UIDropDownMenus so we'll just check
-        -- for the condition(s) that doesn't use an operation
         if conditionText == "Self" then
             reminderText = reminderText .. " = " .. UnitName("player")
         elseif conditionText ~= "Everyone" then
-            local operationText = conditionFrame.operationDropDown.text:GetText()
-            debug("operationText = " .. operationText)
-            if operationText == "Operation" then
-                -- TODO: Print a friendly error message that the user didn't choose an operation here.
-                return
-            end
+            local operationText = operationDropDown.text:GetText()
             reminderText = reminderText .. " " .. OPERATION_LIST[operationText]
         end
 
-        if conditionFrame.valueEditBox:IsEnabled() then
-            debug("is enabled")
-            local value = conditionFrame.valueEditBox:GetText()
-            if not value or value == "" then
-                -- TODO: Print a friendly error message that the user didn't type a value here.
-                return
-            end
-            reminderText = reminderText .. " " .. conditionFrame.valueEditBox:GetText()
+        if valueEditBox:IsEnabled() then
+            reminderText = reminderText .. " " .. valueEditBox:GetText():gsub(separator, "")
         elseif conditionText == "Profession" then
-            local professionText = conditionFrame.professionDropDown.text:GetText()
-            debug("professionText = " .. professionText)
-            if professionText == "Profession" then
-                -- TODO: Print a friendly error message that the user didn't choose a profession here.
-                return
-            end
-            reminderText = reminderText .. " " .. professionText
+            reminderText = reminderText .. " " .. professionDropDown.text:GetText()
         end
 
         local intervalText = IntervalDropDown.text:GetText()
-        reminderText = reminderText .. "," .. INTERVAL_LIST[intervalText]
+        reminderText = reminderText .. separator .. INTERVAL_LIST[intervalText]
     end
 
     return reminderText
