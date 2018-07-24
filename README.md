@@ -48,7 +48,10 @@ COMMAND LINE:
 KNOWN ISSUES:
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally
-* Using a comma in your reminder message causes reminder to not get run.  Need to either escape it or find another separator.
+
+CAVEATS:
+
+* Since comma is used as the separator, they are stripped out of your reminder message and value text
 
 TODO:
 
