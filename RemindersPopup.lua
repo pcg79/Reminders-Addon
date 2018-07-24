@@ -282,3 +282,7 @@ function Reminders:DisplayReminders(data)
     UpdateFrame(frame, 1)
   end
 end
+
+function Reminders:ResetReminders()
+  ReminderFrame = nil
+end
