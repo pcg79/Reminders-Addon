@@ -106,11 +106,8 @@ function Evaluate(self)
                 -- on next reload.
                 -- TODO: If I ever implement a timer or event-based reminder checking,
                 -- change this to something like 5-10 minutes in the future.
-
                 local snooze = time() + 5
                 Reminders:SetPlayerReminder(self.id, snooze)
-                this:SetText("Snoozed!")
-                this:Disable()
                 chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. message .. "|r has been snoozed")
             end
         }
