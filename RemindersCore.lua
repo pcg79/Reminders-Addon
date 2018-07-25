@@ -6,7 +6,7 @@ GUI = nil
 RemindersDB = {}
 
 function chatMessage(message)
-    print("Reminder: "..message)
+    print("|cffff0000Reminders|r: "..message)
 end
 
 function debug(message)

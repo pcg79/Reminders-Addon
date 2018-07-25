@@ -102,7 +102,7 @@ function Evaluate(self)
                 -- change this to something like 5-10 minutes in the future.
                 local snooze = time() + 5
                 Reminders:SetPlayerReminder(self.id, snooze)
-                chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. message .. "|r has been snoozed")
+                chatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed")
             end
         }
     end
