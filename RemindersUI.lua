@@ -96,9 +96,9 @@ local function AreInputsValid()
             if not value or value == "" then
                 return false
             end
-        elseif conditionText == "Profession" then
+        elseif conditionText == PROFESSION_LIST_DEFAULT then
             local professionText = professionDropDown.text:GetText()
-            if professionText == "Profession" then
+            if professionText == PROFESSION_LIST_DEFAULT then
                 return false
             end
         end
@@ -304,11 +304,11 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
         valueEditBox:Disable()
-    elseif conditionText == "Name" or conditionText == "Profession" then
+    elseif conditionText == "Name" or conditionText == PROFESSION_LIST_DEFAULT then
         operationDropDown:SetText("Equals")
         operationDropDown:SetDisabled(true)
 
-        if conditionText == "Profession" then
+        if conditionText == PROFESSION_LIST_DEFAULT then
             valueEditBox:Hide()
             valueEditBox:Disable()
             professionDropDown.frame:Show()
@@ -357,7 +357,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     professionDropDown.frame:Show()
     professionDropDown:SetLabel("")
     professionDropDown:SetWidth(180)
-    professionDropDown:SetText("Profession")
+    professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
     professionDropDown:SetList(AlphabeticallySortedList(PROFESSION_LIST))
     professionDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 
@@ -444,7 +444,7 @@ function Reminders:ResetInputUI()
         conditionFrame.valueEditBox:Enable()
         conditionFrame.valueEditBox:SetText("")
         conditionFrame.valueEditBox:Show()
-        conditionFrame.professionDropDown:SetText("Profession")
+        conditionFrame.professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
         conditionFrame.professionDropDown.frame:Hide()
         if i > 1 then
             conditionFrame:Hide()
