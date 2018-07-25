@@ -280,11 +280,6 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 
     operationDropDown:SetDisabled(false)
 
-    debug("conditionText = " .. conditionText)
-    debug("event = " .. event)
-    debug("value = " .. value)
-    debug("operationDropDown.text:GetText() = " .. (operationDropDown.text:GetText() or ""))
-
     valueEditBox:Enable()
     valueEditBox:Show()
     professionDropDown.frame:Hide()
@@ -310,8 +305,6 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 end
 
 function Reminders:CreateConditionFrame(parentFrame)
-    debug("[CreateConditionFrame] here")
-
     local i = 1
     -- Name should include an id and we should put these into a reusable pool
     local conditionFrame = CreateFrame("Frame", "ConditionFrame", parentFrame)
@@ -387,10 +380,8 @@ function Reminders:LoadReminders(parentFrame)
     local i = 0
     for key, reminder in pairs(RemindersDB.global.reminders) do
         i = i + 1
-        debug("[LoadReminders] i = " .. i)
-        debug("[LoadReminders] key = " .. key)
+
         local reminder = Reminders:BuildReminder(reminder)
-        debug("[LoadReminders] reminder.id = " .. reminder.id)
         local reminderItem = REMINDER_ITEMS[i] or CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList, "UIPanelButtonTemplate")
         reminderItem:SetSize(SCROLLWIDTH - 60, 50)
         reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
