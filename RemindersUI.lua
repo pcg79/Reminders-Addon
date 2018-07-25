@@ -22,6 +22,7 @@ OPERATION_LIST["Greater Than Or Equal To"] = ">="
 OPERATION_LIST["Less Than"] = "<"
 OPERATION_LIST["Less Than Or Equal To"] = "<="
 
+INTERVAL_LIST_DEFAULT = "Interval"
 INTERVAL_LIST = {
     Daily = "daily",
     Weekly = "weekly"
@@ -106,7 +107,7 @@ local function AreInputsValid()
         end
 
         local intervalText = IntervalDropDown.text:GetText()
-        if intervalText == "Interval" then
+        if intervalText == INTERVAL_LIST_DEFAULT then
             return false
         end
     end
@@ -237,7 +238,7 @@ function CreateIntervalDropDown(parentFrame)
     IntervalDropDown.frame:Show()
     IntervalDropDown:SetLabel("")
     IntervalDropDown:SetWidth(100)
-    IntervalDropDown:SetText("Interval")
+    IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
     IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
 end
@@ -435,7 +436,7 @@ end
 function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
     IntervalDropDown:SetValue(0)
-    IntervalDropDown:SetText("Interval")
+    IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
 
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
         conditionFrame.conditionDropDown:SetValue(0)
