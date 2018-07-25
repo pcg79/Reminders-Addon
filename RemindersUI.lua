@@ -21,11 +21,11 @@ OPERATION_LIST["Less Than"] = "<"
 OPERATION_LIST["Less Than Or Equal To"] = "<="
 
 INTERVAL_LIST = {
-    Debug = "debug",
     Daily = "daily",
     Weekly = "weekly"
 }
 
+PROFESSION_LIST_DEFAULT = "Profession"
 PROFESSION_LIST = {
     Alchemy        = "Alchemy",
     Blacksmithing  = "Blacksmithing",
@@ -155,7 +155,22 @@ local function CreateReminder()
         AddReminder(newReminder)
         Reminders:ResetInputUI()
 
-        chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+        chatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+    end
+end
+
+local function GetIntervalList()
+    if RemindersDB.char.debug then
+        local interval_list = {}
+
+        for k, v in pairs(INTERVAL_LIST) do
+            interval_list[k] = v
+        end
+
+        interval_list["Debug"] = "debug"
+        return interval_list
+    else
+        return INTERVAL_LIST
     end
 end
 
@@ -221,7 +236,7 @@ function CreateIntervalDropDown(parentFrame)
     IntervalDropDown:SetLabel("")
     IntervalDropDown:SetWidth(100)
     IntervalDropDown:SetText("Interval")
-    IntervalDropDown:SetList(AlphabeticallySortedList(INTERVAL_LIST))
+    IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
     IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
 end
 
@@ -257,12 +272,13 @@ function BuildReminderText()
 
         if valueEditBox:IsEnabled() then
             reminderText = reminderText .. " " .. valueEditBox:GetText():gsub(separator, "")
-        elseif conditionText == "Profession" then
+        elseif conditionText == PROFESSION_LIST_DEFAULT then
             reminderText = reminderText .. " " .. professionDropDown.text:GetText()
         end
 
         local intervalText = IntervalDropDown.text:GetText()
-        reminderText = reminderText .. separator .. INTERVAL_LIST[intervalText]
+        debug("GetIntervalList()[intervalText] = " .. GetIntervalList()[intervalText])
+        reminderText = reminderText .. separator .. GetIntervalList()[intervalText]
     end
 
     return reminderText
