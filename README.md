@@ -43,6 +43,7 @@ class, profession, and name only support equals.  level and ilevel support equal
 
 ## TODO
 
+* Look into changing reminder checks to event/timer-based instead of on addon load.
 * Implement "not equal to" operation
 * Initially sort the reminder list by some order
 * Allow specific recipes/spells condition
