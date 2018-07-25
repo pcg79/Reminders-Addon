@@ -2,6 +2,8 @@ local AceGUI = LibStub("AceGUI-3.0")
 
 -- Globals
 REMINDER_ITEMS = {}
+
+CONDITION_LIST_DEFAULT = "Condition"
 CONDITION_FRAMES = {}
 CONDITION_LIST = {
     Everyone   = "*",
@@ -77,7 +79,7 @@ local function AreInputsValid()
         local professionDropDown = conditionFrame.professionDropDown
 
         local conditionText = conditionDropDown.text:GetText()
-        if conditionText == "Condition" then
+        if conditionText == CONDITION_LIST_DEFAULT then
             return false
         elseif conditionText ~= "Everyone" and conditionText ~= "Self" then
             local operationText = operationDropDown.text:GetText()
@@ -333,7 +335,7 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionDropDown.frame:Show()
     conditionDropDown:SetLabel("")
     conditionDropDown:SetWidth(100)
-    conditionDropDown:SetText("Condition")
+    conditionDropDown:SetText(CONDITION_LIST_DEFAULT)
     conditionDropDown:SetList(AlphabeticallySortedList(CONDITION_LIST))
     conditionDropDown:SetCallback("OnValueChanged", ConditionDropDownOnValueChanged)
 
@@ -437,7 +439,7 @@ function Reminders:ResetInputUI()
 
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
         conditionFrame.conditionDropDown:SetValue(0)
-        conditionFrame.conditionDropDown:SetText("Condition")
+        conditionFrame.conditionDropDown:SetText(CONDITION_LIST_DEFAULT)
         conditionFrame.operationDropDown:SetDisabled(false)
         conditionFrame.operationDropDown:SetValue(0)
         conditionFrame.operationDropDown:SetText("Operation")
