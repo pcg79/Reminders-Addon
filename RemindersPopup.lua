@@ -217,10 +217,25 @@ end
 
 local function NewFrame(data)
   local frame = CreateFrame('Frame', 'Reminders'..NumFrames, UIParent, 'ButtonFrameTemplate')
-  frame.portrait:SetPoint('TOPLEFT', data.icon and -4 or -3, data.icon and 6 or 5)
-  frame.portrait:SetTexture(data.icon or 'Interface\\GossipFrame\\AvailableQuestIcon')
+  frame:SetBackdrop({
+    bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground"
+  })
+  -- Original portrait
+  -- frame.portrait:SetPoint('TOPLEFT', data.icon and -4 or -3, data.icon and 6 or 5)
+  -- frame.portrait:SetTexture(data.icon or "Interface\\TUTORIALFRAME\\UI-HELP-PORTRAIT")
+
+  -- Blue shiny blob
+  -- frame.portrait:SetPoint('TOPLEFT', -40, 40)
+  -- frame.portrait:SetPoint('BOTTOMRIGHT', -480, 120)
+  -- frame.portrait:SetTexture(data.icon or "Interface\\UNITPOWERBARALT\\Arcane_Circular_Fill")
+
+  -- Spell book
+  frame.portrait:SetPoint('TOPLEFT', -5, 7)
+  frame.portrait:SetTexture(data.icon or "Interface\\QUESTFRAME\\UI-QuestLog-BookIcon")
+
   frame.Inset:SetPoint('TOPLEFT', 4, -23)
   frame.Inset.Bg:SetColorTexture(0, 0, 0)
+  frame.TopTileStreaks:Hide()
 
   frame.images = {}
   frame.text = frame:CreateFontString(nil, nil, 'GameFontHighlight')
