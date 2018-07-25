@@ -156,7 +156,6 @@ end
 
 function Delete(self)
     local id = nil
-    debug("type(self) = " .. type(self))
     if type(self) == "table" then
         id = self.id
     elseif type(self) == "string" then
@@ -226,15 +225,11 @@ function EvaluateCondition(self)
         tokens[tokenCount] = token
     end
 
-    -- debug("tokenCount = "..tokenCount)
-
     local toSkip = 0
     for i=1, tokenCount do
-        -- debug("i = "..i)
 
         if toSkip <= 0 then
             local token = tokens[i]:lower()
-            -- debug("token = "..token)
             local count = 0
 
             if token == R_EVERYONE then
@@ -244,13 +239,7 @@ function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local name = tokens[i+count]
-
-                -- debug("(name) operation = "..operation)
-                -- debug("name = "..name)
-
                 local playerName = UnitName("player")
-
-                -- debug("playerName = "..playerName)
 
                 evalString = evalString.." "..tostring(playerName == name)
 
@@ -260,22 +249,15 @@ function EvaluateCondition(self)
                 count = count + 1
                 local level = tokens[i+count]
 
+                -- TODO: This isn't necessary any more.  Change the operation to just be "=="
                 if operation == "=" then
                     operation = "=="
                 end
 
-                -- debug("(level) operation = "..operation)
-                -- debug("level = "..level)
-
                 local playerLevel = UnitLevel("player")
                 local levelStmt = "return "..playerLevel..operation..level
-
-                -- debug("stmt: "..levelStmt)
-
                 local levelFunc = assert(loadstring(levelStmt))
-                local result, errorMsg = levelFunc();
-
-                -- debug("level result = "..tostring(result))
+                local result, errorMsg = levelFunc()
 
                 evalString = evalString.." "..tostring(result)
 
@@ -284,13 +266,7 @@ function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local class = tokens[i+count]
-
-                -- debug("(class) operation = "..operation)
-                -- debug("class = "..class)
-
                 local playerClass = UnitClass("player")
-
-                -- debug("playerClass = "..playerClass)
 
                 evalString = evalString.." "..tostring(playerClass == class)
 
@@ -299,22 +275,10 @@ function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local profession = tokens[i+count]:lower()
-
-                -- debug("(profession) operation = "..operation)
-                -- debug("profession = "..profession)
-
                 local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
 
                 local prof1Name = GetProfessionNameByIndex(prof1) or ""
                 local prof2Name = GetProfessionNameByIndex(prof2) or ""
-
-
-                -- debug("prof1Name = "..(prof1Name or "nil"))
-                -- debug("prof2Name = "..(prof2Name or "nil"))
-                -- debug("archaeology = "..(archaeology or "nil"))
-                -- debug("fishing = "..(fishing or "nil"))
-                -- debug("cooking = "..(cooking or "nil"))
-                -- debug("firstAid = "..(firstAid or "nil"))
 
                 local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
                    (profession == "archaeology" and archaeology ~= nil) or
@@ -327,25 +291,17 @@ function EvaluateCondition(self)
             elseif token == R_ILEVEL then
                 count = count + 1
                 local operation = tokens[i+count]
+
+                -- TODO: This isn't necessary any more.  Change the operation to just be "=="
                 if operation == "=" then
                     operation = "=="
                 end
                 count = count + 1
                 local ilevel = tokens[i+count]
-
-                -- debug("(ilevel) operation = "..operation)
-                -- debug("ilevel = "..ilevel)
-
                 local playerILevel = GetAverageItemLevel()
-
                 local ilevelStmt = "return "..playerILevel..operation..ilevel
-
-                -- debug("stmt: "..ilevelStmt)
-
                 local ilevelFunc = assert(loadstring(ilevelStmt))
-                local result, errorMsg = ilevelFunc();
-
-                -- debug("ilevel result = "..tostring(result))
+                local result, errorMsg = ilevelFunc()
 
                 evalString = evalString.." "..tostring(result)
 
@@ -366,12 +322,8 @@ function EvaluateCondition(self)
     else
         evalString = "return "..evalString
 
-        -- debug("evalString: "..evalString)
-
         local evalFunc = assert(loadstring(evalString))
-        local result, errorMsg = evalFunc();
-
-        -- debug("end result = "..tostring(result))
+        local result, errorMsg = evalFunc()
 
         return result
     end
