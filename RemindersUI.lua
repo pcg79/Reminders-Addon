@@ -127,7 +127,7 @@ local function AddReminder(newReminder)
         local reminder = Reminders:BuildReminder(reminder)
         if reminder:IsEqual(newReminder) then
             debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
-            -- TODO:  Print out "already added" msg somewhere
+            chatMessage("A Reminder for |cff32cd32" .. newReminder.message .. "|r with the same condition and interval already exists!")
             return
         end
     end
