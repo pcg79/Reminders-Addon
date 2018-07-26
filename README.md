@@ -33,6 +33,12 @@ class, profession, and name only support equals.  level and ilevel support equal
 /reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
 ```
 
+## UI
+
+When a Reminder is created it will appear in the list as a button in the main UI.  You can left click on the button to force the system to evaluate that reminder.  That's mostly for test purposes so I don't know if that functionality will stay.
+
+You can also Alt+Click on a Reminder button to delete the Reminder.
+
 ## KNOWN ISSUES
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally.
@@ -46,6 +52,7 @@ class, profession, and name only support equals.  level and ilevel support equal
 
 ## TODO
 
+* Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
 * Look into changing reminder checks to event/timer-based instead of on addon load.
 * Implement "not equal to" operation
 * Initially sort the reminder list by some order
