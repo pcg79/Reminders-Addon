@@ -22,7 +22,7 @@ Let's say you want your characters that are level 90 or above to run Firelands e
 
 class, profession, and name only support equals.  level and ilevel support equal, less than, greater than, less than or equal to, and great than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
 
-### COMMAND LINE:
+### COMMAND LINE
 
 ```
 /reminders - Toggles the Reminders UI open or closed
@@ -34,11 +34,14 @@ class, profession, and name only support equals.  level and ilevel support equal
 ```
 
 ## KNOWN ISSUES
+
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally.
 * Text isn't internationalized.  If you're interested in helping, let me know!
 
 
-## CAVEATS:
+## CAVEATS
+
+* Right now the processing of reminders is (mainly) triggered by a UI load which means either when your character loads or you manually run `/reload` in the console.  This means if you have a reminder that should go off and you're still logged in, it won't go off.  I hope to change that someday.
 * Since comma is used as the separator internally, commas are stripped out of your reminder message and value text
 
 ## TODO
