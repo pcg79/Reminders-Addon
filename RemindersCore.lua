@@ -1,4 +1,4 @@
-Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0")
+Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceTimer-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
@@ -71,29 +71,52 @@ function Reminders:ResetAll()
 end
 
 function Reminders:OnInitialize()
-    if not _G["RemindersDBG"] then
-        _G["RemindersDBG"] = GlobalDefaults()
-    end
+    -- if not _G["RemindersDBG"] then
+    --     _G["RemindersDBG"] = GlobalDefaults()
+    -- end
 
-    if not RemindersDBPC then
-        _G["RemindersDBPC"] = PerCharacterDefaults()
-    end
+    -- if not RemindersDBPC then
+    --     _G["RemindersDBPC"] = PerCharacterDefaults()
+    -- end
 
-    RemindersDB.global = _G["RemindersDBG"]
-    RemindersDB.char   = _G["RemindersDBPC"]
+    -- RemindersDB.global = _G["RemindersDBG"]
+    -- RemindersDB.char   = _G["RemindersDBPC"]
+end
+
+function Reminders:Fire()
+    print("[ " .. date("%X") .. " ] Fired")
+end
+
+local delay = 10
+
+function CTimerFire()
+    print("[ " .. date("%X") .. " ] CTimerFired")
+
+    C_Timer.After(delay, CTimerFire)
 end
 
 function Reminders:OnEnable()
-    Reminders:DebugPrintReminders()
+    local nextFire = time() + delay
+    C_Timer.After(delay, function()
+        print("[ " .. date("%X") .. " ] CTimerFired")
 
-    Reminders:EvaluateReminders()
-    Reminders:CleanUpPlayerReminders()
+        C_Timer.After(delay, CTimerFire)
+    end)
 
-    if not GUI then GUI = Reminders:CreateUI() end
+    print("[ " .. date("%X") .. " ] It should fire in " .. delay .. " seconds (" .. nextFire .. " aka " .. date("%X", nextFire ) .. ")")
 
-    Reminders:LoadReminders(GUI)
 
-    if RemindersDB.char.debug then GUI:Show() end
+
+    -- Reminders:DebugPrintReminders()
+
+    -- Reminders:EvaluateReminders()
+    -- Reminders:CleanUpPlayerReminders()
+
+    -- if not GUI then GUI = Reminders:CreateUI() end
+
+    -- Reminders:LoadReminders(GUI)
+
+    -- if RemindersDB.char.debug then GUI:Show() end
 end
 
 function Reminders:BuildAndDisplayReminders(messages)
@@ -150,7 +173,7 @@ function Reminders:SetPlayerReminder(reminder_id, value)
     debug("[SetPlayerReminder] value = "..(value or "nil"))
     RemindersDB.char.reminders[reminder_id] = value
 
-    Reminders:DebugPrintReminders()
+    -- Reminders:DebugPrintReminders()
 end
 
 function Reminders:DeletePlayerReminder(reminder_id)
@@ -162,13 +185,13 @@ function Reminders:DebugPrintReminders()
     local reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
         local reminder = Reminders:BuildReminder(reminder)
-        chatMessage(reminder:ToString())
+        debug("[Global Reminders] " .. reminder:ToString())
     end
 
     debug("Printing profile reminders:")
     reminders = RemindersDB.char.reminders
     for key, remindAt in pairs(reminders) do
-        chatMessage("[Profile Reminders] " .. key .. " = " .. remindAt)
+        debug("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
 end
 

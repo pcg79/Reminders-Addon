@@ -5,6 +5,10 @@
 ## SavedVariablesPerCharacter: RemindersDBPC
 ## Version: 8.0.1
 
+# Libraries
+embeds.xml
+
+# Files
 RemindersCore.lua
 RemindersReminder.lua
 RemindersUI.lua
