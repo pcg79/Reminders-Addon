@@ -3,7 +3,7 @@
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 8.0.0-7375fcd-alpha
+## Version: 8.0.1
 
 RemindersCore.lua
 RemindersReminder.lua
