@@ -15,9 +15,11 @@ function CalculateNextRemindAt(self)
     local timeNow = time()
     local nextRemindAt = nil
     local interval = self.interval
+    local timeUntilnextRemindAt = nil
 
     if interval == "daily" then
-        nextRemindAt = timeNow + Reminders:GetQuestResetTime()
+        timeUntilnextRemindAt = Reminders:GetQuestResetTime()
+        nextRemindAt = timeNow + timeUntilnextRemindAt
     elseif interval == "weekly" then
         local nextQuestResetTime = timeNow + Reminders:GetQuestResetTime()
         local nextQuestResetTimeWDay = date("%w", nextQuestResetTime)
@@ -30,11 +32,13 @@ function CalculateNextRemindAt(self)
         local numDaysUntilTuesday = (tuesdayIndex - nextQuestResetTimeWDay) % 7
 
         nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
+        timeUntilnextRemindAt = nextRemindAt - timeNow
     elseif interval == "debug" then -- for debugging only (for now)
-        nextRemindAt = timeNow + 30
+        timeUntilnextRemindAt = 30
+        nextRemindAt = timeNow + timeUntilnextRemindAt
     end
 
-    return nextRemindAt
+    return { nextRemindAt = nextRemindAt, timeUntilnextRemindAt = timeUntilnextRemindAt }
 end
 
 function IsEqual(self, otherReminder)
@@ -45,7 +49,7 @@ end
 
 function ToString(self)
     local nextRemindAt = Reminders:GetPlayerReminder(self.id)
-    debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
+    -- debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
     if nextRemindAt then
         nextRemindAt = date("%x %X", nextRemindAt)
     else
@@ -81,6 +85,38 @@ function SetNextRemindAt(self)
     Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
 end
 
+function Reminders:EvaluateReminder(reminder)
+    chatMessage("[ " .. date("%X") .. " ] EvaluateReminder called for reminder " .. reminder.id)
+    Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
+end
+
+function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
+    timeUntilnextRemindAt = 30
+    local nextRemindAt = nil
+    local test = nil
+    if timeUntilnextRemindAt then
+        nextRemindAt = timeUntilnextRemindAt + time()
+    else
+        local calculatedTimes = self:CalculateNextRemindAt()
+        nextRemindAt = calculatedTimes.nextRemindAt
+        timeUntilnextRemindAt = calculatedTimes.timeUntilnextRemindAt
+    end
+
+    test = timeUntilnextRemindAt + time()
+
+    if self.timer then
+        chatMessage("[ " .. date("%X") .. " ] Timer for reminder " .. self.id .. " cancelled")
+        Reminders:CancelTimer(self.timer)
+    end
+    self.timer = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
+
+    chatMessage("[ " .. date("%X") .. " ] Timer scheduled for reminder " .. self.id .. ".")
+    chatMessage("[ " .. date("%X") .. " ] It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%X", nextRemindAt ) .. ")")
+    chatMessage("[ " .. date("%X") .. " ] timeUntilnextRemindAt + time() = " .. date("%X", test ))
+
+    Reminders:SetPlayerReminder(self.id, nextRemindAt)
+end
+
 function Evaluate(self)
     local message = self:Process()
     -- If Process returned a message, that means the reminder triggered.
@@ -100,8 +136,8 @@ function Evaluate(self)
                 -- on next reload.
                 -- TODO: If I ever implement a timer or event-based reminder checking,
                 -- change this to something like 5-10 minutes in the future.
-                local snooze = time() + 5
-                Reminders:SetPlayerReminder(self.id, snooze)
+                local snooze = 5
+                self:SetAndScheduleNextReminder(snooze)
                 chatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed")
             end
         }
@@ -123,7 +159,9 @@ function Process(self)
     if self:EvaluateCondition() then
         debug("[Process] eval true for "..self.id)
         if playerReminder then
-            debug("[Process] player has reminder already")
+            debug("[Process] player has reminder " .. self.id .. " already")
+            debug("timeNow = " .. timeNow)
+            debug("playerReminder = " .. playerReminder)
             if timeNow >= playerReminder then
                 shouldRemind = true
             end
@@ -133,8 +171,9 @@ function Process(self)
             shouldRemind = true
         end
 
+        self:SetAndScheduleNextReminder()
+
         if shouldRemind then
-            self:SetNextRemindAt()
             return self.message
         end
     elseif playerReminder then
@@ -172,10 +211,12 @@ function Reminders:BuildReminder(params)
     self.condition = params.condition
     self.interval = (params.interval or "daily")
     self.id = params.id
+    self.timer = params.timer
 
     self.IsEqual = IsEqual
     self.ToString = ToString
-    self.SetNextRemindAt = SetNextRemindAt
+    -- self.SetNextRemindAt = SetNextRemindAt
+    self.SetAndScheduleNextReminder = SetAndScheduleNextReminder
     self.CalculateNextRemindAt = CalculateNextRemindAt
     self.Process = Process
     self.EvaluateCondition = EvaluateCondition
@@ -208,7 +249,7 @@ end
 function EvaluateCondition(self)
     local condition = self.condition
 
-    debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
+    -- debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
 
     -- Go through each condition
     -- everyone
