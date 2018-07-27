@@ -56,7 +56,6 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 * Initially sort the reminder list by some order
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., Legion Engineering Level > 80)
-* Escape to close
 * Add ability to sort reminder list
 * Improve the reminder list look and feel
 * Multiple conditions joined with AND or OR
