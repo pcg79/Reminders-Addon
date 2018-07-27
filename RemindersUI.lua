@@ -136,7 +136,6 @@ local function AddReminder(newReminder)
     end
 
     newReminder:Save()
-    -- newReminder:SetNextRemindAt()
     newReminder:SetAndScheduleNextReminder()
 
     Reminders:LoadReminders(GUI)
