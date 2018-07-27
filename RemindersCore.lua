@@ -84,7 +84,7 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
-    Reminders:DebugPrintReminders()
+    -- Reminders:DebugPrintReminders()
 
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
