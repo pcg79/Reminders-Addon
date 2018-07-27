@@ -1,4 +1,4 @@
-Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0")
+Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceTimer-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
 -- Globals
@@ -84,7 +84,7 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
-    Reminders:DebugPrintReminders()
+    -- Reminders:DebugPrintReminders()
 
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
@@ -150,7 +150,7 @@ function Reminders:SetPlayerReminder(reminder_id, value)
     debug("[SetPlayerReminder] value = "..(value or "nil"))
     RemindersDB.char.reminders[reminder_id] = value
 
-    Reminders:DebugPrintReminders()
+    -- Reminders:DebugPrintReminders()
 end
 
 function Reminders:DeletePlayerReminder(reminder_id)
@@ -162,13 +162,13 @@ function Reminders:DebugPrintReminders()
     local reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
         local reminder = Reminders:BuildReminder(reminder)
-        chatMessage(reminder:ToString())
+        debug("[Global Reminders] " .. reminder:ToString())
     end
 
     debug("Printing profile reminders:")
     reminders = RemindersDB.char.reminders
     for key, remindAt in pairs(reminders) do
-        chatMessage("[Profile Reminders] " .. key .. " = " .. remindAt)
+        debug("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
 end
 
