@@ -41,11 +41,13 @@ class, profession, and name only support equals.  level and ilevel support equal
 
 ## CAVEATS
 
-* Right now the processing of reminders is (mainly) triggered by a UI load which means either when your character loads or you manually run `/reload` in the console.  This means if you have a reminder that should go off and you're still logged in, it won't go off.  I hope to change that someday.
 * Since comma is used as the separator internally, commas are stripped out of your reminder message and value text
 
 ## TODO
 
+* Make sure Reminders don't popup while in combat
+* Move Reminder popup off to the side
+* Make Reminder popup moveable
 * Implement "not equal to" operation
 * Initially sort the reminder list by some order
 * Allow specific recipes/spells condition
