@@ -303,7 +303,9 @@ local function Process(self)
             shouldRemind = true
         end
 
-        self:SetAndScheduleNextReminder()
+        if shouldRemind or not remindersTimers[self.id] then
+            self:SetAndScheduleNextReminder()
+        end
 
         if shouldRemind then
             return self.message
