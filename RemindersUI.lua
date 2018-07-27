@@ -162,6 +162,10 @@ local function CreateReminder()
     end
 end
 
+local function EditBoxOnEscapePressed(self)
+    GUI:Hide()
+end
+
 local function GetIntervalList()
     if RemindersDB.char.debug then
         local interval_list = {}
@@ -219,6 +223,7 @@ function CreateMessageEditBox(parentFrame)
     local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
     editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
     editbox:SetScript("OnEnterPressed", CreateReminder)
+    editbox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
     editbox:SetScript("OnTextChanged", OnInputValueChanged)
     editbox:SetFontObject(GameFontHighlightSmall)
     editbox:SetWidth(500)
@@ -378,7 +383,9 @@ function Reminders:CreateConditionFrame(parentFrame)
     valueEditBox:SetBackdropColor (0, 0, 0, 0.5)
     valueEditBox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
     valueEditBox:SetScript("OnEnterPressed", CreateReminder)
+    valueEditBox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
     valueEditBox:SetScript("OnTextChanged", OnInputValueChanged)
+    valueEditBox:SetAutoFocus(false)
 
 
     conditionFrame.conditionDropDown = conditionDropDown
