@@ -90,7 +90,18 @@ local default = {
   y = 0,
 }
 
+local movedPosition = nil
+
 --[[ Internal API ]]--
+
+local function StopMovingAndRecordPosition(frame)
+  frame:StopMovingOrSizing()
+  movedPosition = {
+    x = frame:GetTop(),
+    y = frame:GetLeft()
+  }
+end
+
 
 local function UpdateFrame(frame, i)
   local data = frame.data.reminders[i]
@@ -220,6 +231,7 @@ local function NewFrame(data)
   frame:SetBackdrop({
     bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground"
   })
+
   -- Original portrait
   -- frame.portrait:SetPoint('TOPLEFT', data.icon and -4 or -3, data.icon and 6 or 5)
   -- frame.portrait:SetTexture(data.icon or "Interface\\TUTORIALFRAME\\UI-HELP-PORTRAIT")
@@ -254,6 +266,9 @@ local function NewFrame(data)
   frame:SetClampedToScreen(true)
   frame:EnableMouse(true)
   frame:SetToplevel(true)
+  frame:SetMovable(true)
+  frame:SetScript("OnMouseDown", function() frame:StartMoving() end)
+  frame:SetScript("OnMouseUp", function() StopMovingAndRecordPosition(frame) end)
 
   frame.editbox = CreateFrame('EditBox', nil, frame, 'InputBoxTemplate')
   frame.editbox:SetHeight(20)
@@ -272,15 +287,6 @@ end
 
 
 --[[ User API ]]--
-
--- function Reminders:RegisterTutorial(data)
---   assert(type(data) == 'table', 'RegisterTutorials: 2nd arg must be a table', 2)
---   assert(self, 'RegisterTutorials: 1st arg was not provided', 2)
-
---   if not Frames[self] then
---     Frames[self] = NewFrame(data)
---   end
--- end
 
 function Reminders:DisplayReminders(data)
   if ReminderFrame == nil then
