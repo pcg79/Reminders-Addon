@@ -273,15 +273,6 @@ end
 
 --[[ User API ]]--
 
--- function Reminders:RegisterTutorial(data)
---   assert(type(data) == 'table', 'RegisterTutorials: 2nd arg must be a table', 2)
---   assert(self, 'RegisterTutorials: 1st arg was not provided', 2)
-
---   if not Frames[self] then
---     Frames[self] = NewFrame(data)
---   end
--- end
-
 function Reminders:DisplayReminders(data)
   if ReminderFrame == nil then
     ReminderFrame = NewFrame(data)

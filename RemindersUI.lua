@@ -126,11 +126,11 @@ end
 local function AddReminder(newReminder)
     -- Don't save reminders where the message, reminder, and interval already exist
     for key, reminder in pairs(RemindersDB.global.reminders) do
-        debug("[AddReminder] looping...")
+        Reminders:debug("[AddReminder] looping...")
         local reminder = Reminders:BuildReminder(reminder)
         if reminder:IsEqual(newReminder) then
-            debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
-            chatMessage("A Reminder for |cff32cd32" .. newReminder.message .. "|r with the same condition and interval already exists!")
+            Reminders:debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
+            Reminders:ChatMessage("A Reminder for |cff32cd32" .. newReminder.message .. "|r with the same condition and interval already exists!")
             return
         end
     end
@@ -158,7 +158,7 @@ local function CreateReminder()
         AddReminder(newReminder)
         Reminders:ResetInputUI()
 
-        chatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+        Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
     end
 end
 
@@ -280,7 +280,7 @@ function BuildReminderText()
         end
 
         local intervalText = IntervalDropDown.text:GetText()
-        debug("GetIntervalList()[intervalText] = " .. GetIntervalList()[intervalText])
+        Reminders:debug("GetIntervalList()[intervalText] = " .. GetIntervalList()[intervalText])
         reminderText = reminderText .. separator .. GetIntervalList()[intervalText]
     end
 
@@ -289,7 +289,7 @@ end
 
 local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     -- for k,v in pairs(conditionDropDown) do
-    --     debug("k = " .. k)
+    --     Reminders:debug("k = " .. k)
     -- end
 
     local conditionText = conditionDropDown.text:GetText()
@@ -413,7 +413,9 @@ function Reminders:LoadReminders(parentFrame)
             if IsAltKeyDown() then
                 reminder:Delete()
                 Reminders:LoadReminders(parentFrame)
-                chatMessage("|cffff0000Reminders|r: Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
+            elseif IsControlKeyDown() then
+                reminder:SetAndScheduleNextReminder(1)
             else
                 Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
             end
