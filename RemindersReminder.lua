@@ -85,11 +85,6 @@ function SetNextRemindAt(self)
     Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
 end
 
-function Reminders:EvaluateReminder(reminder)
-    chatMessage("[ " .. date("%X") .. " ] EvaluateReminder called for reminder " .. reminder.id)
-    Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
-end
-
 function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     local nextRemindAt = nil
     if timeUntilnextRemindAt then
