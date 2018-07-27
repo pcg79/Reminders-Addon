@@ -4,6 +4,7 @@ Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 -- Globals
 GUI = nil
 RemindersDB = {}
+ForceEvaluate = false
 
 function chatMessage(message)
     print("|cffff0000Reminders|r: "..message)
@@ -84,16 +85,30 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
-    -- Reminders:DebugPrintReminders()
-
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
 
-    if not GUI then GUI = Reminders:CreateUI() end
+    GUI = Reminders:CreateUI()
+
+    Reminders:RegisterEvents()
 
     Reminders:LoadReminders(GUI)
 
     if RemindersDB.char.debug then GUI:Show() end
+end
+
+function Reminders:RegisterEvents()
+    GUI:RegisterEvent("PLAYER_REGEN_ENABLED")
+    GUI:SetScript("OnEvent", function(_, event, ...)
+        if event == "PLAYER_REGEN_ENABLED" then
+            Reminders:debug("Out of combat")
+            if Reminders:ShouldForceEvaluate() then
+                Reminders:debug("...and we should force eval")
+                Reminders:CancelEvaluateAfterCombat()
+                Reminders:EvaluateReminders()
+            end
+        end
+    end)
 end
 
 function Reminders:BuildAndDisplayReminders(messages)
@@ -111,7 +126,25 @@ function Reminders:BuildAndDisplayReminders(messages)
     end
 end
 
+function Reminders:ShouldForceEvaluate()
+    return ForceEvaluate
+end
+
+function Reminders:EvaluateAfterCombat()
+    ForceEvaluate = true
+end
+
+function Reminders:CancelEvaluateAfterCombat()
+    ForceEvaluate = false
+end
+
 function Reminders:EvaluateReminders()
+    if UnitAffectingCombat("player") then
+        Reminders:debug("In combat, not showing reminder")
+        Reminders:EvaluateAfterCombat()
+        return
+    end
+
     local reminderMessages = {}
 
     for i, reminder in pairs(RemindersDB.global.reminders) do
