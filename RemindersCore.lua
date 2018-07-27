@@ -122,6 +122,9 @@ function Reminders:BuildAndDisplayReminders(messages)
             width = 552,
             imageHeight = 256,
             reminders = messages,
+            relPoint = "BOTTOMRIGHT",
+            x = -400,
+            y = 200,
         })
     end
 end
