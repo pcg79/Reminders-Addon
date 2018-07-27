@@ -51,7 +51,6 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 
 ## TODO
 
-* Make Reminder popup moveable
 * Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
 * Implement "not equal to" operation
 * Initially sort the reminder list by some order
