@@ -81,10 +81,6 @@ function Serialize(self)
     }
 end
 
-function SetNextRemindAt(self)
-    Reminders:SetPlayerReminder(self.id, self:CalculateNextRemindAt())
-end
-
 function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     local nextRemindAt = nil
     if timeUntilnextRemindAt then
@@ -209,7 +205,6 @@ function Reminders:BuildReminder(params)
 
     self.IsEqual = IsEqual
     self.ToString = ToString
-    -- self.SetNextRemindAt = SetNextRemindAt
     self.SetAndScheduleNextReminder = SetAndScheduleNextReminder
     self.CalculateNextRemindAt = CalculateNextRemindAt
     self.Process = Process
