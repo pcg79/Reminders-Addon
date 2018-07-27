@@ -4,22 +4,23 @@ Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 -- Globals
 GUI = nil
 RemindersDB = {}
+ForceEvaluate = false
 
-function chatMessage(message)
+function Reminders:ChatMessage(message)
     print("|cffff0000Reminders|r: "..message)
 end
 
-function debug(message)
+function Reminders:debug(message)
   if RemindersDB.char.debug then
-     chatMessage("[debug] "..message)
+     Reminders:ChatMessage("[ " .. date("%x %X") .. " ][debug] "..message)
   end
 end
 
 function Reminders:CommandProcessor(input)
     local commands = {}
-    debug("input = " .. input)
+    Reminders:debug("input = " .. input)
     for token in input.gmatch(input, "[^ ]+") do
-        debug("token = " .. token)
+        Reminders:debug("token = " .. token)
         tinsert(commands, token)
     end
 
@@ -39,10 +40,10 @@ function Reminders:CommandProcessor(input)
         if RemindersDB.char.debug then
             str = "on"
         end
-        chatMessage("Debug logging is now " .. str)
+        Reminders:ChatMessage("Debug logging is now " .. str)
     elseif command == "delete" then
         local id = commands[2]
-        debug("id = " .. id)
+        Reminders:debug("id = " .. id)
 
         Delete(id)
     else
@@ -55,14 +56,14 @@ function Reminders:CommandProcessor(input)
             "|cffffcc00/reminders reset|r - Deletes all your reminders.  Use with caution.  Not reversible.\n"..
             "|cffffcc00/reminders help|r - This message"
 
-        chatMessage(usage)
+        Reminders:ChatMessage(usage)
     end
 end
 
 function Reminders:ResetAll()
-    debug("resetting all")
-    _G["RemindersDBG"] = GlobalDefaults()
-    _G["RemindersDBPC"] = PerCharacterDefaults()
+    Reminders:debug("resetting all")
+    _G["RemindersDBG"] = Reminders:GlobalDefaults()
+    _G["RemindersDBPC"] = Reminders:PerCharacterDefaults()
 
     RemindersDB.global = _G["RemindersDBG"]
     RemindersDB.char   = _G["RemindersDBPC"]
@@ -84,16 +85,30 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
-    -- Reminders:DebugPrintReminders()
-
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
 
-    if not GUI then GUI = Reminders:CreateUI() end
+    GUI = Reminders:CreateUI()
+
+    Reminders:RegisterEvents()
 
     Reminders:LoadReminders(GUI)
 
     if RemindersDB.char.debug then GUI:Show() end
+end
+
+function Reminders:RegisterEvents()
+    GUI:RegisterEvent("PLAYER_REGEN_ENABLED")
+    GUI:SetScript("OnEvent", function(_, event, ...)
+        if event == "PLAYER_REGEN_ENABLED" then
+            Reminders:debug("Out of combat")
+            if Reminders:ShouldForceEvaluate() then
+                Reminders:debug("...and we should force eval")
+                Reminders:CancelEvaluateAfterCombat()
+                Reminders:EvaluateReminders()
+            end
+        end
+    end)
 end
 
 function Reminders:BuildAndDisplayReminders(messages)
@@ -107,11 +122,32 @@ function Reminders:BuildAndDisplayReminders(messages)
             width = 552,
             imageHeight = 256,
             reminders = messages,
+            relPoint = "BOTTOMRIGHT",
+            x = -400,
+            y = 200,
         })
     end
 end
 
+function Reminders:ShouldForceEvaluate()
+    return ForceEvaluate
+end
+
+function Reminders:EvaluateAfterCombat()
+    ForceEvaluate = true
+end
+
+function Reminders:CancelEvaluateAfterCombat()
+    ForceEvaluate = false
+end
+
 function Reminders:EvaluateReminders()
+    if UnitAffectingCombat("player") then
+        Reminders:debug("In combat, not showing reminder")
+        Reminders:EvaluateAfterCombat()
+        return
+    end
+
     local reminderMessages = {}
 
     for i, reminder in pairs(RemindersDB.global.reminders) do
@@ -135,7 +171,7 @@ function Reminders:CleanUpPlayerReminders()
         local globalReminder = RemindersDB.global.reminders[id]
 
         if globalReminder == nil then
-            debug("Reminder "..id.." doesn't exist in global list.  Deleting...")
+            Reminders:debug("Reminder "..id.." doesn't exist in global list.  Deleting...")
             RemindersDB.char.reminders[id] = nil
         end
     end
@@ -146,8 +182,8 @@ function Reminders:GetPlayerReminder(reminder_id)
 end
 
 function Reminders:SetPlayerReminder(reminder_id, value)
-    debug("[SetPlayerReminder] reminder_id = "..reminder_id)
-    debug("[SetPlayerReminder] value = "..(value or "nil"))
+    Reminders:debug("[SetPlayerReminder] reminder_id = "..reminder_id)
+    Reminders:debug("[SetPlayerReminder] value = "..(value or "nil"))
     RemindersDB.char.reminders[reminder_id] = value
 
     -- Reminders:DebugPrintReminders()
@@ -158,28 +194,28 @@ function Reminders:DeletePlayerReminder(reminder_id)
 end
 
 function Reminders:DebugPrintReminders()
-    debug("Printing global reminders:")
+    Reminders:debug("Printing global reminders:")
     local reminders = RemindersDB.global.reminders
     for _, reminder in pairs(reminders) do
         local reminder = Reminders:BuildReminder(reminder)
-        debug("[Global Reminders] " .. reminder:ToString())
+        Reminders:debug("[Global Reminders] " .. reminder:ToString())
     end
 
-    debug("Printing profile reminders:")
+    Reminders:debug("Printing profile reminders:")
     reminders = RemindersDB.char.reminders
     for key, remindAt in pairs(reminders) do
-        debug("[Profile Reminders] " .. key .. " = " .. remindAt)
+        Reminders:debug("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
 end
 
-function GlobalDefaults()
+function Reminders:GlobalDefaults()
     return {
         reminders = {},
         remindersCount = 0,
     }
 end
 
-function PerCharacterDefaults()
+function Reminders:PerCharacterDefaults()
     return {
         reminders = {},
         debug = false,
