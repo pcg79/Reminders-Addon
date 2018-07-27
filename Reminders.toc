@@ -1,9 +1,10 @@
 ## Interface: 80000
 ## Title: Reminders
+## Notes: Set up periodic reminders
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 8.0.1
+## Version: 8.0.2-alpha
 
 # Libraries
 embeds.xml
