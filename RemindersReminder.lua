@@ -91,9 +91,7 @@ function Reminders:EvaluateReminder(reminder)
 end
 
 function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
-    timeUntilnextRemindAt = 30
     local nextRemindAt = nil
-    local test = nil
     if timeUntilnextRemindAt then
         nextRemindAt = timeUntilnextRemindAt + time()
     else
@@ -102,17 +100,18 @@ function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
         timeUntilnextRemindAt = calculatedTimes.timeUntilnextRemindAt
     end
 
-    test = timeUntilnextRemindAt + time()
-
     if self.timer then
         chatMessage("[ " .. date("%X") .. " ] Timer for reminder " .. self.id .. " cancelled")
         Reminders:CancelTimer(self.timer)
     end
-    self.timer = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
+    -- The C_Timer wrapper is to work around a bug in C_Timer (which ScheduleTimer uses) where timers close
+    -- to login trigger too fast.  http://www.wowinterface.com/forums/showthread.php?p=329035#post329035
+    C_Timer.After(0, function()
+        self.timer = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
+    end)
 
     chatMessage("[ " .. date("%X") .. " ] Timer scheduled for reminder " .. self.id .. ".")
     chatMessage("[ " .. date("%X") .. " ] It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%X", nextRemindAt ) .. ")")
-    chatMessage("[ " .. date("%X") .. " ] timeUntilnextRemindAt + time() = " .. date("%X", test ))
 
     Reminders:SetPlayerReminder(self.id, nextRemindAt)
 end
@@ -138,7 +137,7 @@ function Evaluate(self)
                 -- change this to something like 5-10 minutes in the future.
                 local snooze = 5
                 self:SetAndScheduleNextReminder(snooze)
-                chatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed")
+                chatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " seconds")
             end
         }
     end
