@@ -9,6 +9,7 @@ local R_ILEVEL     = "ilevel"
 local R_AND = "and"
 local R_OR  = "or"
 
+local remindersTimers = {}
 
 local function CalculateNextRemindAt(self)
     local secondsInADay = 24 * 60 * 60
@@ -81,6 +82,13 @@ local function Serialize(self)
     }
 end
 
+local function CancelReminderTimer(id)
+    Reminders:debug("Timer cancelled for reminder " .. id)
+
+    Reminders:CancelTimer(remindersTimers[id])
+    remindersTimers[id] = nil
+end
+
 local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     local nextRemindAt = nil
     if timeUntilnextRemindAt then
@@ -91,14 +99,13 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
         timeUntilnextRemindAt = calculatedTimes.timeUntilnextRemindAt
     end
 
-    if self.timer then
-        chatMessage("Timer for reminder " .. self.id .. " cancelled")
-        Reminders:CancelTimer(self.timer)
+    if remindersTimers[self.id] then
+        CancelReminderTimer(self.id)
     end
     -- The C_Timer wrapper is to work around a bug in C_Timer (which ScheduleTimer uses) where timers close
     -- to login trigger too fast.  http://www.wowinterface.com/forums/showthread.php?p=329035#post329035
     C_Timer.After(0, function()
-        self.timer = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
+        remindersTimers[self.id] = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
     end)
 
     Reminders:debug("Timer scheduled for reminder " .. self.id .. ".")
@@ -285,8 +292,8 @@ local function Process(self)
         Reminders:debug("[Process] eval true for "..self.id)
         if playerReminder then
             Reminders:debug("[Process] player has reminder " .. self.id .. " already")
-            Reminders:debug("timeNow = " .. timeNow)
-            Reminders:debug("playerReminder = " .. playerReminder)
+            Reminders:debug("[Process] timeNow = " .. timeNow)
+            Reminders:debug("[Process] playerReminder = " .. playerReminder)
             if timeNow >= playerReminder then
                 shouldRemind = true
             end
@@ -326,6 +333,8 @@ local function Delete(self)
         id = self
     end
     Reminders:debug("Deleting id " .. id)
+
+    CancelReminderTimer(id)
 
     RemindersDB.global.reminders[id] = nil
 end
