@@ -51,9 +51,9 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 
 ### TODO
 
+* Redo the popup.  Multiple pages isn't great.
 * Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
 * Implement "not equal to" operation
-* Initially sort the reminder list by some order
 * Allow specific recipes/spells condition
 * Allow profession level condition (i.e., Legion Engineering Level > 80)
 * Add ability to sort reminder list
