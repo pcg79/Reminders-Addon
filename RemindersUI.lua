@@ -414,7 +414,7 @@ function Reminders:LoadReminders(parentFrame)
                 reminder:Delete()
                 Reminders:LoadReminders(parentFrame)
                 Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
-            elseif IsControlKeyDown() then
+            elseif IsControlKeyDown() and RemindersDB.char.debug then
                 reminder:SetAndScheduleNextReminder(1)
             else
                 Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
