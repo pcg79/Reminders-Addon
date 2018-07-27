@@ -71,52 +71,29 @@ function Reminders:ResetAll()
 end
 
 function Reminders:OnInitialize()
-    -- if not _G["RemindersDBG"] then
-    --     _G["RemindersDBG"] = GlobalDefaults()
-    -- end
+    if not _G["RemindersDBG"] then
+        _G["RemindersDBG"] = GlobalDefaults()
+    end
 
-    -- if not RemindersDBPC then
-    --     _G["RemindersDBPC"] = PerCharacterDefaults()
-    -- end
+    if not RemindersDBPC then
+        _G["RemindersDBPC"] = PerCharacterDefaults()
+    end
 
-    -- RemindersDB.global = _G["RemindersDBG"]
-    -- RemindersDB.char   = _G["RemindersDBPC"]
-end
-
-function Reminders:Fire()
-    print("[ " .. date("%X") .. " ] Fired")
-end
-
-local delay = 10
-
-function CTimerFire()
-    print("[ " .. date("%X") .. " ] CTimerFired")
-
-    C_Timer.After(delay, CTimerFire)
+    RemindersDB.global = _G["RemindersDBG"]
+    RemindersDB.char   = _G["RemindersDBPC"]
 end
 
 function Reminders:OnEnable()
-    local nextFire = time() + delay
-    C_Timer.After(delay, function()
-        print("[ " .. date("%X") .. " ] CTimerFired")
+    Reminders:DebugPrintReminders()
 
-        C_Timer.After(delay, CTimerFire)
-    end)
+    Reminders:EvaluateReminders()
+    Reminders:CleanUpPlayerReminders()
 
-    print("[ " .. date("%X") .. " ] It should fire in " .. delay .. " seconds (" .. nextFire .. " aka " .. date("%X", nextFire ) .. ")")
+    if not GUI then GUI = Reminders:CreateUI() end
 
+    Reminders:LoadReminders(GUI)
 
-
-    -- Reminders:DebugPrintReminders()
-
-    -- Reminders:EvaluateReminders()
-    -- Reminders:CleanUpPlayerReminders()
-
-    -- if not GUI then GUI = Reminders:CreateUI() end
-
-    -- Reminders:LoadReminders(GUI)
-
-    -- if RemindersDB.char.debug then GUI:Show() end
+    if RemindersDB.char.debug then GUI:Show() end
 end
 
 function Reminders:BuildAndDisplayReminders(messages)
