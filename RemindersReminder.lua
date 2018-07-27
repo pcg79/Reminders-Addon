@@ -10,7 +10,7 @@ local R_AND = "and"
 local R_OR  = "or"
 
 
-function CalculateNextRemindAt(self)
+local function CalculateNextRemindAt(self)
     local secondsInADay = 24 * 60 * 60
     local timeNow = time()
     local nextRemindAt = nil
@@ -41,15 +41,15 @@ function CalculateNextRemindAt(self)
     return { nextRemindAt = nextRemindAt, timeUntilnextRemindAt = timeUntilnextRemindAt }
 end
 
-function IsEqual(self, otherReminder)
+local function IsEqual(self, otherReminder)
     return self.message:lower() == otherReminder.message:lower() and
         self.condition:lower()  == otherReminder.condition:lower() and
         self.interval:lower()   == otherReminder.interval:lower()
 end
 
-function ToString(self)
+local function ToString(self)
     local nextRemindAt = Reminders:GetPlayerReminder(self.id)
-    -- debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
+    -- Reminders:debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
     if nextRemindAt then
         nextRemindAt = date("%x %X", nextRemindAt)
     else
@@ -72,7 +72,7 @@ function ToString(self)
     return reminderMessage
 end
 
-function Serialize(self)
+local function Serialize(self)
     return {
         id = self.id,
         condition = self.condition,
@@ -81,7 +81,7 @@ function Serialize(self)
     }
 end
 
-function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
+local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     local nextRemindAt = nil
     if timeUntilnextRemindAt then
         nextRemindAt = timeUntilnextRemindAt + time()
@@ -92,7 +92,7 @@ function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     end
 
     if self.timer then
-        chatMessage("[ " .. date("%X") .. " ] Timer for reminder " .. self.id .. " cancelled")
+        chatMessage("Timer for reminder " .. self.id .. " cancelled")
         Reminders:CancelTimer(self.timer)
     end
     -- The C_Timer wrapper is to work around a bug in C_Timer (which ScheduleTimer uses) where timers close
@@ -101,13 +101,13 @@ function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
         self.timer = Reminders:ScheduleTimer("EvaluateReminders", timeUntilnextRemindAt, self)
     end)
 
-    chatMessage("[ " .. date("%X") .. " ] Timer scheduled for reminder " .. self.id .. ".")
-    chatMessage("[ " .. date("%X") .. " ] It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%X", nextRemindAt ) .. ")")
+    Reminders:debug("Timer scheduled for reminder " .. self.id .. ".")
+    Reminders:debug("It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%X", nextRemindAt ) .. ")")
 
     Reminders:SetPlayerReminder(self.id, nextRemindAt)
 end
 
-function Evaluate(self)
+local function Evaluate(self)
     local message = self:Process()
     -- If Process returned a message, that means the reminder triggered.
     -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
@@ -128,100 +128,10 @@ function Evaluate(self)
                 -- change this to something like 5-10 minutes in the future.
                 local snooze = 5
                 self:SetAndScheduleNextReminder(snooze)
-                chatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " seconds")
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " seconds")
             end
         }
     end
-end
-
--- Does this toon qualify for this reminder?
---     If they do, does this toon already have this reminder?
---         If they do, we'll check their own personal next remind at and remind (and resave) if required
---         If they don't, we'll remind and save this reminder to their personal DB.
---     If they don't qualify for this reminder, do they already have the reminder in their personal DB?
---         If they do, delete it from their personal DB.
---         If they don't, that's ok, do nothing.
-function Process(self)
-    local timeNow = time()
-    local playerReminder = Reminders:GetPlayerReminder(self.id)
-    local shouldRemind = false
-
-    if self:EvaluateCondition() then
-        debug("[Process] eval true for "..self.id)
-        if playerReminder then
-            debug("[Process] player has reminder " .. self.id .. " already")
-            debug("timeNow = " .. timeNow)
-            debug("playerReminder = " .. playerReminder)
-            if timeNow >= playerReminder then
-                shouldRemind = true
-            end
-        else -- This toon has never seen this reminder but they quality for it
-            -- We could make this a config setting.  "Remind first time immediately"
-            debug("[Process] player does NOT have reminder already")
-            shouldRemind = true
-        end
-
-        self:SetAndScheduleNextReminder()
-
-        if shouldRemind then
-            return self.message
-        end
-    elseif playerReminder then
-        -- The toon once qualified for this reminder but doesn't any more so let's delete it
-        Reminders:DeletePlayerReminder(self.id)
-    end
-end
-
-function Save(self)
-    if not self.id then
-        RemindersDB.global.remindersCount = RemindersDB.global.remindersCount + 1
-        self.id = "r"..RemindersDB.global.remindersCount
-    end
-
-    debug("Saving id " .. self.id)
-
-    RemindersDB.global.reminders[self.id] = self:Serialize()
-end
-
-function Delete(self)
-    local id = nil
-    if type(self) == "table" then
-        id = self.id
-    elseif type(self) == "string" then
-        id = self
-    end
-    debug("Deleting id " .. id)
-
-    RemindersDB.global.reminders[id] = nil
-end
-
-function Reminders:BuildReminder(params)
-    local self = {}
-    self.message = params.message
-    self.condition = params.condition
-    self.interval = (params.interval or "daily")
-    self.id = params.id
-    self.timer = params.timer
-
-    self.IsEqual = IsEqual
-    self.ToString = ToString
-    self.SetAndScheduleNextReminder = SetAndScheduleNextReminder
-    self.CalculateNextRemindAt = CalculateNextRemindAt
-    self.Process = Process
-    self.EvaluateCondition = EvaluateCondition
-    self.Save = Save
-    self.Delete = Delete
-    self.DeletePlayerReminder = DeletePlayerReminder
-    self.Serialize = Serialize
-    self.Evaluate = Evaluate
-
-    return self
-end
-
-function Reminders:GetQuestResetTime()
-    -- It seems GetQuestResetTime() gives you one second before the actual reset.
-    -- So add 1 to get the actual reset.
-    return _G.GetQuestResetTime() + 1
 end
 
 local function GetProfessionNameByIndex(profIndex)
@@ -232,13 +142,12 @@ local function GetProfessionNameByIndex(profIndex)
     return name
 end
 
-
 -- We build up a string to evaluate based on any conditions we find
 -- then we evaluate the string as a whole.
-function EvaluateCondition(self)
+local function EvaluateCondition(self)
     local condition = self.condition
 
-    -- debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
+    -- Reminders:debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
 
     -- Go through each condition
     -- everyone
@@ -357,4 +266,95 @@ function EvaluateCondition(self)
 
         return result
     end
+end
+
+
+-- Does this toon qualify for this reminder?
+--     If they do, does this toon already have this reminder?
+--         If they do, we'll check their own personal next remind at and remind (and resave) if required
+--         If they don't, we'll remind and save this reminder to their personal DB.
+--     If they don't qualify for this reminder, do they already have the reminder in their personal DB?
+--         If they do, delete it from their personal DB.
+--         If they don't, that's ok, do nothing.
+local function Process(self)
+    local timeNow = time()
+    local playerReminder = Reminders:GetPlayerReminder(self.id)
+    local shouldRemind = false
+
+    if self:EvaluateCondition() then
+        Reminders:debug("[Process] eval true for "..self.id)
+        if playerReminder then
+            Reminders:debug("[Process] player has reminder " .. self.id .. " already")
+            Reminders:debug("timeNow = " .. timeNow)
+            Reminders:debug("playerReminder = " .. playerReminder)
+            if timeNow >= playerReminder then
+                shouldRemind = true
+            end
+        else -- This toon has never seen this reminder but they quality for it
+            -- We could make this a config setting.  "Remind first time immediately"
+            Reminders:debug("[Process] player does NOT have reminder already")
+            shouldRemind = true
+        end
+
+        self:SetAndScheduleNextReminder()
+
+        if shouldRemind then
+            return self.message
+        end
+    elseif playerReminder then
+        -- The toon once qualified for this reminder but doesn't any more so let's delete it
+        Reminders:DeletePlayerReminder(self.id)
+    end
+end
+
+local function Save(self)
+    if not self.id then
+        RemindersDB.global.remindersCount = RemindersDB.global.remindersCount + 1
+        self.id = "r"..RemindersDB.global.remindersCount
+    end
+
+    Reminders:debug("Saving id " .. self.id)
+
+    RemindersDB.global.reminders[self.id] = self:Serialize()
+end
+
+local function Delete(self)
+    local id = nil
+    if type(self) == "table" then
+        id = self.id
+    elseif type(self) == "string" then
+        id = self
+    end
+    Reminders:debug("Deleting id " .. id)
+
+    RemindersDB.global.reminders[id] = nil
+end
+
+function Reminders:BuildReminder(params)
+    local self = {}
+    self.message = params.message
+    self.condition = params.condition
+    self.interval = (params.interval or "daily")
+    self.id = params.id
+    self.timer = params.timer
+
+    self.IsEqual = IsEqual
+    self.ToString = ToString
+    self.SetAndScheduleNextReminder = SetAndScheduleNextReminder
+    self.CalculateNextRemindAt = CalculateNextRemindAt
+    self.Process = Process
+    self.EvaluateCondition = EvaluateCondition
+    self.Save = Save
+    self.Delete = Delete
+    self.DeletePlayerReminder = DeletePlayerReminder
+    self.Serialize = Serialize
+    self.Evaluate = Evaluate
+
+    return self
+end
+
+function Reminders:GetQuestResetTime()
+    -- It seems GetQuestResetTime() gives you one second before the actual reset.
+    -- So add 1 to get the actual reset.
+    return _G.GetQuestResetTime() + 1
 end
