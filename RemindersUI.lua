@@ -52,14 +52,66 @@ EDIT_BOX_BACKDROP = {
 }
 MESSAGE_EDIT_BOX = nil
 
-local function SortAlphabetically(a, b)
+-- Sort function from https://stackoverflow.com/a/15706820/367697
+local function spairs(t, order)
+    -- collect the keys
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    -- if order function given, sort by it by passing the table and keys a, b,
+    -- otherwise just sort the keys
+    if order then
+        table.sort(keys, function(a,b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+
+local function SortByNextRemindAt(t, a, b)
+    -- I need a big number to make sure the reminders that the current character
+    -- doesn't have reminders for filter to the top
+    local aNextRemindAt = Reminders:GetPlayerReminder(a) or 99999999999
+    local bNextRemindAt = Reminders:GetPlayerReminder(b) or 99999999999
+
+    if aNextRemindAt == bNextRemindAt then
+        a = tonumber(strsub(a, 2))
+        b = tonumber(strsub(b, 2))
+        return a < b
+    end
+
+    return aNextRemindAt < bNextRemindAt
+end
+
+local function SortAlphabetically(t, a, b)
     return a:lower() < b:lower()
 end
 
 local function AlphabeticallySortedList(list)
     local a = {}
-    for n in pairs(list) do table.insert(a, n) end
-    table.sort(a, SortAlphabetically)
+
+    for k,v in spairs(list, SortAlphabetically) do
+        table.insert(a, k)
+    end
+
+    return a
+end
+
+local function NextRemindAtSortedList(list)
+    local a = {}
+
+    -- first make a new list where the key = the nextRemindAt
+    for k,v in spairs(list, SortByNextRemindAt) do
+        a[k] = v
+    end
 
     return a
 end
@@ -404,7 +456,7 @@ end
 
 function Reminders:LoadReminders(parentFrame)
     local i = 0
-    for key, reminder in pairs(RemindersDB.global.reminders) do
+    for key, reminder in spairs(RemindersDB.global.reminders, SortByNextRemindAt) do
         i = i + 1
 
         local reminder = Reminders:BuildReminder(reminder)
