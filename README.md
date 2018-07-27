@@ -33,23 +33,23 @@ class, profession, and name only support equals.  level and ilevel support equal
 /reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
 ```
 
-## UI
+### UI
 
 When a Reminder is created it will appear in the list as a button in the main UI.  You can left click on the button to force the system to evaluate that reminder.  That's mostly for test purposes so I don't know if that functionality will stay.
 
 You can also Alt+Click on a Reminder button to delete the Reminder.
 
-## KNOWN ISSUES
+### KNOWN ISSUES
 
 * Weekly reset is assumed to be Tuesday which will likely cause issues internationally.
 * Text isn't internationalized.  If you're interested in helping, let me know!
 
 
-## CAVEATS
+### CAVEATS
 
 * Since comma is used as the separator internally, commas are stripped out of your reminder message and value text
 
-## TODO
+### TODO
 
 * Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
 * Implement "not equal to" operation
