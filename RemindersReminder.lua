@@ -347,7 +347,6 @@ function Reminders:BuildReminder(params)
     self.condition = params.condition
     self.interval = (params.interval or "daily")
     self.id = params.id
-    self.timer = params.timer
 
     self.IsEqual = IsEqual
     self.ToString = ToString
