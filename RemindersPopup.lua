@@ -288,7 +288,7 @@ end
 
 --[[ User API ]]--
 
-function Reminders:DisplayReminders(data)
+function Reminders:DisplayPopup(data)
   if ReminderFrame == nil then
     ReminderFrame = NewFrame(data)
   end
@@ -304,6 +304,6 @@ function Reminders:DisplayReminders(data)
   end
 end
 
-function Reminders:ResetReminders()
+function Reminders:ResetPopup()
   ReminderFrame = nil
 end
