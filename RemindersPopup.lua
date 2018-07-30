@@ -90,15 +90,22 @@ local default = {
   y = 0,
 }
 
-local movedPosition = nil
+local movedPosition = {
+  x = nil,
+  y = nil,
+  point = nil,
+  relPoint = nil,
+}
 
 --[[ Internal API ]]--
 
 local function StopMovingAndRecordPosition(frame)
   frame:StopMovingOrSizing()
   movedPosition = {
-    x = frame:GetTop(),
-    y = frame:GetLeft()
+    x = frame:GetLeft(),
+    y = frame:GetTop(),
+    point = "TOPLEFT",
+    relPoint = "BOTTOMLEFT",
   }
 end
 
@@ -132,7 +139,7 @@ local function UpdateFrame(frame, i)
 
   -- Frame
   frame:ClearAllPoints()
-  frame:SetPoint(data.point, data.anchor, data.relPoint, data.x, data.y)
+  frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
   frame:SetWidth(data.width + 16)
   frame.TitleText:SetPoint('TOP', 0, -5)
   frame.TitleText:SetText(data.title)
@@ -288,7 +295,7 @@ end
 
 --[[ User API ]]--
 
-function Reminders:DisplayReminders(data)
+function Reminders:DisplayPopup(data)
   if ReminderFrame == nil then
     ReminderFrame = NewFrame(data)
   end
@@ -304,6 +311,6 @@ function Reminders:DisplayReminders(data)
   end
 end
 
-function Reminders:ResetReminders()
+function Reminders:ResetPopup()
   ReminderFrame = nil
 end

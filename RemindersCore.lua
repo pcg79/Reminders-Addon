@@ -113,9 +113,9 @@ end
 
 function Reminders:BuildAndDisplayReminders(messages)
     if next(messages) ~= nil then
-        Reminders:ResetReminders()
+        Reminders:ResetPopup()
 
-        Reminders:DisplayReminders({
+        Reminders:DisplayPopup({
             title = "Reminder!",
             font = "Fonts\\FRIZQT__.TTF",
             fontHeight = 16,

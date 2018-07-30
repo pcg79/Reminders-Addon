@@ -108,7 +108,6 @@ end
 local function NextRemindAtSortedList(list)
     local a = {}
 
-    -- first make a new list where the key = the nextRemindAt
     for k,v in spairs(list, SortByNextRemindAt) do
         a[k] = v
     end
