@@ -113,19 +113,33 @@ end
 
 function Reminders:BuildAndDisplayReminders(messages)
     if next(messages) ~= nil then
-        Reminders:ResetPopup()
+        if RemindersDB.char.debug then
+            Reminders:DisplayInlinePopup({
+                title = "Reminder!",
+                font = "Fonts\\FRIZQT__.TTF",
+                fontHeight = 16,
+                width = 552,
+                imageHeight = 256,
+                reminders = messages,
+                relPoint = "BOTTOMRIGHT",
+                x = -400,
+                y = 200,
+            })
+        else
+            Reminders:ResetPopup()
 
-        Reminders:DisplayPopup({
-            title = "Reminder!",
-            font = "Fonts\\FRIZQT__.TTF",
-            fontHeight = 16,
-            width = 552,
-            imageHeight = 256,
-            reminders = messages,
-            relPoint = "BOTTOMRIGHT",
-            x = -400,
-            y = 200,
-        })
+            Reminders:DisplayPopup({
+                title = "Reminder!",
+                font = "Fonts\\FRIZQT__.TTF",
+                fontHeight = 16,
+                width = 552,
+                imageHeight = 256,
+                reminders = messages,
+                relPoint = "BOTTOMRIGHT",
+                x = -400,
+                y = 200,
+            })
+        end
     end
 end
 
