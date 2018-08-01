@@ -128,14 +128,9 @@ local function Evaluate(self)
             buttonLeft = 400,
             buttonBottom = -10,
             buttonClick = function(this, button)
-                -- Because reminders are only checked on ui load, we'll just set the next
-                -- remind time for a few seconds in the future and then it'll popup again
-                -- on next reload.
-                -- TODO: If I ever implement a timer or event-based reminder checking,
-                -- change this to something like 5-10 minutes in the future.
-                local snooze = 5
-                self:SetAndScheduleNextReminder(snooze)
-                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " seconds")
+                local snooze = 10
+                self:SetAndScheduleNextReminder(snooze * 60)
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " minutes")
                 this:SetText("Snoozed!")
                 this:Disable()
             end
