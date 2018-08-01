@@ -118,7 +118,7 @@ local function NewFrame(parentFrame, reminder, i)
   frame:SetPoint("TOPLEFT", parentFrame, 0, -(60 + ((i-1) * reminderFrameHeight)))
   frame:SetWidth(parentFrame:GetWidth() - 10)
   frame:SetHeight(reminderFrameHeight)
-  frame:SetFrameStrata('DIALOG')
+  -- frame:SetFrameStrata('DIALOG')
 
   frame.text:ClearAllPoints()
   frame.text:SetJustifyH('LEFT')
