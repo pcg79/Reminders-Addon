@@ -35,21 +35,12 @@ Frame Arguments
  title .......... Title relative to frame (replace General value).
  width .......... Width relative to frame (replace General value).
 Note: All other arguments can be used as a general!
- image .......... [optional] Image path (tga or blp).
- imageHeight .... Default is 128. Default image size is 256x128.
- imageX ......... Default is 0 (center). Left/Right position relative to center.
- imageY ......... Default is 20 (top margin).
  text ........... Text string.
  textHeight ..... Default is 0 (auto height).
  textX .......... Default is 25. Left and Right margin.
  textY .......... Default is 20 (top margin).
- editbox ........ [optional] Edit box text string (directing value). Edit box is out of content flow.
- editboxWidth ... Default is 400.
- editboxLeft, editboxBottom
  button ......... [optional] Button text string (directing value). Button is out of content flow.
- buttonWidth .... Default is 100.
  buttonClick .... Function with button's click action.
- buttonLeft, buttonBottom
 
  point .......... Default is "CENTER".
  anchor ......... Default is "UIParent".
@@ -57,16 +48,10 @@ Note: All other arguments can be used as a general!
  x, y ........... Default is 0, 0.
 --]]
 
--- Lua API
-local floor = math.floor
-local fmod = math.fmod
-local format = string.format
-local strfind = string.find
-local round = function(n) return floor(n + 0.5) end
-
-local BUTTON_TEX = 'Interface\\Buttons\\UI-SpellbookIcon-%sPage-%s'
 local ReminderFrames = {}
+local NumReminderFrames = 0
 local NumReminders = 0
+local reminderFrameHeight = 30
 
 local default = {
   title = "Reminder!",
@@ -74,14 +59,9 @@ local default = {
   font = "",
   fontHeight = 12,
 
-  imageHeight = 128,
-  imageX = 0,
-  imageY = 20,
   textHeight = 0,
   textX = 25,
   textY = 20,
-  editboxWidth = 400,
-  buttonWidth = 100,
   point = "CENTER",
   anchor = UIParent,
   relPoint = "CENTER",
@@ -98,7 +78,7 @@ local movedPosition = {
 
 --[[ Internal API ]]--
 
--- Since GetLeft and GetTop are measured from the BOTTOMLEFT of the screen we'll set the rePoint
+-- Since GetLeft and GetTop are measured from the BOTTOMLEFT of the screen we'll set the relPoint
 -- to BOTTOMLEFT in order to make the positioning easier
 local function StopMovingAndRecordPosition(frame)
   frame:StopMovingOrSizing()
@@ -111,7 +91,7 @@ local function StopMovingAndRecordPosition(frame)
 end
 
 local function NewFrame(parentFrame, reminder, i)
-  if not reminder.image and not reminder.textY then
+  if not reminder.textY then
     reminder.textY = 0
   end
 
@@ -125,19 +105,19 @@ local function NewFrame(parentFrame, reminder, i)
   if parentFrame.reminderFrames[i] then
     frame = parentFrame.reminderFrames[i]
   else
-    frame = CreateFrame("Frame", "ReminderFrame"..i, parentFrame)
+    local masterFrameName = parentFrame:GetName()
+    frame = CreateFrame("Frame", masterFrameName .. "ChildFrame" .. i, parentFrame)
     frame.text = frame:CreateFontString(nil, nil, "GameFontHighlight")
-    frame.button = CreateFrame("Button", "ReminderFrameButton"..i, frame, "UIPanelButtonTemplate")
+    frame.button = CreateFrame("Button", masterFrameName .. "Button" .. i, frame, "UIPanelButtonTemplate")
 
     tinsert(parentFrame.reminderFrames, frame)
   end
 
   -- Frame
-  local frameHeight = 30
   frame:ClearAllPoints()
-  frame:SetPoint("TOPLEFT", parentFrame, 0, -(60 + ((i-1) * frameHeight)))
-  frame:SetWidth(reminder.width + 16)
-  frame:SetHeight(frameHeight)
+  frame:SetPoint("TOPLEFT", parentFrame, 0, -(60 + ((i-1) * reminderFrameHeight)))
+  frame:SetWidth(parentFrame:GetWidth() - 10)
+  frame:SetHeight(reminderFrameHeight)
   frame:SetFrameStrata('DIALOG')
 
   frame.text:ClearAllPoints()
@@ -160,46 +140,35 @@ local function CreateIndividualReminderFrames(frame)
   local reminders = frame.data.reminders
 
   for i, reminderFrame in pairs(frame.reminderFrames) do
-    print("Hiding reminderFrame " .. i)
     reminderFrame:Hide()
   end
 
   for i, reminder in pairs(reminders) do
-    print("Creating reminderFrame " .. i)
     NewFrame(frame, reminder, i)
   end
 end
 
 local function NewMasterFrame(data)
-  if not data.image and not data.textY then
+  if not data.textY then
     data.textY = 0
   end
+
   for k, v in pairs(default) do
     if not data[k] then
       data[k] = v
     end
   end
 
-  local frame = CreateFrame('Frame', 'RemindersPopup', UIParent, 'ButtonFrameTemplate')
-  frame:Hide()
-
+  local frame = CreateFrame("Frame", "RemindersPopup"..(NumReminderFrames + 1), UIParent, "UIPanelDialogTemplate")
   frame:SetBackdrop({
-    bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground"
+    bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground",
+    insets = {left = 4, right = 4, top = 4, bottom = 4},
   })
   frame:ClearAllPoints()
   frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
   frame:SetWidth(data.width + 16)
-  frame:SetHeight(108 + (NumReminders * 20))
-  frame.TitleText:SetPoint('TOP', 0, -5)
-  frame.TitleText:SetText(data.title)
-
-  -- Spell book
-  frame.portrait:SetPoint('TOPLEFT', -5, 7)
-  frame.portrait:SetTexture(data.icon or "Interface\\QUESTFRAME\\UI-QuestLog-BookIcon")
-
-  frame.Inset:SetPoint('TOPLEFT', 4, -23)
-  frame.Inset.Bg:SetColorTexture(0, 0, 0)
-  frame.TopTileStreaks:Hide()
+  frame:SetHeight(80 + (NumReminders * reminderFrameHeight))
+  frame.Title:SetText(data.title)
 
   frame:SetFrameStrata('DIALOG')
   frame:SetClampedToScreen(true)
@@ -208,6 +177,7 @@ local function NewMasterFrame(data)
   frame:SetMovable(true)
   frame:SetScript("OnMouseDown", function() frame:StartMoving() end)
   frame:SetScript("OnMouseUp", function() StopMovingAndRecordPosition(frame) end)
+  frame:Hide()
 
   frame.reminderFrames = {}
   return frame
@@ -225,21 +195,18 @@ function Reminders:DisplayInlinePopup(data)
 
   NumReminders = count
 
-  print("NumReminders = " .. NumReminders)
-
   -- Attempt to reuse any created but unused frames
   for _, reminderFrame in pairs(ReminderPopupFrames) do
     if not reminderFrame:IsVisible() and not frame then
-      print("Found one to reuse")
       frame = reminderFrame
-      frame:SetHeight(108 + (NumReminders * 20))
+      frame:SetHeight(80 + (NumReminders * reminderFrameHeight))
     end
   end
 
   -- No unused frames available so make a new one
   if not frame then
-    print("Making new Master Frame")
     frame = NewMasterFrame(data)
+    NumReminderFrames = NumReminderFrames + 1
     tinsert(ReminderPopupFrames, frame)
   end
 
