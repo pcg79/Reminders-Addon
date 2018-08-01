@@ -22,6 +22,10 @@ Let's say you want your characters that are level 90 or above to run Firelands e
 
 class, profession, and name only support equals.  level and ilevel support equal, less than, greater than, less than or equal to, and great than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
 
+### FEATURES
+
+* Snooze button.  Puts the reminder to sleep for 10 minutes then reminds you again.
+
 ### COMMAND LINE
 
 ```
@@ -51,7 +55,6 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 
 ### TODO
 
-* Redo the popup.  Multiple pages isn't great.
 * Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
 * Implement "not equal to" operation
 * Allow specific recipes/spells condition
@@ -59,3 +62,7 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 * Add ability to sort reminder list
 * Improve the reminder list look and feel
 * Multiple conditions joined with AND or OR
+
+### REPORT OR VIEW ISSUES
+
+https://github.com/pcg79/Reminders-Addon/issues
