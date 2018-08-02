@@ -105,10 +105,9 @@ local function NewFrame(parentFrame, reminder, i)
   if parentFrame.reminderFrames[i] then
     frame = parentFrame.reminderFrames[i]
   else
-    local masterFrameName = parentFrame:GetName()
-    frame = CreateFrame("Frame", masterFrameName .. "ChildFrame" .. i, parentFrame)
+    frame = CreateFrame("Frame", "$parentChildFrame" .. i, parentFrame)
     frame.text = frame:CreateFontString(nil, nil, "GameFontHighlight")
-    frame.button = CreateFrame("Button", masterFrameName .. "Button" .. i, frame, "UIPanelButtonTemplate")
+    frame.button = CreateFrame("Button", "$parentButton" .. i, frame, "UIPanelButtonTemplate")
 
     tinsert(parentFrame.reminderFrames, frame)
   end
