@@ -119,7 +119,7 @@ local function NewFrame(parentFrame, reminder, i)
   frame:SetHeight(reminderFrameHeight)
 
   frame.button:ClearAllPoints()
-  frame.button:SetSize(100, 22)
+  frame.button:SetSize(80, 22)
   frame.button:SetPoint("TOPRIGHT", frame, 0, 0)
   frame.button:SetText(reminder.button)
   frame.button:SetScript("OnClick", reminder.buttonClick)
@@ -157,15 +157,16 @@ local function NewMasterFrame(data)
     end
   end
 
-  local frame = CreateFrame("Frame", "RemindersPopup"..(NumReminderFrames + 1), UIParent, "UIPanelDialogTemplate")
-  frame:SetBackdrop({
-    bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground",
-    insets = {left = 6, right = 6, top = 6, bottom = 6},
-  })
+  local frameName = "RemindersPopup"..(NumReminderFrames + 1)
+  local frame = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
+  -- Learned how to do this from http://www.wowinterface.com/forums/showthread.php?p=329257#post329257
+  _G[frameName.."TitleBG"]:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground")
+  _G[frameName.."DialogBG"]:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground")
+
   frame:ClearAllPoints()
   frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
   frame:SetWidth(data.width + 16)
-  frame:SetHeight(80 + (NumReminders * reminderFrameHeight))
+  frame:SetHeight(60 + (NumReminders * reminderFrameHeight))
   frame.Title:SetText(data.title)
 
   frame:SetFrameStrata('DIALOG')
