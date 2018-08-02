@@ -114,23 +114,22 @@ local function NewFrame(parentFrame, reminder, i)
 
   -- Frame
   frame:ClearAllPoints()
-  frame:SetPoint("TOPLEFT", parentFrame, 0, -(60 + ((i-1) * reminderFrameHeight)))
-  frame:SetWidth(parentFrame:GetWidth() - 10)
+  frame:SetPoint("TOPLEFT", parentFrame, 20, -(40 + ((i-1) * reminderFrameHeight)))
+  frame:SetWidth(parentFrame:GetWidth() - 30)
   frame:SetHeight(reminderFrameHeight)
-  -- frame:SetFrameStrata('DIALOG')
-
-  frame.text:ClearAllPoints()
-  frame.text:SetJustifyH('LEFT')
-  frame.text:SetPoint('TOPLEFT', frame, 40, 0)
-  frame.text:SetWidth(reminder.width)
-  frame.text:SetText(reminder.text)
 
   frame.button:ClearAllPoints()
   frame.button:SetSize(100, 22)
   frame.button:SetPoint("TOPRIGHT", frame, 0, 0)
   frame.button:SetText(reminder.button)
-  frame.button:SetScript('OnClick', reminder.buttonClick)
+  frame.button:SetScript("OnClick", reminder.buttonClick)
   frame.button:Enable()
+
+  frame.text:ClearAllPoints()
+  frame.text:SetJustifyH("LEFT")
+  frame.text:SetPoint("TOPLEFT", frame, 0, 0)
+  frame.text:SetWidth(frame:GetWidth() - frame.button:GetWidth())
+  frame.text:SetText(reminder.text)
 
   frame:Show()
 end
@@ -161,7 +160,7 @@ local function NewMasterFrame(data)
   local frame = CreateFrame("Frame", "RemindersPopup"..(NumReminderFrames + 1), UIParent, "UIPanelDialogTemplate")
   frame:SetBackdrop({
     bgFile = "Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground",
-    insets = {left = 4, right = 4, top = 4, bottom = 4},
+    insets = {left = 6, right = 6, top = 6, bottom = 6},
   })
   frame:ClearAllPoints()
   frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
