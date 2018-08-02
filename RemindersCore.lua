@@ -112,10 +112,8 @@ function Reminders:RegisterEvents()
 end
 
 function Reminders:BuildAndDisplayReminders(messages)
-    if next(messages) ~= nil then
-        Reminders:ResetPopup()
-
-        Reminders:DisplayPopup({
+    if next(messages) then
+        Reminders:DisplayInlinePopup({
             title = "Reminder!",
             font = "Fonts\\FRIZQT__.TTF",
             fontHeight = 16,
