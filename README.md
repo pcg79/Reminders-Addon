@@ -1,4 +1,4 @@
-## Reminders addon
+## Reminders
 
 Have you ever thought "*Ah, man, I forgot to make Living Steel yesterday!*" or "*Shoot, the daily reset is in an hour and I forgot to run the Stormwind Offensive dailies!*"?
 
@@ -53,16 +53,8 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 
 * Since comma is used as the separator internally, commas are stripped out of your reminder message and value text
 
-### TODO
+### ISSUES OR FEATURES
 
-* Add an "on hover" tooltip for the Reminders with some info (like Alt+Click = delete)
-* Implement "not equal to" operation
-* Allow specific recipes/spells condition
-* Allow profession level condition (i.e., Legion Engineering Level > 80)
-* Add ability to sort reminder list
-* Improve the reminder list look and feel
-* Multiple conditions joined with AND or OR
-
-### REPORT OR VIEW ISSUES
+To view my ideas for new features, known bugs, to report your own bug, or request a feature, hit up the Github repo:
 
 https://github.com/pcg79/Reminders-Addon/issues

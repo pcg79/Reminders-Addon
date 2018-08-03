@@ -294,7 +294,7 @@ local function Process(self)
             if timeNow >= playerReminder then
                 shouldRemind = true
             end
-        else -- This toon has never seen this reminder but they quality for it
+        else -- This toon has never seen this reminder but they qualify for it
             -- We could make this a config setting.  "Remind first time immediately"
             Reminders:debug("[Process] player does NOT have reminder already")
             shouldRemind = true
