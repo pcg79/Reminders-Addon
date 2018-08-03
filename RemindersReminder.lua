@@ -218,7 +218,7 @@ local function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local profession = tokens[i+count]:lower()
-                local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+                local prof1, prof2, archaeology, fishing, cooking = GetProfessions()
 
                 local prof1Name = GetProfessionNameByIndex(prof1) or ""
                 local prof2Name = GetProfessionNameByIndex(prof2) or ""
@@ -226,8 +226,7 @@ local function EvaluateCondition(self)
                 local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
                    (profession == "archaeology" and archaeology ~= nil) or
                    (profession == "fishing" and fishing ~= nil) or
-                   (profession == "cooking" and cooking ~= nil) or
-                   (profession == "firstaid" and firstAid ~= nil)
+                   (profession == "cooking" and cooking ~= nil)
 
                 evalString = evalString.." "..tostring(profResult)
 
