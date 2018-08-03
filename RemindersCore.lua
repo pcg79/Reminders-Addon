@@ -73,11 +73,11 @@ end
 
 function Reminders:OnInitialize()
     if not _G["RemindersDBG"] then
-        _G["RemindersDBG"] = GlobalDefaults()
+        _G["RemindersDBG"] = Reminders:GlobalDefaults()
     end
 
     if not RemindersDBPC then
-        _G["RemindersDBPC"] = PerCharacterDefaults()
+        _G["RemindersDBPC"] = Reminders:PerCharacterDefaults()
     end
 
     RemindersDB.global = _G["RemindersDBG"]
