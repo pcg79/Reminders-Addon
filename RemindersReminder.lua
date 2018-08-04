@@ -129,6 +129,9 @@ local function Evaluate(self)
             buttonBottom = -10,
             buttonClick = function(this, button)
                 local snooze = 10
+                if RemindersDB.char.debug then
+                    snooze = .1667
+                end
                 self:SetAndScheduleNextReminder(snooze * 60)
                 Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " minutes")
                 this:SetText("Snoozed!")
@@ -288,8 +291,8 @@ local function Process(self)
         Reminders:debug("[Process] eval true for "..self.id)
         if playerReminder then
             Reminders:debug("[Process] player has reminder " .. self.id .. " already")
-            Reminders:debug("[Process] timeNow = " .. timeNow)
-            Reminders:debug("[Process] playerReminder = " .. playerReminder)
+            Reminders:debug("[Process] timeNow = " .. timeNow .. " (aka " .. date("%X", timeNow ) .. ")")
+            Reminders:debug("[Process] playerReminder = " .. playerReminder.. " (aka " .. date("%X", playerReminder ) .. ")")
             if timeNow >= playerReminder then
                 shouldRemind = true
             end
