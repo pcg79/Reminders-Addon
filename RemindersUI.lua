@@ -498,15 +498,20 @@ function Reminders:ResetInputUI()
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
 
+    -- SetValue has to be before SetText or the text is blanked out
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
         conditionFrame.conditionDropDown:SetValue(0)
         conditionFrame.conditionDropDown:SetText(CONDITION_LIST_DEFAULT)
+
         conditionFrame.operationDropDown:SetDisabled(false)
         conditionFrame.operationDropDown:SetValue(0)
         conditionFrame.operationDropDown:SetText("Operation")
+
         conditionFrame.valueEditBox:Enable()
         conditionFrame.valueEditBox:SetText("")
         conditionFrame.valueEditBox:Show()
+
+        conditionFrame.professionDropDown:SetValue(0)
         conditionFrame.professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
         conditionFrame.professionDropDown.frame:Hide()
         if i > 1 then
