@@ -58,6 +58,7 @@ local default = {
   width = 350,
   font = "",
   fontHeight = 12,
+  baseMasterFrameHeight = 60,
 
   textHeight = 0,
   textX = 25,
@@ -166,7 +167,7 @@ local function NewMasterFrame(data)
   frame:ClearAllPoints()
   frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
   frame:SetWidth(data.width + 16)
-  frame:SetHeight(60 + (NumReminders * reminderFrameHeight))
+  frame:SetHeight(data.baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
   frame.Title:SetText(data.title)
 
   frame:SetFrameStrata('DIALOG')
@@ -198,7 +199,8 @@ function Reminders:DisplayInlinePopup(data)
   for _, reminderFrame in pairs(ReminderPopupFrames) do
     if not reminderFrame:IsVisible() and not frame then
       frame = reminderFrame
-      frame:SetHeight(80 + (NumReminders * reminderFrameHeight))
+      local baseMasterFrameHeight = data.baseMasterFrameHeight or default.baseMasterFrameHeight
+      frame:SetHeight(baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
     end
   end
 
