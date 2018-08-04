@@ -90,10 +90,20 @@ local function CancelReminderTimer(id)
 end
 
 local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
-    local nextRemindAt = nil
+    local nextRemindAt = Reminders:GetPlayerReminder(self.id)
+    local timeNow = time()
+
     if timeUntilnextRemindAt then
-        nextRemindAt = timeUntilnextRemindAt + time()
+        timeUntilnextRemindAt = floor(timeUntilnextRemindAt)
+        -- Snoozed so set for time + snoozed time
+        nextRemindAt = timeUntilnextRemindAt + timeNow
+    elseif nextRemindAt and nextRemindAt > timeNow then
+        -- Toon already has an entry for this reminder and it's in the future
+        -- so set for that amount of time
+        timeUntilnextRemindAt = nextRemindAt - timeNow
     else
+        -- No reminder yet or it was in the past.  Recalcuate correct next
+        -- remind time
         local calculatedTimes = self:CalculateNextRemindAt()
         nextRemindAt = calculatedTimes.nextRemindAt
         timeUntilnextRemindAt = calculatedTimes.timeUntilnextRemindAt
