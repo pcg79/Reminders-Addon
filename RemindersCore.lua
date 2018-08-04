@@ -181,10 +181,13 @@ end
 
 function Reminders:SetPlayerReminder(reminder_id, value)
     Reminders:debug("[SetPlayerReminder] reminder_id = "..reminder_id)
-    Reminders:debug("[SetPlayerReminder] value = "..(value or "nil"))
-    RemindersDB.char.reminders[reminder_id] = value
 
-    -- Reminders:DebugPrintReminders()
+    if value then
+        Reminders:debug("[SetPlayerReminder] value = " .. value .. " (aka " .. date("%X", value ) .. ")")
+    else
+        Reminders:debug("[SetPlayerReminder] Deleting reminder")
+    end
+    RemindersDB.char.reminders[reminder_id] = value
 end
 
 function Reminders:DeletePlayerReminder(reminder_id)

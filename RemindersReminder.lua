@@ -90,10 +90,20 @@ local function CancelReminderTimer(id)
 end
 
 local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
-    local nextRemindAt = nil
+    local nextRemindAt = Reminders:GetPlayerReminder(self.id)
+    local timeNow = time()
+
     if timeUntilnextRemindAt then
-        nextRemindAt = timeUntilnextRemindAt + time()
+        timeUntilnextRemindAt = floor(timeUntilnextRemindAt)
+        -- Snoozed so set for time + snoozed time
+        nextRemindAt = timeUntilnextRemindAt + timeNow
+    elseif nextRemindAt and nextRemindAt > timeNow then
+        -- Toon already has an entry for this reminder and it's in the future
+        -- so set for that amount of time
+        timeUntilnextRemindAt = nextRemindAt - timeNow
     else
+        -- No reminder yet or it was in the past.  Recalcuate correct next
+        -- remind time
         local calculatedTimes = self:CalculateNextRemindAt()
         nextRemindAt = calculatedTimes.nextRemindAt
         timeUntilnextRemindAt = calculatedTimes.timeUntilnextRemindAt
@@ -129,6 +139,9 @@ local function Evaluate(self)
             buttonBottom = -10,
             buttonClick = function(this, button)
                 local snooze = 10
+                if RemindersDB.char.debug then
+                    snooze = .1667
+                end
                 self:SetAndScheduleNextReminder(snooze * 60)
                 Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " minutes")
                 this:SetText("Snoozed!")
@@ -288,8 +301,8 @@ local function Process(self)
         Reminders:debug("[Process] eval true for "..self.id)
         if playerReminder then
             Reminders:debug("[Process] player has reminder " .. self.id .. " already")
-            Reminders:debug("[Process] timeNow = " .. timeNow)
-            Reminders:debug("[Process] playerReminder = " .. playerReminder)
+            Reminders:debug("[Process] timeNow = " .. timeNow .. " (aka " .. date("%X", timeNow ) .. ")")
+            Reminders:debug("[Process] playerReminder = " .. playerReminder.. " (aka " .. date("%X", playerReminder ) .. ")")
             if timeNow >= playerReminder then
                 shouldRemind = true
             end
