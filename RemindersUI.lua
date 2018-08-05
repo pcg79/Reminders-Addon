@@ -478,6 +478,15 @@ function Reminders:LoadReminders(parentFrame)
                 Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
             end
         end)
+        reminderItem:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("Alt+Click - Delete Reminder", 1.0, 1.0, 1.0)
+            GameTooltip:Show()
+        end)
+        reminderItem:SetScript("OnLeave", function(self)
+            GameTooltip:Hide()
+        end)
+
         reminderItem:Show()
         REMINDER_ITEMS[i] = reminderItem
     end
