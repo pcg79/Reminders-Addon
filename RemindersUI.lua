@@ -201,22 +201,6 @@ local function ParseReminder(text)
     return { message = array[1], condition = array[2], interval = array[3] }
 end
 
-local function CreateReminder()
-    if AreInputsValid() then
-        local reminderText = BuildReminderText()
-        local newReminder = Reminders:BuildReminder(ParseReminder(reminderText))
-
-        AddReminder(newReminder)
-        Reminders:ResetInputUI()
-
-        Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
-    end
-end
-
-local function EditBoxOnEscapePressed(self)
-    GUI:Hide()
-end
-
 local function GetIntervalList()
     if RemindersDB.char.debug then
         local interval_list = {}
@@ -232,74 +216,7 @@ local function GetIntervalList()
     end
 end
 
-
-function Reminders:CreateUI()
-    local frameName = "RemindersFrame"
-
-    local gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
-    gui:Hide()
-
-    gui:SetSize(1000, 600)
-    gui:SetPoint("CENTER")
-    gui:EnableMouse(true)
-    gui.Title:SetText("Reminders")
-
-    CreateMessageEditBox(gui)
-
-    Reminders:CreateConditionFrame(gui)
-
-    Reminders:CreateScrollFrame(gui)
-
-    CreateIntervalDropDown(gui)
-
-    CreateButton = CreateFrame("Button", frameName.."Create", gui, "UIPanelButtonTemplate")
-    CreateButton:SetScript("OnClick", CreateReminder)
-    CreateButton:SetPoint("TOPLEFT", 860, -48)
-    CreateButton:SetHeight(20)
-    CreateButton:SetWidth(100)
-    CreateButton:SetText("Create")
-    CreateButton:Disable()
-
-    local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
-    closeButton:SetScript("OnClick", function(self) gui:Hide() end)
-    closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
-    closeButton:SetHeight(20)
-    closeButton:SetWidth(100)
-    closeButton:SetText("Close")
-
-    return gui
-end
-
-function CreateMessageEditBox(parentFrame)
-    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
-    editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
-    editbox:SetScript("OnEnterPressed", CreateReminder)
-    editbox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
-    editbox:SetScript("OnTextChanged", OnInputValueChanged)
-    editbox:SetFontObject(GameFontHighlightSmall)
-    editbox:SetWidth(500)
-    editbox:SetHeight(25)
-    editbox:EnableMouse(true)
-    editbox:SetBackdrop(EDIT_BOX_BACKDROP)
-    editbox:SetBackdropColor (0, 0, 0, 0.5)
-    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
-
-    MESSAGE_EDIT_BOX = editbox
-end
-
-function CreateIntervalDropDown(parentFrame)
-    IntervalDropDown = AceGUI:Create("Dropdown")
-    IntervalDropDown.frame:SetParent(parentFrame)
-    IntervalDropDown.frame:SetPoint("TOPLEFT", 560, -48)
-    IntervalDropDown.frame:Show()
-    IntervalDropDown:SetLabel("")
-    IntervalDropDown:SetWidth(100)
-    IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
-    IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
-    IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
-end
-
-function BuildReminderText()
+local function BuildReminderText()
     if not AreInputsValid() then
         return
     end
@@ -343,6 +260,51 @@ function BuildReminderText()
     return reminderText
 end
 
+local function CreateReminder()
+    if AreInputsValid() then
+        local reminderText = BuildReminderText()
+        local newReminder = Reminders:BuildReminder(ParseReminder(reminderText))
+
+        AddReminder(newReminder)
+        Reminders:ResetInputUI()
+
+        Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+    end
+end
+
+local function EditBoxOnEscapePressed(self)
+    GUI:Hide()
+end
+
+local function CreateMessageEditBox(parentFrame)
+    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
+    editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
+    editbox:SetScript("OnEnterPressed", CreateReminder)
+    editbox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
+    editbox:SetScript("OnTextChanged", OnInputValueChanged)
+    editbox:SetFontObject(GameFontHighlightSmall)
+    editbox:SetWidth(500)
+    editbox:SetHeight(25)
+    editbox:EnableMouse(true)
+    editbox:SetBackdrop(EDIT_BOX_BACKDROP)
+    editbox:SetBackdropColor (0, 0, 0, 0.5)
+    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+
+    MESSAGE_EDIT_BOX = editbox
+end
+
+local function CreateIntervalDropDown(parentFrame)
+    IntervalDropDown = AceGUI:Create("Dropdown")
+    IntervalDropDown.frame:SetParent(parentFrame)
+    IntervalDropDown.frame:SetPoint("TOPLEFT", 560, -48)
+    IntervalDropDown.frame:Show()
+    IntervalDropDown:SetLabel("")
+    IntervalDropDown:SetWidth(100)
+    IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
+    IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
+    IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
+end
+
 local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     -- for k,v in pairs(conditionDropDown) do
     --     Reminders:debug("k = " .. k)
@@ -379,7 +341,7 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     OnInputValueChanged()
 end
 
-function Reminders:CreateConditionFrame(parentFrame)
+local function CreateConditionFrame(parentFrame)
     local i = 1
     -- Name should include an id and we should put these into a reusable pool
     local conditionFrame = CreateFrame("Frame", "ConditionFrame", parentFrame)
@@ -451,6 +413,43 @@ function Reminders:CreateConditionFrame(parentFrame)
     conditionDropDown.professionDropDown = professionDropDown
 
     CONDITION_FRAMES[i] = conditionFrame
+end
+
+function Reminders:CreateUI()
+    local frameName = "RemindersFrame"
+
+    local gui = CreateFrame("Frame", frameName, UIParent, "UIPanelDialogTemplate")
+    gui:Hide()
+
+    gui:SetSize(1000, 600)
+    gui:SetPoint("CENTER")
+    gui:EnableMouse(true)
+    gui.Title:SetText("Reminders")
+
+    CreateMessageEditBox(gui)
+
+    CreateConditionFrame(gui)
+
+    Reminders:CreateScrollFrame(gui)
+
+    CreateIntervalDropDown(gui)
+
+    CreateButton = CreateFrame("Button", frameName.."Create", gui, "UIPanelButtonTemplate")
+    CreateButton:SetScript("OnClick", CreateReminder)
+    CreateButton:SetPoint("TOPLEFT", 860, -48)
+    CreateButton:SetHeight(20)
+    CreateButton:SetWidth(100)
+    CreateButton:SetText("Create")
+    CreateButton:Disable()
+
+    local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
+    closeButton:SetScript("OnClick", function(self) gui:Hide() end)
+    closeButton:SetPoint("BOTTOMRIGHT", -27, 17)
+    closeButton:SetHeight(20)
+    closeButton:SetWidth(100)
+    closeButton:SetText("Close")
+
+    return gui
 end
 
 function Reminders:LoadReminders(parentFrame)
