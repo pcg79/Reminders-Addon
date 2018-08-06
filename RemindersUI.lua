@@ -45,12 +45,27 @@ PROFESSION_LIST = {
     Tailoring      = "Tailoring",
 }
 
+DAY_LIST_DEFAULT_VALUE = 3
+DAY_LIST = {
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+}
+DAY_LIST_DEFAULT = DAY_LIST[DAY_LIST_DEFAULT_VALUE]
+
 EDIT_BOX_BACKDROP = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
     edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
     tile = true, edgeSize = 1, tileSize = 5,
 }
 MESSAGE_EDIT_BOX = nil
+
+
+-- Utility functions --
 
 -- Sort function from https://stackoverflow.com/a/15706820/367697
 local function spairs(t, order)
@@ -114,6 +129,8 @@ local function NextRemindAtSortedList(list)
 
     return a
 end
+
+-- UI --
 
 local function AreInputsValid()
     local messageText = MESSAGE_EDIT_BOX:GetText()
@@ -253,7 +270,6 @@ local function BuildReminderText()
         end
 
         local intervalText = IntervalDropDown.text:GetText()
-        Reminders:debug("GetIntervalList()[intervalText] = " .. GetIntervalList()[intervalText])
         reminderText = reminderText .. separator .. GetIntervalList()[intervalText]
     end
 
@@ -293,6 +309,31 @@ local function CreateMessageEditBox(parentFrame)
     MESSAGE_EDIT_BOX = editbox
 end
 
+local function CreateDayDropDown(parentFrame)
+    DayDropDown = AceGUI:Create("Dropdown")
+    DayDropDown.frame:SetParent(parentFrame)
+    DayDropDown.frame:SetPoint("TOPLEFT", 670, -48)
+    DayDropDown.frame:Hide()
+    DayDropDown:SetLabel("")
+    DayDropDown:SetWidth(100)
+    DayDropDown:SetText(DAY_LIST_DEFAULT)
+    DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
+    DayDropDown:SetList(DAY_LIST)
+    DayDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
+end
+
+local function IntervalDropDownOnInputValueChanged(intervalDropDown, event, value)
+    local intervalText = intervalDropDown.text:GetText()
+
+    if intervalText == "Weekly" then
+        DayDropDown.frame:Show()
+    else
+        DayDropDown.frame:Hide()
+    end
+
+    OnInputValueChanged()
+end
+
 local function CreateIntervalDropDown(parentFrame)
     IntervalDropDown = AceGUI:Create("Dropdown")
     IntervalDropDown.frame:SetParent(parentFrame)
@@ -302,7 +343,7 @@ local function CreateIntervalDropDown(parentFrame)
     IntervalDropDown:SetWidth(100)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
-    IntervalDropDown:SetCallback("OnValueChanged", OnInputValueChanged);
+    IntervalDropDown:SetCallback("OnValueChanged", IntervalDropDownOnInputValueChanged)
 end
 
 local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
@@ -433,6 +474,7 @@ function Reminders:CreateUI()
     Reminders:CreateScrollFrame(gui)
 
     CreateIntervalDropDown(gui)
+    CreateDayDropDown(gui)
 
     CreateButton = CreateFrame("Button", frameName.."Create", gui, "UIPanelButtonTemplate")
     CreateButton:SetScript("OnClick", CreateReminder)
@@ -505,6 +547,9 @@ function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
+    DayDropDown:SetText(DAY_LIST_DEFAULT)
+    DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
+    DayDropDown.frame:Hide()
 
     -- SetValue has to be before SetText or the text is blanked out
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
