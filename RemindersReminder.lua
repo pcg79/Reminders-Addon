@@ -62,8 +62,8 @@ local function ToString(self)
         reminderMessage = self.id .. " | " .. self.message .. " | " .. self.condition .. " | " .. self.interval .. " | " .. nextRemindAt
     else
         reminderMessage = "Reminding "
-        if self.condition == "Everyone" then
-            reminderMessage = reminderMessage .. "all characters "
+        if self.condition == "*" then
+            reminderMessage = reminderMessage .. "all characters"
         else
             reminderMessage = reminderMessage .. "characters where " .. self.condition
         end
