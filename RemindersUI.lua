@@ -45,17 +45,7 @@ PROFESSION_LIST = {
     Tailoring      = "Tailoring",
 }
 
-DAY_LIST_DEFAULT_VALUE = 3
-DAY_LIST = {
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-}
-DAY_LIST_DEFAULT = DAY_LIST[DAY_LIST_DEFAULT_VALUE]
+DAY_LIST_DEFAULT_VALUE = 3  -- Tuesday
 
 EDIT_BOX_BACKDROP = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -128,6 +118,10 @@ local function NextRemindAtSortedList(list)
     end
 
     return a
+end
+
+local function DayListDefault()
+    return Reminders:DayList()[DAY_LIST_DEFAULT_VALUE]
 end
 
 -- UI --
@@ -215,7 +209,7 @@ local function ParseReminder(text)
         tinsert(array, token:trim())
     end
 
-    return { message = array[1], condition = array[2], interval = array[3] }
+    return { message = array[1], condition = array[2], interval = array[3], day = array[4] }
 end
 
 local function GetIntervalList()
@@ -271,6 +265,10 @@ local function BuildReminderText()
 
         local intervalText = IntervalDropDown.text:GetText()
         reminderText = reminderText .. separator .. GetIntervalList()[intervalText]
+
+        if intervalText == "Weekly" then
+            reminderText = reminderText .. separator .. DayDropDown:GetValue()
+        end
     end
 
     return reminderText
@@ -316,9 +314,9 @@ local function CreateDayDropDown(parentFrame)
     DayDropDown.frame:Hide()
     DayDropDown:SetLabel("")
     DayDropDown:SetWidth(100)
-    DayDropDown:SetText(DAY_LIST_DEFAULT)
+    DayDropDown:SetText(DayListDefault())
     DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
-    DayDropDown:SetList(DAY_LIST)
+    DayDropDown:SetList(Reminders:DayList())
     DayDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 end
 
@@ -547,7 +545,7 @@ function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
-    DayDropDown:SetText(DAY_LIST_DEFAULT)
+    DayDropDown:SetText(DayListDefault())
     DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
     DayDropDown.frame:Hide()
 

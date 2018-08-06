@@ -222,3 +222,15 @@ function Reminders:PerCharacterDefaults()
         debug = false,
     }
 end
+
+function Reminders:DayList()
+    return {
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    }
+end
