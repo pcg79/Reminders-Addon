@@ -25,14 +25,19 @@ local function CalculateNextRemindAt(self)
         local nextQuestResetTime = timeNow + Reminders:GetQuestResetTime()
         local nextQuestResetTimeWDay = date("%w", nextQuestResetTime)
 
-        -- We'll have to change this if server resets stop being on Tuesday.
-        -- Also not sure how this'll handle internationalization.  I'm guessing poorly.
+        -- Not sure how this'll handle internationalization.  I'm guessing poorly.
         -- Might have to change local time to PST, calculate time distance, then
         -- change back to local time.
-        local tuesdayIndex = 2
-        local numDaysUntilTuesday = (tuesdayIndex - nextQuestResetTimeWDay) % 7
 
-        nextRemindAt = nextQuestResetTime + (numDaysUntilTuesday * secondsInADay)
+        -- Lua tables are 1-based (ids start at 1) but the weekdays
+        -- from `date(%w)` are 0-based (Sunday = 0).  We store the day as
+        -- the index from the DayList table (in RemindersCore).  So to
+        -- convert to %w we have to subtract 1.  Good times.
+
+        local dayIndex = self.day - 1
+        local numDaysUntilReminderDay = (dayIndex - nextQuestResetTimeWDay) % 7
+
+        nextRemindAt = nextQuestResetTime + (numDaysUntilReminderDay * secondsInADay)
         timeUntilnextRemindAt = nextRemindAt - timeNow
     elseif interval == "debug" then -- for debugging only (for now)
         timeUntilnextRemindAt = 30
@@ -50,7 +55,6 @@ end
 
 local function ToString(self)
     local nextRemindAt = Reminders:GetPlayerReminder(self.id)
-    -- Reminders:debug("[ToString] nextRemindAt = "..(nextRemindAt or "nil"))
     if nextRemindAt then
         nextRemindAt = date("%x %X", nextRemindAt)
     else
@@ -68,6 +72,9 @@ local function ToString(self)
             reminderMessage = reminderMessage .. "characters where " .. self.condition
         end
         reminderMessage = reminderMessage .. " to " .. self.message .. " " .. self.interval
+        if self.interval == "weekly" then
+            reminderMessage = reminderMessage .. " on " .. Reminders:DayList()[tonumber(self.day)]
+        end
     end
 
     return reminderMessage
@@ -78,7 +85,8 @@ local function Serialize(self)
         id = self.id,
         condition = self.condition,
         message = self.message,
-        interval = self.interval
+        interval = self.interval,
+        day = self.day,
     }
 end
 
@@ -119,7 +127,7 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
     end)
 
     Reminders:debug("Timer scheduled for reminder " .. self.id .. ".")
-    Reminders:debug("It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%X", nextRemindAt ) .. ")")
+    Reminders:debug("It should fire in " .. timeUntilnextRemindAt .. " seconds (" .. nextRemindAt .. " aka " .. date("%A, %x %X", nextRemindAt ) .. ")")
 
     Reminders:SetPlayerReminder(self.id, nextRemindAt)
 end
@@ -355,6 +363,7 @@ function Reminders:BuildReminder(params)
     self.message = params.message
     self.condition = params.condition
     self.interval = (params.interval or "daily")
+    self.day = (params.day or 3) -- Default to Tuesday for backwards compatability
     self.id = params.id
 
     self.IsEqual = IsEqual
