@@ -492,42 +492,49 @@ function Reminders:CreateUI()
     return gui
 end
 
+local function CreateReminderItem(reminder, i, parentFrame)
+    local reminderItem = REMINDER_ITEMS[i] or CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList, "UIPanelButtonTemplate")
+    reminderItem:SetSize(SCROLLWIDTH - 60, 50)
+    reminderItem:ClearAllPoints()
+    reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
+    reminderItem.text = reminderItem.text or reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
+    reminderItem.text:SetSize(SCROLLWIDTH - 60, 50)
+    reminderItem.text:SetJustifyH("LEFT")
+    reminderItem.text:ClearAllPoints()
+    reminderItem.text:SetPoint("TOPLEFT", 10, 0)
+    reminderItem.text:SetText(reminder:ToString())
+    reminderItem:SetScript("OnClick", function(self, button)
+        if IsAltKeyDown() then
+            reminder:Delete()
+            Reminders:LoadReminders(parentFrame)
+            Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
+        elseif IsControlKeyDown() and RemindersDB.char.debug then
+            reminder:SetAndScheduleNextReminder(1)
+        else
+            Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
+        end
+    end)
+    reminderItem:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Alt+Click - Delete Reminder", 1.0, 1.0, 1.0)
+        GameTooltip:Show()
+    end)
+    reminderItem:SetScript("OnLeave", function(self)
+        GameTooltip:Hide()
+    end)
+
+    reminderItem:Show()
+
+    return reminderItem
+end
+
 function Reminders:LoadReminders(parentFrame)
     local i = 0
     for key, reminder in spairs(RemindersDB.global.reminders, SortByNextRemindAt) do
         i = i + 1
 
         local reminder = Reminders:BuildReminder(reminder)
-        local reminderItem = REMINDER_ITEMS[i] or CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList, "UIPanelButtonTemplate")
-        reminderItem:SetSize(SCROLLWIDTH - 60, 50)
-        reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
-        reminderItem.text = reminderItem.text or reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
-        reminderItem.text:SetSize(SCROLLWIDTH - 60, 50)
-        reminderItem.text:SetJustifyH("LEFT")
-        reminderItem.text:SetPoint("TOPLEFT", 10, 0)
-        reminderItem.text:SetText(reminder:ToString())
-        reminderItem:SetScript("OnClick", function(self, button)
-            if IsAltKeyDown() then
-                reminder:Delete()
-                Reminders:LoadReminders(parentFrame)
-                Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
-            elseif IsControlKeyDown() and RemindersDB.char.debug then
-                reminder:SetAndScheduleNextReminder(1)
-            else
-                Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
-            end
-        end)
-        reminderItem:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:AddLine("Alt+Click - Delete Reminder", 1.0, 1.0, 1.0)
-            GameTooltip:Show()
-        end)
-        reminderItem:SetScript("OnLeave", function(self)
-            GameTooltip:Hide()
-        end)
-
-        reminderItem:Show()
-        REMINDER_ITEMS[i] = reminderItem
+        REMINDER_ITEMS[i] = CreateReminderItem(reminder, i, parentFrame)
     end
 
     local remindersCount = i
