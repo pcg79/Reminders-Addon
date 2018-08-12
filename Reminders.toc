@@ -15,3 +15,4 @@ RemindersReminder.lua
 RemindersUI.lua
 RemindersScrollFrame.lua
 RemindersInlinePopup.lua
+RemindersConfig.lua

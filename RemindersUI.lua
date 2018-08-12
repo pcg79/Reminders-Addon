@@ -45,8 +45,6 @@ PROFESSION_LIST = {
     Tailoring      = "Tailoring",
 }
 
-DAY_LIST_DEFAULT_VALUE = 3  -- Tuesday
-
 EDIT_BOX_BACKDROP = {
     bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
     edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
@@ -121,7 +119,7 @@ local function NextRemindAtSortedList(list)
 end
 
 local function DayListDefault()
-    return Reminders:DayList()[DAY_LIST_DEFAULT_VALUE]
+    return Reminders:DayList()[RemindersDB.char.defaultDay]
 end
 
 -- UI --
@@ -315,7 +313,7 @@ local function CreateDayDropDown(parentFrame)
     DayDropDown:SetLabel("")
     DayDropDown:SetWidth(100)
     DayDropDown:SetText(DayListDefault())
-    DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
+    DayDropDown:SetValue(RemindersDB.char.defaultDay)
     DayDropDown:SetList(Reminders:DayList())
     DayDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 end
@@ -553,7 +551,7 @@ function Reminders:ResetInputUI()
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     DayDropDown:SetText(DayListDefault())
-    DayDropDown:SetValue(DAY_LIST_DEFAULT_VALUE)
+    DayDropDown:SetValue(RemindersDB.char.defaultDay)
     DayDropDown.frame:Hide()
 
     -- SetValue has to be before SetText or the text is blanked out

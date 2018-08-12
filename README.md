@@ -32,6 +32,7 @@ class, profession, and name only support equals.  level and ilevel support equal
 /reminders - Toggles the Reminders UI open or closed
 /reminders (show|open) - Opens the Reminders UI
 /reminders eval - Forces an evaluation of your reminders
+/reminders opt|opts|option|options|config - Opens addon options
 /reminders debug - Toggles debugging for the app
 /reminders delete id - Deletes the reminder with the id.  Can get the id by turning on debugging.
 /reminders reset - Deletes all your reminders.  Use with caution.  Not reversible.
@@ -45,7 +46,6 @@ You can also Alt+Click on a Reminder button to delete the Reminder.
 
 ### KNOWN ISSUES
 
-* Weekly reset is assumed to be Tuesday which will likely cause issues internationally.
 * Text isn't internationalized.  If you're interested in helping, let me know!
 
 
