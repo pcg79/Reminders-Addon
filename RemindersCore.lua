@@ -1,10 +1,21 @@
+local addonName, addon = ...
+
 Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceTimer-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
+
+Reminders.version = GetAddOnMetadata(addonName, "Version")
 
 -- Globals
 GUI = nil
 RemindersDB = {}
 ForceEvaluate = false
+
+-- Calling it once just opens the option screen.  Calling it again
+-- makes it actually go to the Reminders section.
+local function ShowInterfaceOptions()
+    InterfaceOptionsFrame_OpenToCategory(Reminders:GetName())
+    InterfaceOptionsFrame_OpenToCategory(Reminders:GetName())
+end
 
 function Reminders:ChatMessage(message)
     print("|cffff0000Reminders|r: "..message)
@@ -46,6 +57,8 @@ function Reminders:CommandProcessor(input)
         Reminders:debug("id = " .. id)
 
         Delete(id)
+    elseif command == "opt" or command == "opts" or command == "option" or command == "options" or command == "config" then
+        ShowInterfaceOptions()
     else
         local usage = "|cffff0000Usage:|r\n\n"..
             "|cffffcc00/reminders|r - Toggles the Reminders UI open or closed\n"..
@@ -85,6 +98,8 @@ function Reminders:OnInitialize()
 end
 
 function Reminders:OnEnable()
+    Reminders:CreateOptions()
+
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
 
@@ -220,8 +235,17 @@ function Reminders:PerCharacterDefaults()
     return {
         reminders = {},
         debug = false,
+        defaultDay = 3, -- Tuesday
     }
 end
+
+function Reminders:ResetCharacterOptions()
+    local defaults = Reminders:PerCharacterDefaults()
+
+    RemindersDB.char.debug = defaults.debug
+    RemindersDB.char.defaultDay = defaults.defaultDay
+end
+
 
 function Reminders:DayList()
     return {
