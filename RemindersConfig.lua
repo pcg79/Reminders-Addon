@@ -81,5 +81,4 @@ function Reminders:CreateOptions()
     local optionsFrame = AceConfigDialog:AddToBlizOptions(Reminders:GetName())
 
     optionsFrame.default = SetDefaultOptions
-
 end
