@@ -146,7 +146,7 @@ local function Evaluate(self)
             buttonLeft = 400,
             buttonBottom = -10,
             buttonClick = function(this, button)
-                local snooze = 10
+                local snooze = RemindersDB.char.snoozeAmount
                 if RemindersDB.char.debug then
                     snooze = .1667
                 end

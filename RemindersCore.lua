@@ -17,6 +17,16 @@ local function ShowInterfaceOptions()
     InterfaceOptionsFrame_OpenToCategory(Reminders:GetName())
 end
 
+local function SetDefaultsIfUnset()
+    if not RemindersDB.char.defaultDay then
+        RemindersDB.char.defaultDay = Reminders:PerCharacterDefaults().defaultDay
+    end
+
+    if not RemindersDB.char.snoozeAmount then
+        RemindersDB.char.snoozeAmount = Reminders:PerCharacterDefaults().snoozeAmount
+    end
+end
+
 function Reminders:ChatMessage(message)
     print("|cffff0000Reminders|r: "..message)
 end
@@ -95,6 +105,8 @@ function Reminders:OnInitialize()
 
     RemindersDB.global = _G["RemindersDBG"]
     RemindersDB.char   = _G["RemindersDBPC"]
+
+    SetDefaultsIfUnset()
 end
 
 function Reminders:OnEnable()
@@ -236,6 +248,7 @@ function Reminders:PerCharacterDefaults()
         reminders = {},
         debug = false,
         defaultDay = 3, -- Tuesday
+        snoozeAmount = 10,
     }
 end
 
