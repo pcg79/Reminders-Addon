@@ -1,17 +1,26 @@
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
+-- Default Day
+
 local function SetDefaultDay(_, val)
     RemindersDB.char.defaultDay = val
 end
 
 local function GetDefaultDay(_)
-    if not RemindersDB.char.defaultDay then
-        RemindersDB.char.defaultDay = 3 -- Tuesday
-    end
-
     return RemindersDB.char.defaultDay
 end
+
+-- Snooze Amount
+
+local function SetSnoozeAmount(_, val)
+    RemindersDB.char.snoozeAmount = val
+end
+
+local function GetSnoozeAmount(_)
+    return RemindersDB.char.snoozeAmount
+end
+
 
 local function SetDefaultOptions()
     Reminders:ResetCharacterOptions()
@@ -41,7 +50,7 @@ function Reminders:CreateOptions()
 
             LookAndFeel = {
                 type = "group",
-                name = "Look and Feel",
+                name = "Behavior",
                 inline = true,
                 order = 1,
                 args = {
@@ -49,11 +58,23 @@ function Reminders:CreateOptions()
                         name = "Default Day",
                         desc = "Per character Default day for Weekly reminders",
                         type = "select",
+                        order = 1.1,
                         values = Reminders:DayList(),
                         get = GetDefaultDay,
                         set = SetDefaultDay,
                         style = "dropdown",
-                        order = 1.1,
+                    },
+                    snoozeAmount = {
+                        name = "Snooze Amount",
+                        desc = "Amount (in minutes) to sleep a reminder",
+                        type = "range",
+                        order = 1.2,
+                        min = 1,
+                        max = 1440,
+                        step = 1,
+                        bigStep = 10,
+                        get = GetSnoozeAmount,
+                        set = SetSnoozeAmount,
                     },
                 },
             },
@@ -65,12 +86,12 @@ function Reminders:CreateOptions()
                 order = 2,
                 args = {
                     debug = {
-                        name = "Debug",
-                        desc = "Enables / disables debugging (requires UI reload)",
+                        name = "Debug mode (requires UI reload)",
+                        desc = "Enables / disables debugging",
                         type = "toggle",
+                        order = 2.1,
                         get = function(_) return RemindersDB.char.debug end,
                         set = function(_, val) RemindersDB.char.debug = val end,
-                        order = 2.1,
                     },
                 },
             },

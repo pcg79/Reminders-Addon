@@ -21,6 +21,10 @@ local function SetDefaultsIfUnset()
     if not RemindersDB.char.defaultDay then
         RemindersDB.char.defaultDay = Reminders:PerCharacterDefaults().defaultDay
     end
+
+    if not RemindersDB.char.snoozeAmount then
+        RemindersDB.char.snoozeAmount = Reminders:PerCharacterDefaults().snoozeAmount
+    end
 end
 
 function Reminders:ChatMessage(message)
@@ -244,6 +248,7 @@ function Reminders:PerCharacterDefaults()
         reminders = {},
         debug = false,
         defaultDay = 3, -- Tuesday
+        snoozeAmount = 10,
     }
 end
 
