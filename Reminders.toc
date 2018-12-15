@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 81000
 ## Title: Reminders
 ## Notes: Set up periodic reminders
 ## Author: pcg79
