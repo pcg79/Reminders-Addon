@@ -1,5 +1,30 @@
 # Reminders
 
+## [v8.1.1](https://github.com/pcg79/Reminders-Addon/tree/v8.1.1) (2019-03-30)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.1.0...v8.1.1)
+
+- Added Dismiss button to individual reminder items
+
+## [v8.1.0](https://github.com/pcg79/Reminders-Addon/tree/v8.1.0) (2018-09-07)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.0.10...v8.1.0)
+
+- Updated to support BfA version 8.1
+
+## [v8.0.10](https://github.com/pcg79/Reminders-Addon/tree/v8.0.10) (2018-09-07)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.0.9...v8.0.10)
+
+- Added config setting for Snooze amount
+
+## [v8.0.9](https://github.com/pcg79/Reminders-Addon/tree/v8.0.9) (2018-08-12)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.0.8...v8.0.9)
+
+- Added a config panel to allow configuring default weekly day and turning on/off debugging.
+
+## [v8.0.8](https://github.com/pcg79/Reminders-Addon/tree/v8.0.8) (2018-08-10)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.0.7...v8.0.8)
+
+- Allow choosing which day of the week to remind weekly. Defaults to Tuesday.
+
 ## [v8.0.7](https://github.com/pcg79/Reminders-Addon/tree/v8.0.7) (2018-08-05)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.0.6...v8.0.7)
 
