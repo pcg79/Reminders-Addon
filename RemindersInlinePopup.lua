@@ -36,7 +36,6 @@ Frame Arguments
  width .......... Width relative to frame (replace General value).
 Note: All other arguments can be used as a general!
  text ........... Text string.
- textHeight ..... Default is 0 (auto height).
  textX .......... Default is 25. Left and Right margin.
  textY .......... Default is 20 (top margin).
  button ......... [optional] Button text string (directing value). Button is out of content flow.
@@ -60,7 +59,6 @@ local default = {
   fontHeight = 12,
   baseMasterFrameHeight = 60,
 
-  textHeight = 0,
   textX = 25,
   textY = 20,
   point = "CENTER",
