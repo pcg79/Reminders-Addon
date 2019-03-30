@@ -139,13 +139,9 @@ local function Evaluate(self)
     if message and message ~= "" then
         self:Save()
 
-        return {
-            text = message,
-            textHeight = 100,
-            button = "Snooze",
-            buttonLeft = 400,
-            buttonBottom = -10,
-            buttonClick = function(this, button)
+        local snoozeButton = {
+            text = "Snooze",
+            onClick = function(this, button)
                 local snooze = RemindersDB.char.snoozeAmount
                 if RemindersDB.char.debug then
                     snooze = .1667
@@ -155,6 +151,20 @@ local function Evaluate(self)
                 this:SetText("Snoozed!")
                 this:Disable()
             end
+        }
+
+        local dismissButton = {
+            text = "Dismiss",
+            onClick = function(this, button)
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r dismissed")
+                this:GetParent():Hide()
+            end
+        }
+
+        return {
+            text = message,
+            snoozeButton = snoozeButton,
+            dismissButton = dismissButton
         }
     end
 end

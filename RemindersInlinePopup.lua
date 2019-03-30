@@ -36,7 +36,6 @@ Frame Arguments
  width .......... Width relative to frame (replace General value).
 Note: All other arguments can be used as a general!
  text ........... Text string.
- textHeight ..... Default is 0 (auto height).
  textX .......... Default is 25. Left and Right margin.
  textY .......... Default is 20 (top margin).
  button ......... [optional] Button text string (directing value). Button is out of content flow.
@@ -60,7 +59,6 @@ local default = {
   fontHeight = 12,
   baseMasterFrameHeight = 60,
 
-  textHeight = 0,
   textX = 25,
   textY = 20,
   point = "CENTER",
@@ -108,7 +106,8 @@ local function NewFrame(parentFrame, reminder, i)
   else
     frame = CreateFrame("Frame", "$parentChildFrame" .. i, parentFrame)
     frame.text = frame:CreateFontString(nil, nil, "GameFontHighlight")
-    frame.button = CreateFrame("Button", "$parentButton" .. i, frame, "UIPanelButtonTemplate")
+    frame.snoozeButton = CreateFrame("Button", "$parentSnoozeButton" .. i, frame, "UIPanelButtonTemplate")
+    frame.dismissButton = CreateFrame("Button", "$parentDismissButton" .. i, frame, "UIPanelButtonTemplate")
 
     tinsert(parentFrame.reminderFrames, frame)
   end
@@ -119,17 +118,26 @@ local function NewFrame(parentFrame, reminder, i)
   frame:SetWidth(parentFrame:GetWidth() - 30)
   frame:SetHeight(reminderFrameHeight)
 
-  frame.button:ClearAllPoints()
-  frame.button:SetSize(80, 22)
-  frame.button:SetPoint("TOPRIGHT", frame, 0, 0)
-  frame.button:SetText(reminder.button)
-  frame.button:SetScript("OnClick", reminder.buttonClick)
-  frame.button:Enable()
+  local snoozeButton = reminder.snoozeButton
+  frame.snoozeButton:ClearAllPoints()
+  frame.snoozeButton:SetSize(80, 22)
+  frame.snoozeButton:SetPoint("TOPRIGHT", frame, -90, 0)
+  frame.snoozeButton:SetText(snoozeButton.text)
+  frame.snoozeButton:SetScript("OnClick", snoozeButton.onClick)
+  frame.snoozeButton:Enable()
+
+  local dismissButton = reminder.dismissButton
+  frame.dismissButton:ClearAllPoints()
+  frame.dismissButton:SetSize(80, 22)
+  frame.dismissButton:SetPoint("TOPRIGHT", frame, 0, 0)
+  frame.dismissButton:SetText(dismissButton.text)
+  frame.dismissButton:SetScript("OnClick", dismissButton.onClick)
+  frame.dismissButton:Enable()
 
   frame.text:ClearAllPoints()
   frame.text:SetJustifyH("LEFT")
   frame.text:SetPoint("TOPLEFT", frame, 0, 0)
-  frame.text:SetWidth(frame:GetWidth() - frame.button:GetWidth())
+  frame.text:SetWidth(frame:GetWidth() - frame.snoozeButton:GetWidth() - frame.dismissButton:GetWidth())
   frame.text:SetText(reminder.text)
 
   frame:Show()
