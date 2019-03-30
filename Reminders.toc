@@ -4,7 +4,7 @@
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 8.0.9
+## Version: 8.1.1
 
 # Libraries
 embeds.xml
