@@ -1,5 +1,10 @@
 # Reminders
 
+## [v8.2.5](https://github.com/pcg79/Reminders-Addon/tree/v8.2.5) (2019-09-28)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.2.0...v8.2.5)
+
+- Updated app for 8.2.5
+
 ## [v8.2.0](https://github.com/pcg79/Reminders-Addon/tree/v8.2.0) (2019-06-27)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.1.1...v8.2.0)
 

@@ -1,10 +1,10 @@
-## Interface: 80200
+## Interface: 80205
 ## Title: Reminders
 ## Notes: Set up periodic reminders
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 8.2.0
+## Version: 8.2.5
 
 # Libraries
 embeds.xml
