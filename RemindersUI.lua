@@ -424,7 +424,6 @@ local function CreateConditionFrame(parentFrame)
 
 
     local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame, BackdropTemplateMixin and "BackdropTemplate")
-
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
     valueEditBox:SetWidth(100)
