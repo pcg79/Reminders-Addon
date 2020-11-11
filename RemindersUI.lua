@@ -289,7 +289,7 @@ local function EditBoxOnEscapePressed(self)
 end
 
 local function CreateMessageEditBox(parentFrame)
-    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame)
+    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame, BackdropTemplateMixin and "BackdropTemplate")
     editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
     editbox:SetScript("OnEnterPressed", CreateReminder)
     editbox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
@@ -423,7 +423,8 @@ local function CreateConditionFrame(parentFrame)
     professionDropDown.frame:Hide()
 
 
-    local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame)
+    local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame, BackdropTemplateMixin and "BackdropTemplate")
+
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
     valueEditBox:SetWidth(100)
