@@ -1,5 +1,12 @@
 # Reminders
 
+## [v9.0.1](https://github.com/pcg79/Reminders-Addon/tree/v9.0.1) (2020-11-11)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.2.5...v9.0.1)
+
+- Updated TOC for 9.0.1
+- Blizzard removed the Backdrop Frame mixin by default in 9.0 so it has to be explicitly added to Frames that need it.
+- This one's for my dog, Hina.  I miss her everyday.
+
 ## [v8.2.5](https://github.com/pcg79/Reminders-Addon/tree/v8.2.5) (2019-09-28)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.2.0...v8.2.5)
 
