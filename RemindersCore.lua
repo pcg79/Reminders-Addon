@@ -32,7 +32,7 @@ function Reminders:ChatMessage(message)
 end
 
 function Reminders:debug(message)
-  if RemindersDB.char.debug then
+  if not RemindersDB.char or RemindersDB.char.debug then
      Reminders:ChatMessage("[ " .. date("%x %X") .. " ][debug] "..message)
   end
 end
@@ -95,6 +95,8 @@ function Reminders:ResetAll()
 end
 
 function Reminders:OnInitialize()
+    Reminders:debug("Initializing...")
+
     if not _G["RemindersDBG"] then
         _G["RemindersDBG"] = Reminders:GlobalDefaults()
     end
@@ -107,13 +109,17 @@ function Reminders:OnInitialize()
     RemindersDB.char   = _G["RemindersDBPC"]
 
     SetDefaultsIfUnset()
+    Reminders:debug("Done Initializing")
 end
 
 function Reminders:OnEnable()
+    Reminders:debug("Enabling...")
     Reminders:CreateOptions()
 
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
+
+    Reminders:debug("Creating UI")
 
     GUI = Reminders:CreateUI()
 
@@ -122,6 +128,7 @@ function Reminders:OnEnable()
     Reminders:LoadReminders(GUI)
 
     if RemindersDB.char.debug then GUI:Show() end
+    Reminders:debug("Done Enabling")
 end
 
 function Reminders:RegisterEvents()
