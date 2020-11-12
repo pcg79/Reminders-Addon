@@ -1,5 +1,11 @@
 # Reminders
 
+## [v9.0.2](https://github.com/pcg79/Reminders-Addon/tree/v9.0.2) (2020-11-12)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v9.0.1...v9.0.2)
+
+- Removed Ace3 Addon as a requirement by embedding the necessary libs in this addon.
+- Bumped Interface number to 90001 (as I should've done in 9.0.1. Oops)
+
 ## [v9.0.1](https://github.com/pcg79/Reminders-Addon/tree/v9.0.1) (2020-11-11)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v8.2.5...v9.0.1)
 
