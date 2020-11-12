@@ -7,7 +7,7 @@
 ## Version: 9.0.1
 
 # Libraries
-embeds.xml
+Libs\embeds.xml
 
 # Files
 RemindersCore.lua
