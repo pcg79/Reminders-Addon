@@ -1,10 +1,10 @@
-## Interface: 90001
+## Interface: 90002
 ## Title: Reminders
 ## Notes: Set up periodic reminders
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 9.0.2
+## Version: 9.0.3
 
 # Libraries
 Libs\embeds.xml
