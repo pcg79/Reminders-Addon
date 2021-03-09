@@ -1,5 +1,10 @@
 # Reminders
 
+## [v9.0.4](https://github.com/pcg79/Reminders-Addon/tree/v9.0.4) (2021-03-09)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v9.0.3...v9.0.4)
+
+- Updated app for 9.0.5
+
 ## [v9.0.3](https://github.com/pcg79/Reminders-Addon/tree/v9.0.3) (2020-11-17)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v9.0.2...v9.0.3)
 
