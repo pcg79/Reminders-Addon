@@ -312,9 +312,10 @@ local function CreateDayDropDown(parentFrame)
     DayDropDown.frame:Hide()
     DayDropDown:SetLabel("")
     DayDropDown:SetWidth(100)
+    DayDropDown:SetList(Reminders:DayList())
     DayDropDown:SetText(DayListDefault())
     DayDropDown:SetValue(RemindersDB.char.defaultDay)
-    DayDropDown:SetList(Reminders:DayList())
+
     DayDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
 end
 
