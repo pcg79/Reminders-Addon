@@ -3,7 +3,7 @@ local addonName, addon = ...
 Reminders = LibStub("AceAddon-3.0"):NewAddon("Reminders", "AceConsole-3.0", "AceTimer-3.0")
 Reminders:RegisterChatCommand("reminders", "CommandProcessor")
 
-Reminders.version = GetAddOnMetadata(addonName, "Version")
+Reminders.version = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata)(addonName, "Version");
 
 -- Globals
 GUI = nil

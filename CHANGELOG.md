@@ -1,5 +1,11 @@
 # Reminders
 
+## [v11.0.2](https://github.com/pcg79/Reminders-Addon/tree/v11.0.2) (2024-08-13)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v10.1.0..v11.0.2)
+
+- Updated app for 11.0.2
+- Updated call to now deprecated GetAddOnMetadata
+
 ## [v10.1.0](https://github.com/pcg79/Reminders-Addon/tree/v9.1.0) (2023-05-13)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v9.1.0...v10.1.0)
 
