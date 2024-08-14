@@ -5,6 +5,8 @@
 
 - Updated app for 11.0.2
 - Updated call to now deprecated GetAddOnMetadata
+- Fixed the day drop down not showing anything when you choose "Weekly"
+- Fixed the /reminders options chat command
 
 ## [v10.1.0](https://github.com/pcg79/Reminders-Addon/tree/v9.1.0) (2023-05-13)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v9.1.0...v10.1.0)
