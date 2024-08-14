@@ -13,8 +13,7 @@ ForceEvaluate = false
 -- Calling it once just opens the option screen.  Calling it again
 -- makes it actually go to the Reminders section.
 local function ShowInterfaceOptions()
-    InterfaceOptionsFrame_OpenToCategory(Reminders:GetName())
-    InterfaceOptionsFrame_OpenToCategory(Reminders:GetName())
+    Settings.OpenToCategory(Reminders:GetName())
 end
 
 local function SetDefaultsIfUnset()
