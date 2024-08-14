@@ -133,8 +133,15 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
 end
 
 local function Evaluate(self)
-    local message = self:Process()
-    -- If Process returned a message, that means the reminder triggered.
+    local message = ""
+    if RemindersDB.char.debug then
+        message = self.message
+    else
+        message = self:Process()
+    end
+
+    -- If Process returned a message, that means the reminder triggered.  Or if we're in debug
+    -- mode, then just always show all the reminders.
     -- That also means nextRemindAt has changed so we need to update the reminder in the DB.
     if message and message ~= "" then
         self:Save()
