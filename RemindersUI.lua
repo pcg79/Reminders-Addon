@@ -16,7 +16,7 @@ CONDITION_LIST = {
 
 OPERATION_LIST = { }
 OPERATION_LIST["Equals"] = "="
--- OPERATION_LIST["Not Equals"] = "~="
+OPERATION_LIST["Not Equals"] = "~="
 OPERATION_LIST["Greater Than"] = ">"
 OPERATION_LIST["Greater Than Or Equal To"] = ">="
 OPERATION_LIST["Less Than"] = "<"

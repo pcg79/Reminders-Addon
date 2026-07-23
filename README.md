@@ -20,7 +20,7 @@ If you want all of your alchemists to remember to craft Living Steel every day, 
 
 Let's say you want your characters that are level 90 or above to run Firelands every week, you'd set up a weekly reminder where level is equal to or greater than 90.
 
-class, profession, and name only support equals.  level and ilevel support equal, less than, greater than, less than or equal to, and great than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
+class, profession, and name only support equals.  level and ilevel support equal, not equal to, less than, greater than, less than or equal to, and greater than or equal to.  self is a shortcut to "name = <name of the character that created the reminder>"
 
 ### FEATURES
 

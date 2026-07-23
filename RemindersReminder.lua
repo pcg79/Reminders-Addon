@@ -222,7 +222,10 @@ local function EvaluateCondition(self)
                 local name = tokens[i+count]
                 local playerName = UnitName("player")
 
-                evalString = evalString.." "..tostring(playerName == name)
+                local matches = playerName == name
+                if operation == "~=" then matches = not matches end
+
+                evalString = evalString.." "..tostring(matches)
 
             elseif token == R_LEVEL then
                 count = count + 1
@@ -249,7 +252,10 @@ local function EvaluateCondition(self)
                 local class = tokens[i+count]
                 local playerClass = UnitClass("player")
 
-                evalString = evalString.." "..tostring(playerClass == class)
+                local matches = playerClass == class
+                if operation == "~=" then matches = not matches end
+
+                evalString = evalString.." "..tostring(matches)
 
             elseif token == R_PROFESSION then
                 count = count + 1
@@ -265,6 +271,8 @@ local function EvaluateCondition(self)
                    (profession == "archaeology" and archaeology ~= nil) or
                    (profession == "fishing" and fishing ~= nil) or
                    (profession == "cooking" and cooking ~= nil)
+
+                if operation == "~=" then profResult = not profResult end
 
                 evalString = evalString.." "..tostring(profResult)
 
