@@ -1,6 +1,7 @@
 # Reminders
 
-## Unreleased
+## [v12.1.0](https://github.com/pcg79/Reminders-Addon/tree/v12.1.0) (2026-07-24)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v11.0.2...v12.1.0)
 
 - Added a "Not Equals" (not equal to) operation for the Level and iLevel conditions (#14)
 - Fixed the operation dropdown showing a stale checkmark after the form reset or the condition changed; a chosen operation is now kept when it's still valid for the newly selected condition
