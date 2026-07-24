@@ -89,6 +89,27 @@ local function StopMovingAndRecordPosition(frame)
   }
 end
 
+-- Dismissing a reminder hides its row in place, which would leave a gap and
+-- dead space at the bottom.  Re-anchor the still-visible rows into contiguous
+-- slots from the top, shrink the popup to fit, and close it if none remain.
+local function RepackReminderFrames(masterFrame)
+  local slot = 0
+  for _, reminderFrame in ipairs(masterFrame.reminderFrames) do
+    if reminderFrame:IsShown() then
+      reminderFrame:ClearAllPoints()
+      reminderFrame:SetPoint("TOPLEFT", masterFrame, 20, -(40 + (slot * reminderFrameHeight)))
+      slot = slot + 1
+    end
+  end
+
+  if slot == 0 then
+    masterFrame:Hide()
+  else
+    local baseMasterFrameHeight = (masterFrame.data and masterFrame.data.baseMasterFrameHeight) or default.baseMasterFrameHeight
+    masterFrame:SetHeight(baseMasterFrameHeight + (slot * reminderFrameHeight))
+  end
+end
+
 local function NewFrame(parentFrame, reminder, i)
   if not reminder.textY then
     reminder.textY = 0
@@ -131,7 +152,15 @@ local function NewFrame(parentFrame, reminder, i)
   frame.dismissButton:SetSize(80, 22)
   frame.dismissButton:SetPoint("TOPRIGHT", frame, 0, 0)
   frame.dismissButton:SetText(dismissButton.text)
-  frame.dismissButton:SetScript("OnClick", dismissButton.onClick)
+  -- Run the original dismiss behavior (chat message + hide this row), then
+  -- reflow so the remaining rows close the gap and the popup shrinks/closes.
+  local originalOnDismiss = dismissButton.onClick
+  frame.dismissButton:SetScript("OnClick", function(self, mouseButton, down)
+    if originalOnDismiss then
+      originalOnDismiss(self, mouseButton, down)
+    end
+    RepackReminderFrames(parentFrame)
+  end)
   frame.dismissButton:Enable()
 
   frame.text:ClearAllPoints()

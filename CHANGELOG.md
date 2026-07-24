@@ -1,5 +1,9 @@
 # Reminders
 
+## Unreleased
+
+- Fixed the reminder popup leaving a blank gap when a reminder in the middle was dismissed; the remaining reminders now reflow to fill the space, the popup resizes to fit, and it closes automatically when the last one is dismissed (#44)
+
 ## [v12.1.0](https://github.com/pcg79/Reminders-Addon/tree/v12.1.0) (2026-07-24)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v11.0.2...v12.1.0)
 
