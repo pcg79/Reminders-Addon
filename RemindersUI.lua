@@ -520,17 +520,87 @@ function Reminders:CreateUI()
     return gui
 end
 
+local REMINDER_ROW_HEIGHT = 44
+
 local function CreateReminderItem(reminder, i, parentFrame)
-    local reminderItem = REMINDER_ITEMS[i] or CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList, "UIPanelButtonTemplate")
-    reminderItem:SetSize(SCROLLWIDTH - 60, 50)
+    local reminderItem = REMINDER_ITEMS[i]
+    if not reminderItem then
+        reminderItem = CreateFrame("Button", "reminderItemFrame"..i, parentFrame.scrollList)
+
+        -- Zebra background (shade set per-row below)
+        reminderItem.bg = reminderItem:CreateTexture(nil, "BACKGROUND")
+        reminderItem.bg:SetAllPoints()
+
+        -- Soft gold hover highlight (same texture the quest log uses)
+        reminderItem:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        local highlight = reminderItem:GetHighlightTexture()
+        if highlight then
+            highlight:SetBlendMode("ADD")
+            highlight:SetAlpha(0.35)
+        end
+
+        -- Message (primary line)
+        reminderItem.title = reminderItem:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        reminderItem.title:SetJustifyH("LEFT")
+        reminderItem.title:SetWordWrap(false)
+        reminderItem.title:SetPoint("TOPLEFT", 12, -6)
+        reminderItem.title:SetPoint("RIGHT", reminderItem, "RIGHT", -170, 0)
+
+        -- Condition (secondary line, dimmed)
+        reminderItem.subtitle = reminderItem:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        reminderItem.subtitle:SetJustifyH("LEFT")
+        reminderItem.subtitle:SetWordWrap(false)
+        reminderItem.subtitle:SetTextColor(0.6, 0.6, 0.6)
+        reminderItem.subtitle:SetPoint("TOPLEFT", reminderItem.title, "BOTTOMLEFT", 0, -3)
+        reminderItem.subtitle:SetPoint("RIGHT", reminderItem, "RIGHT", -170, 0)
+
+        -- Interval (right-aligned)
+        reminderItem.intervalText = reminderItem:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        reminderItem.intervalText:SetJustifyH("RIGHT")
+        reminderItem.intervalText:SetTextColor(0.85, 0.72, 0.42)
+        reminderItem.intervalText:SetPoint("RIGHT", reminderItem, "RIGHT", -40, 0)
+
+        -- Delete (X) button
+        local deleteButton = CreateFrame("Button", nil, reminderItem)
+        deleteButton:SetSize(18, 18)
+        deleteButton:SetPoint("RIGHT", reminderItem, "RIGHT", -12, 0)
+        deleteButton:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+        deleteButton:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Highlight")
+        deleteButton:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("Delete this reminder", 1, 0.2, 0.2)
+            GameTooltip:Show()
+        end)
+        deleteButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        reminderItem.deleteButton = deleteButton
+    end
+
+    reminderItem:SetSize(SCROLLWIDTH - 80, REMINDER_ROW_HEIGHT)
     reminderItem:ClearAllPoints()
-    reminderItem:SetPoint("TOP", 0, -(50 * (i - 1)))
-    reminderItem.text = reminderItem.text or reminderItem:CreateFontString("Text", "ARTWORK", "NumberFontNormalSmall")
-    reminderItem.text:SetSize(SCROLLWIDTH - 60, 50)
-    reminderItem.text:SetJustifyH("LEFT")
-    reminderItem.text:ClearAllPoints()
-    reminderItem.text:SetPoint("TOPLEFT", 10, 0)
-    reminderItem.text:SetText(reminder:ToString())
+    reminderItem:SetPoint("TOP", 0, -(REMINDER_ROW_HEIGHT * (i - 1)))
+
+    -- Zebra shading (alternate rows)
+    local shade = (i % 2 == 0) and 0.05 or 0.09
+    reminderItem.bg:SetColorTexture(1, 1, 1, shade)
+
+    if RemindersDB.char.debug then
+        -- Keep the raw debug string (id | message | condition | interval | nextRemindAt)
+        reminderItem.title:SetText(reminder:ToString())
+        reminderItem.subtitle:SetText("")
+        reminderItem.intervalText:SetText("")
+    else
+        reminderItem.title:SetText(reminder.message)
+
+        local conditionText = (reminder.condition == "*") and "All characters" or reminder.condition
+        reminderItem.subtitle:SetText(conditionText)
+
+        local intervalText = tostring(reminder.interval):gsub("^%l", string.upper)
+        if reminder.interval == "weekly" and reminder.day then
+            intervalText = intervalText .. " \194\183 " .. (Reminders:DayList()[tonumber(reminder.day)] or "")
+        end
+        reminderItem.intervalText:SetText(intervalText)
+    end
+
     reminderItem:SetScript("OnClick", function(self, button)
         if IsAltKeyDown() then
             reminder:Delete()
@@ -542,9 +612,17 @@ local function CreateReminderItem(reminder, i, parentFrame)
             Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
         end
     end)
+
+    reminderItem.deleteButton:SetScript("OnClick", function()
+        reminder:Delete()
+        Reminders:LoadReminders(parentFrame)
+        Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
+    end)
+
     reminderItem:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine("Alt+Click - Delete Reminder", 1.0, 1.0, 1.0)
+        GameTooltip:AddLine("Left-click to test", 1, 1, 1)
+        GameTooltip:AddLine("Alt+click or the X to delete", 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
     reminderItem:SetScript("OnLeave", function(self)
@@ -573,6 +651,21 @@ function Reminders:LoadReminders(parentFrame)
         for i=remindersCount+1, reminderButtonsCount do
             REMINDER_ITEMS[i]:Hide()
         end
+    end
+
+    -- Grow the scroll child to fit all rows so the list can actually scroll
+    parentFrame.scrollList:SetHeight(math.max(remindersCount * REMINDER_ROW_HEIGHT, SCROLLHEIGHT))
+
+    -- Empty state shown when there are no reminders yet
+    if not parentFrame.emptyState then
+        parentFrame.emptyState = parentFrame.scrollList:CreateFontString(nil, "ARTWORK", "GameFontDisable")
+        parentFrame.emptyState:SetPoint("TOP", 0, -24)
+        parentFrame.emptyState:SetText("No reminders yet.  Create one above to get started.")
+    end
+    if remindersCount == 0 then
+        parentFrame.emptyState:Show()
+    else
+        parentFrame.emptyState:Hide()
     end
 end
 
