@@ -122,6 +122,21 @@ local function DayListDefault()
     return Reminders:DayList()[RemindersDB.char.defaultDay]
 end
 
+-- AceGUI keeps a checkmark on the last-selected pullout item even after the
+-- dropdown's value/text is changed to something else.  SetValue/SetText update
+-- the collapsed text but don't uncheck the old item, so it stays visually
+-- checked (e.g. "Greater Than" showing a check while the dropdown reads
+-- "Operation").  Explicitly uncheck every item in the pullout.
+local function ClearDropDownChecks(dropdown)
+    if dropdown and dropdown.pullout then
+        for _, item in dropdown.pullout:IterateItems() do
+            if item.SetValue then
+                item:SetValue(false)
+            end
+        end
+    end
+end
+
 -- UI --
 
 local function AreInputsValid()
@@ -360,10 +375,16 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     professionDropDown.frame:Hide()
 
     if conditionText == "Everyone" or conditionText == "Self" then
+        -- No operation applies to this condition.
+        operationDropDown:SetValue(0)
+        ClearDropDownChecks(operationDropDown)
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
         valueEditBox:Disable()
     elseif conditionText == "Name" or conditionText == PROFESSION_LIST_DEFAULT then
+        -- These conditions only support "Equals".
+        operationDropDown:SetValue(0)
+        ClearDropDownChecks(operationDropDown)
         operationDropDown:SetText("Equals")
         operationDropDown:SetDisabled(true)
 
@@ -373,7 +394,15 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
             professionDropDown.frame:Show()
         end
     else
-        operationDropDown:SetText("Operation")
+        -- Level / iLevel accept every operation, so keep an existing selection
+        -- (and its checkmark) intact; only fall back to the placeholder when no
+        -- genuine operation is chosen (value 0/nil is the "unset" sentinel).
+        local currentValue = operationDropDown:GetValue()
+        if not (currentValue and currentValue ~= 0) then
+            operationDropDown:SetValue(0)
+            ClearDropDownChecks(operationDropDown)
+            operationDropDown:SetText("Operation")
+        end
     end
 
     OnInputValueChanged()
@@ -551,6 +580,7 @@ function Reminders:ResetInputUI()
     MessageEditBox:SetText("")
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
+    ClearDropDownChecks(IntervalDropDown)
     DayDropDown:SetText(DayListDefault())
     DayDropDown:SetValue(RemindersDB.char.defaultDay)
     DayDropDown.frame:Hide()
@@ -559,10 +589,12 @@ function Reminders:ResetInputUI()
     for i, conditionFrame in pairs(CONDITION_FRAMES) do
         conditionFrame.conditionDropDown:SetValue(0)
         conditionFrame.conditionDropDown:SetText(CONDITION_LIST_DEFAULT)
+        ClearDropDownChecks(conditionFrame.conditionDropDown)
 
         conditionFrame.operationDropDown:SetDisabled(false)
         conditionFrame.operationDropDown:SetValue(0)
         conditionFrame.operationDropDown:SetText("Operation")
+        ClearDropDownChecks(conditionFrame.operationDropDown)
 
         conditionFrame.valueEditBox:Enable()
         conditionFrame.valueEditBox:SetText("")
@@ -570,6 +602,7 @@ function Reminders:ResetInputUI()
 
         conditionFrame.professionDropDown:SetValue(0)
         conditionFrame.professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
+        ClearDropDownChecks(conditionFrame.professionDropDown)
         conditionFrame.professionDropDown.frame:Hide()
         if i > 1 then
             conditionFrame:Hide()
