@@ -24,4 +24,6 @@ jobs:
         run: luarocks install luacheck
 
       - name: Run luacheck
-        run: luacheck .
+        # The addon's own Lua lives at the repo root; checking *.lua avoids
+        # recursing into Libs/ (bundled Ace3) regardless of exclude handling.
+        run: luacheck *.lua
