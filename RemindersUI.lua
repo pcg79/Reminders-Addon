@@ -303,19 +303,49 @@ local function EditBoxOnEscapePressed(self)
     GUI:Hide()
 end
 
+-- Small gold field label used across the input form.
+local function CreateFieldLabel(parentFrame, text, x, y)
+    local label = parentFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    label:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", x, y)
+    label:SetText(text)
+    label:SetTextColor(1, 0.82, 0)
+    return label
+end
+
+-- Faint placeholder text shown in an edit box while it's empty and unfocused.
+local function SetPlaceholder(editbox, text)
+    local ph = editbox:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+    ph:SetPoint("LEFT", editbox, "LEFT", 4, 0)
+    ph:SetText(text)
+
+    local function refresh()
+        if editbox:HasFocus() or editbox:GetText() ~= "" then
+            ph:Hide()
+        else
+            ph:Show()
+        end
+    end
+
+    editbox:HookScript("OnTextChanged", refresh)
+    editbox:HookScript("OnEditFocusGained", function() ph:Hide() end)
+    editbox:HookScript("OnEditFocusLost", refresh)
+    refresh()
+end
+
 local function CreateMessageEditBox(parentFrame)
-    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame, BackdropTemplateMixin and "BackdropTemplate")
-    editbox:SetPoint("TOPLEFT", parentFrame, 50, -50)
+    CreateFieldLabel(parentFrame, "Reminder", 44, -52)
+
+    local editbox = CreateFrame("EditBox", "MessageEditBox", parentFrame, "InputBoxTemplate")
+    editbox:SetPoint("TOPLEFT", parentFrame, 50, -68)
     editbox:SetScript("OnEnterPressed", CreateReminder)
     editbox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
     editbox:SetScript("OnTextChanged", OnInputValueChanged)
     editbox:SetFontObject(GameFontHighlightSmall)
-    editbox:SetWidth(500)
-    editbox:SetHeight(25)
-    editbox:EnableMouse(true)
-    editbox:SetBackdrop(EDIT_BOX_BACKDROP)
-    editbox:SetBackdropColor (0, 0, 0, 0.5)
-    editbox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+    editbox:SetWidth(560)
+    editbox:SetHeight(20)
+    editbox:SetAutoFocus(false)
+
+    SetPlaceholder(editbox, "What do you want to be reminded about?")
 
     MESSAGE_EDIT_BOX = editbox
 end
@@ -323,10 +353,10 @@ end
 local function CreateDayDropDown(parentFrame)
     DayDropDown = AceGUI:Create("Dropdown")
     DayDropDown.frame:SetParent(parentFrame)
-    DayDropDown.frame:SetPoint("TOPLEFT", 670, -48)
+    DayDropDown.frame:SetPoint("TOPLEFT", 670, -116)
     DayDropDown.frame:Hide()
     DayDropDown:SetLabel("")
-    DayDropDown:SetWidth(100)
+    DayDropDown:SetWidth(110)
     DayDropDown:SetList(Reminders:DayList())
     DayDropDown:SetText(DayListDefault())
     DayDropDown:SetValue(RemindersDB.char.defaultDay)
@@ -347,12 +377,14 @@ local function IntervalDropDownOnInputValueChanged(intervalDropDown, event, valu
 end
 
 local function CreateIntervalDropDown(parentFrame)
+    CreateFieldLabel(parentFrame, "Interval", 554, -100)
+
     IntervalDropDown = AceGUI:Create("Dropdown")
     IntervalDropDown.frame:SetParent(parentFrame)
-    IntervalDropDown.frame:SetPoint("TOPLEFT", 560, -48)
+    IntervalDropDown.frame:SetPoint("TOPLEFT", 550, -116)
     IntervalDropDown.frame:Show()
     IntervalDropDown:SetLabel("")
-    IntervalDropDown:SetWidth(100)
+    IntervalDropDown:SetWidth(110)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     IntervalDropDown:SetList(AlphabeticallySortedList(GetIntervalList()))
     IntervalDropDown:SetCallback("OnValueChanged", IntervalDropDownOnInputValueChanged)
@@ -367,6 +399,7 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     local operationDropDown = conditionDropDown.operationDropDown
     local valueEditBox = conditionDropDown.valueEditBox
     local professionDropDown = conditionDropDown.professionDropDown
+    local valueLabel = conditionDropDown.valueLabel
 
     operationDropDown:SetDisabled(false)
 
@@ -375,12 +408,13 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     professionDropDown.frame:Hide()
 
     if conditionText == "Everyone" or conditionText == "Self" then
-        -- No operation applies to this condition.
+        -- No operation or value applies to this condition.
         operationDropDown:SetValue(0)
         ClearDropDownChecks(operationDropDown)
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
         valueEditBox:Disable()
+        if valueLabel then valueLabel:Hide() end
     elseif conditionText == "Name" or conditionText == PROFESSION_LIST_DEFAULT then
         -- These conditions only support "Equals".
         operationDropDown:SetValue(0)
@@ -392,6 +426,9 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
             valueEditBox:Hide()
             valueEditBox:Disable()
             professionDropDown.frame:Show()
+            if valueLabel then valueLabel:SetText("Profession"); valueLabel:Show() end
+        else
+            if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
         end
     else
         -- Level / iLevel accept every operation, so keep an existing selection
@@ -403,6 +440,7 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
             ClearDropDownChecks(operationDropDown)
             operationDropDown:SetText("Operation")
         end
+        if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
     end
 
     OnInputValueChanged()
@@ -410,17 +448,22 @@ end
 
 local function CreateConditionFrame(parentFrame)
     local i = 1
+
+    CreateFieldLabel(parentFrame, "Condition", 44, -100)
+    CreateFieldLabel(parentFrame, "Operation", 179, -100)
+    local valueLabel = CreateFieldLabel(parentFrame, "Value", 366, -100)
+
     -- Name should include an id and we should put these into a reusable pool
     local conditionFrame = CreateFrame("Frame", "ConditionFrame", parentFrame)
-    conditionFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 0, -100)
-    conditionFrame:SetSize(1000, 100)
+    conditionFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 0, -116)
+    conditionFrame:SetSize(1000, 40)
 
     local conditionDropDown = AceGUI:Create("Dropdown")
     conditionDropDown.frame:SetParent(conditionFrame)
-    conditionDropDown.frame:SetPoint("TOPLEFT", 46, 0)
+    conditionDropDown.frame:SetPoint("TOPLEFT", 40, 0)
     conditionDropDown.frame:Show()
     conditionDropDown:SetLabel("")
-    conditionDropDown:SetWidth(100)
+    conditionDropDown:SetWidth(120)
     conditionDropDown:SetText(CONDITION_LIST_DEFAULT)
     conditionDropDown:SetList(AlphabeticallySortedList(CONDITION_LIST))
     conditionDropDown:SetCallback("OnValueChanged", ConditionDropDownOnValueChanged)
@@ -428,10 +471,10 @@ local function CreateConditionFrame(parentFrame)
 
     local operationDropDown = AceGUI:Create("Dropdown")
     operationDropDown.frame:SetParent(conditionFrame)
-    operationDropDown.frame:SetPoint("TOPLEFT", 200, 0)
+    operationDropDown.frame:SetPoint("TOPLEFT", 170, 0)
     operationDropDown.frame:Show()
     operationDropDown:SetLabel("")
-    operationDropDown:SetWidth(180)
+    operationDropDown:SetWidth(165)
     operationDropDown:SetText("Operation")
     operationDropDown:SetList(AlphabeticallySortedList(OPERATION_LIST))
     operationDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
@@ -441,10 +484,10 @@ local function CreateConditionFrame(parentFrame)
 
     local professionDropDown = AceGUI:Create("Dropdown")
     professionDropDown.frame:SetParent(conditionFrame)
-    professionDropDown.frame:SetPoint("TOPLEFT", 450, 0)
+    professionDropDown.frame:SetPoint("TOPLEFT", 350, 0)
     professionDropDown.frame:Show()
     professionDropDown:SetLabel("")
-    professionDropDown:SetWidth(180)
+    professionDropDown:SetWidth(140)
     professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
     professionDropDown:SetList(AlphabeticallySortedList(PROFESSION_LIST))
     professionDropDown:SetCallback("OnValueChanged", OnInputValueChanged)
@@ -453,31 +496,29 @@ local function CreateConditionFrame(parentFrame)
     professionDropDown.frame:Hide()
 
 
-    local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame, BackdropTemplateMixin and "BackdropTemplate")
-    valueEditBox:SetPoint("TOPLEFT", conditionFrame, 450, 0)
+    local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame, "InputBoxTemplate")
+    valueEditBox:SetPoint("TOPLEFT", conditionFrame, 366, -3)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
-    valueEditBox:SetWidth(100)
-    valueEditBox:SetHeight(25)
-    valueEditBox:EnableMouse(true)
-    valueEditBox:SetBackdrop(EDIT_BOX_BACKDROP)
-    valueEditBox:SetBackdropColor (0, 0, 0, 0.5)
-    valueEditBox:SetBackdropBorderColor (0.3, 0.3, 0.30, 0.80)
+    valueEditBox:SetWidth(150)
+    valueEditBox:SetHeight(20)
+    valueEditBox:SetAutoFocus(false)
     valueEditBox:SetScript("OnEnterPressed", CreateReminder)
     valueEditBox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
     valueEditBox:SetScript("OnTextChanged", OnInputValueChanged)
-    valueEditBox:SetAutoFocus(false)
 
 
     conditionFrame.conditionDropDown = conditionDropDown
     conditionFrame.operationDropDown = operationDropDown
     conditionFrame.valueEditBox      = valueEditBox
     conditionFrame.professionDropDown = professionDropDown
+    conditionFrame.valueLabel        = valueLabel
 
     -- So I can reference these in ConditionDropDownOnClick
     -- Not sure if these's a better way to access them without making them global
     conditionDropDown.operationDropDown = operationDropDown
     conditionDropDown.valueEditBox = valueEditBox
     conditionDropDown.professionDropDown = professionDropDown
+    conditionDropDown.valueLabel = valueLabel
 
     CONDITION_FRAMES[i] = conditionFrame
 end
@@ -504,11 +545,18 @@ function Reminders:CreateUI()
 
     CreateButton = CreateFrame("Button", frameName.."Create", gui, "UIPanelButtonTemplate")
     CreateButton:SetScript("OnClick", CreateReminder)
-    CreateButton:SetPoint("TOPLEFT", 860, -48)
-    CreateButton:SetHeight(20)
+    CreateButton:SetPoint("TOPLEFT", 880, -116)
+    CreateButton:SetHeight(22)
     CreateButton:SetWidth(100)
     CreateButton:SetText("Create")
     CreateButton:Disable()
+
+    -- Divider separating the create-a-reminder form from the list below
+    local divider = gui:CreateTexture(nil, "ARTWORK")
+    divider:SetColorTexture(1, 1, 1, 0.15)
+    divider:SetHeight(1)
+    divider:SetPoint("TOPLEFT", gui, "TOPLEFT", 40, -152)
+    divider:SetPoint("TOPRIGHT", gui, "TOPRIGHT", -40, -152)
 
     local closeButton = CreateFrame("Button", frameName.."Close", gui, "UIPanelButtonTemplate")
     closeButton:SetScript("OnClick", function(self) gui:Hide() end)
@@ -697,6 +745,12 @@ function Reminders:ResetInputUI()
         conditionFrame.professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
         ClearDropDownChecks(conditionFrame.professionDropDown)
         conditionFrame.professionDropDown.frame:Hide()
+
+        if conditionFrame.valueLabel then
+            conditionFrame.valueLabel:SetText("Value")
+            conditionFrame.valueLabel:Show()
+        end
+
         if i > 1 then
             conditionFrame:Hide()
         end

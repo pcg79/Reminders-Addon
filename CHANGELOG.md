@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed the reminder popup leaving a blank gap when a reminder in the middle was dismissed; the remaining reminders now reflow to fill the space, the popup resizes to fit, and it closes automatically when the last one is dismissed (#44)
+- Polished the create-a-reminder form: field labels, native-styled input boxes with placeholder hint text, a cleaner aligned layout, and a divider separating the form from the list
 
 ## [v12.1.0](https://github.com/pcg79/Reminders-Addon/tree/v12.1.0) (2026-07-24)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v11.0.2...v12.1.0)

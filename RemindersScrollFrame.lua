@@ -8,7 +8,7 @@ function Reminders:CreateScrollFrame(parentFrame)
     local scrollFrame = CreateFrame("ScrollFrame", "scrollFrame", parentFrame, "UIPanelScrollFrameTemplate")
     -- Stretch the list from just under the condition row down to above the
     -- Close button so it fills the window instead of floating near the bottom.
-    scrollFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", -10, -150)
+    scrollFrame:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", -10, -162)
     scrollFrame:SetPoint("BOTTOMRIGHT", parentFrame, "BOTTOMLEFT", SCROLLWIDTH - 30, 45)
 
     -- Not sure what this is even setting.  Changing it doesn't seem to do anything
