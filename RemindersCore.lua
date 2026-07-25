@@ -10,10 +10,11 @@ GUI = nil
 RemindersDB = {}
 local ForceEvaluate = false
 
--- Calling it once just opens the option screen.  Calling it again
--- makes it actually go to the Reminders section.
+-- Open the addon's options in a standalone AceConfigDialog window. Blizzard's
+-- Settings.OpenToCategory now requires a numeric category id (not the addon
+-- name), so we open our own dialog instead of the Blizzard Settings panel.
 local function ShowInterfaceOptions()
-    Settings.OpenToCategory(Reminders:GetName())
+    LibStub("AceConfigDialog-3.0"):Open(Reminders:GetName())
 end
 
 local function SetDefaultsIfUnset()
