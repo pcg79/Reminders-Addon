@@ -389,6 +389,12 @@ local function Delete(self)
     RemindersDB.global.reminders[id] = nil
 end
 
+-- Exposed so other files (e.g. the /reminders delete command) can delete by id
+-- instead of reaching for this file-local function.
+function Reminders:DeleteReminder(id)
+    Delete(id)
+end
+
 -- Enable or disable a reminder without deleting it.  Disabled reminders stay in
 -- the list but never fire, so we drop their timer and this character's pending
 -- entry; re-enabling arms them again for their next occurrence.
@@ -426,7 +432,6 @@ function Reminders:BuildReminder(params)
     self.Save = Save
     self.Delete = Delete
     self.SetDisabled = SetDisabled
-    self.DeletePlayerReminder = DeletePlayerReminder
     self.Serialize = Serialize
     self.Evaluate = Evaluate
 

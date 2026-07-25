@@ -8,7 +8,7 @@ Reminders.version = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata)
 -- Globals
 GUI = nil
 RemindersDB = {}
-ForceEvaluate = false
+local ForceEvaluate = false
 
 -- Calling it once just opens the option screen.  Calling it again
 -- makes it actually go to the Reminders section.
@@ -65,7 +65,7 @@ function Reminders:CommandProcessor(input)
         local id = commands[2]
         Reminders:debug("id = " .. id)
 
-        Delete(id)
+        Reminders:DeleteReminder(id)
     elseif command == "opt" or command == "opts" or command == "option" or command == "options" or command == "config" then
         ShowInterfaceOptions()
     else

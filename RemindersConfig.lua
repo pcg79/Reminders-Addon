@@ -30,7 +30,7 @@ local function SetDefaultOptions()
 end;
 
 function Reminders:CreateOptions()
-    options = {
+    local options = {
         type = "group",
         args = {
             AddonInfo = {

@@ -1,11 +1,11 @@
 local AceGUI = LibStub("AceGUI-3.0")
 
--- Globals
-REMINDER_ITEMS = {}
+-- File-local state (previously leaked into _G; see #40)
+local REMINDER_ITEMS = {}
 
-CONDITION_LIST_DEFAULT = "Condition"
-CONDITION_FRAMES = {}
-CONDITION_LIST = {
+local CONDITION_LIST_DEFAULT = "Condition"
+local CONDITION_FRAMES = {}
+local CONDITION_LIST = {
     Everyone   = "*",
     Name       = "name",
     Level      = "level" ,
@@ -14,7 +14,7 @@ CONDITION_LIST = {
     Self       = "name",
 }
 
-OPERATION_LIST = { }
+local OPERATION_LIST = { }
 OPERATION_LIST["Equals"] = "="
 OPERATION_LIST["Not Equals"] = "~="
 OPERATION_LIST["Greater Than"] = ">"
@@ -22,14 +22,14 @@ OPERATION_LIST["Greater Than Or Equal To"] = ">="
 OPERATION_LIST["Less Than"] = "<"
 OPERATION_LIST["Less Than Or Equal To"] = "<="
 
-INTERVAL_LIST_DEFAULT = "Interval"
-INTERVAL_LIST = {
+local INTERVAL_LIST_DEFAULT = "Interval"
+local INTERVAL_LIST = {
     Daily = "daily",
     Weekly = "weekly"
 }
 
-PROFESSION_LIST_DEFAULT = "Profession"
-PROFESSION_LIST = {
+local PROFESSION_LIST_DEFAULT = "Profession"
+local PROFESSION_LIST = {
     Alchemy        = "Alchemy",
     Blacksmithing  = "Blacksmithing",
     Cooking        = "Cooking",
@@ -45,12 +45,13 @@ PROFESSION_LIST = {
     Tailoring      = "Tailoring",
 }
 
-EDIT_BOX_BACKDROP = {
-    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    edgeFile = "Interface\\ChatFrame\\ChatFrameBackground",
-    tile = true, edgeSize = 1, tileSize = 5,
-}
-MESSAGE_EDIT_BOX = nil
+local MESSAGE_EDIT_BOX = nil
+
+-- Assigned later inside functions but referenced across this file, so they need
+-- a file-level local declaration up front.
+local IntervalDropDown
+local DayDropDown
+local CreateButton
 
 
 -- Utility functions --
@@ -757,7 +758,7 @@ function Reminders:LoadReminders(parentFrame)
 end
 
 function Reminders:ResetInputUI()
-    MessageEditBox:SetText("")
+    MESSAGE_EDIT_BOX:SetText("")
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     ClearDropDownChecks(IntervalDropDown)
