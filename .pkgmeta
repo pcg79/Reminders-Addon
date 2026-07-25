@@ -1,0 +1,10 @@
+# Controls how BigWigsMods/packager builds the release zip.
+# The addon ships its libraries in Libs/, so there are no externals to fetch.
+package-as: Reminders
+
+enable-nolib-creation: no
+
+ignore:
+  - .github
+  - .gitignore
+  - .claude

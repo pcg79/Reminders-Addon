@@ -1,0 +1,32 @@
+name: Package and release
+
+# Runs whenever a tag is pushed (e.g. `git push origin v12.3.0`) and uses the
+# BigWigs packager to build the addon zip and publish a GitHub release for it.
+on:
+  push:
+    tags:
+      - "**"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Package and create the GitHub release
+        uses: BigWigsMods/packager@v2
+        env:
+          # Provided automatically by GitHub; lets the packager create a
+          # GitHub release with the packaged .zip attached.
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: add these as repository secrets to ALSO upload to the
+          # addon sites. Leave them unset to only publish a GitHub release.
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
