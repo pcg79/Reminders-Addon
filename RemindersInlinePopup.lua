@@ -226,29 +226,29 @@ end
 local ReminderPopupFrames = {}
 
 function Reminders:DisplayInlinePopup(data)
-  local frame = nil
   local count = 0
   for _ in pairs(data.reminders) do count = count + 1 end
 
   NumReminders = count
 
-  -- Attempt to reuse any created but unused frames
-  for _, reminderFrame in pairs(ReminderPopupFrames) do
-    if not reminderFrame:IsVisible() and not frame then
-      frame = reminderFrame
-      local baseMasterFrameHeight = data.baseMasterFrameHeight or default.baseMasterFrameHeight
-      frame:SetHeight(baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
-    end
+  -- Only ever show a single popup: reuse the one frame (even if it's currently
+  -- visible) and hide any extras, so a new set of reminders replaces the current
+  -- popup instead of stacking a new one on top of it. (#4)
+  local frame = ReminderPopupFrames[1]
+  for i = 2, #ReminderPopupFrames do
+    ReminderPopupFrames[i]:Hide()
   end
 
-  -- No unused frames available so make a new one
   if not frame then
     frame = NewMasterFrame(data)
     NumReminderFrames = NumReminderFrames + 1
     tinsert(ReminderPopupFrames, frame)
   end
 
-  -- Whether it's new or reusing, set the current data
+  local baseMasterFrameHeight = data.baseMasterFrameHeight or default.baseMasterFrameHeight
+  frame:SetHeight(baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
+
+  -- Set the current data (replacing whatever the popup was showing)
   frame.data = data
 
   CreateIndividualReminderFrames(frame)

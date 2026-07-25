@@ -7,6 +7,7 @@
 - Scoped ~15 accidental globals to `local` so they can't collide with other addons, added a `.luacheckrc` + lint CI to keep it that way, and fixed the latent cross-file bugs it surfaced — including the broken `/reminders delete <id>` command (#40)
 - Fixed `/reminders opt` (options) erroring on current WoW; the Settings API now needs a numeric category id, so the options open in their own window instead
 - Widened the "Debug mode" option so its label is no longer cut off
+- Fixed reminder popups stacking on top of each other; a new reminder now reuses the single popup instead of piling up (#4)
 
 ## [v12.2.0](https://github.com/pcg79/Reminders-Addon/tree/v12.2.0) (2026-07-25)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.1.0...v12.2.0)
