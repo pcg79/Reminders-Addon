@@ -25,8 +25,9 @@ jobs:
           # Provided automatically by GitHub; lets the packager create a
           # GitHub release with the packaged .zip attached.
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-          # Optional: add these as repository secrets to ALSO upload to the
-          # addon sites. Leave them unset to only publish a GitHub release.
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
-          WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+          # NOTE: CurseForge upload is handled by the existing GitHub -> CF
+          # integration that fires when the release is created, so do NOT add a
+          # CF_API_KEY secret here or it would upload to CurseForge twice.
+          # To also publish to WoWInterface / Wago, add these repo secrets:
+          # WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+          # WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
