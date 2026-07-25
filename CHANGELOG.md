@@ -10,6 +10,7 @@
 - Fixed reminder popups stacking on top of each other; a new reminder now reuses the single popup instead of piling up (#4)
 - The snooze confirmation message now shows seconds when the snooze is under a minute (instead of a fractional minute count)
 - Fixed long reminder text overflowing into the next reminder in the popup; popup rows now grow to fit their (wrapped) text (#20)
+- The value field is now disabled (and cleared) until you pick a condition that uses it, so a typed value no longer lingers under value-less conditions like Everyone
 
 ## [v12.2.0](https://github.com/pcg79/Reminders-Addon/tree/v12.2.0) (2026-07-25)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.1.0...v12.2.0)

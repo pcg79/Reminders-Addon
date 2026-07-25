@@ -339,6 +339,18 @@ local function SetPlaceholder(editbox, text)
     refresh()
 end
 
+-- Enable/disable the value edit box AND make it look the part: a plain Disable()
+-- on an InputBoxTemplate box doesn't visibly grey out, so dim it too.
+local function SetValueBoxEnabled(editbox, enabled)
+    if enabled then
+        editbox:Enable()
+        editbox:SetAlpha(1)
+    else
+        editbox:Disable()
+        editbox:SetAlpha(0.5)
+    end
+end
+
 local function CreateMessageEditBox(parentFrame)
     CreateFieldLabel(parentFrame, "Reminder", 44, -52)
 
@@ -410,7 +422,7 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 
     operationDropDown:SetDisabled(false)
 
-    valueEditBox:Enable()
+    SetValueBoxEnabled(valueEditBox, true)
     valueEditBox:Show()
     professionDropDown.frame:Hide()
 
@@ -420,8 +432,9 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
         ClearDropDownChecks(operationDropDown)
         operationDropDown:SetText("")
         operationDropDown:SetDisabled(true)
-        valueEditBox:Disable()
-        if valueLabel then valueLabel:Hide() end
+        SetValueBoxEnabled(valueEditBox, false)
+        valueEditBox:SetText("")
+        if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
     elseif conditionText == "Name" or conditionText == PROFESSION_LIST_DEFAULT then
         -- These conditions only support "Equals".
         operationDropDown:SetValue(0)
@@ -431,7 +444,8 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
 
         if conditionText == PROFESSION_LIST_DEFAULT then
             valueEditBox:Hide()
-            valueEditBox:Disable()
+            SetValueBoxEnabled(valueEditBox, false)
+            valueEditBox:SetText("")
             professionDropDown.frame:Show()
             if valueLabel then valueLabel:SetText("Profession"); valueLabel:Show() end
         else
@@ -512,6 +526,7 @@ local function CreateConditionFrame(parentFrame)
     valueEditBox:SetScript("OnEnterPressed", CreateReminder)
     valueEditBox:SetScript("OnEscapePressed", EditBoxOnEscapePressed)
     valueEditBox:SetScript("OnTextChanged", OnInputValueChanged)
+    SetValueBoxEnabled(valueEditBox, false) -- disabled until a condition that uses a value is chosen
 
 
     conditionFrame.conditionDropDown = conditionDropDown
@@ -777,7 +792,7 @@ function Reminders:ResetInputUI()
         conditionFrame.operationDropDown:SetText("Operation")
         ClearDropDownChecks(conditionFrame.operationDropDown)
 
-        conditionFrame.valueEditBox:Enable()
+        SetValueBoxEnabled(conditionFrame.valueEditBox, false)
         conditionFrame.valueEditBox:SetText("")
         conditionFrame.valueEditBox:Show()
 
