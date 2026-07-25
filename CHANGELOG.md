@@ -1,5 +1,10 @@
 # Reminders
 
+## Unreleased
+
+- Added the ability to enable/disable a reminder via a checkbox in the list, instead of only deleting it; disabled reminders stay listed (dimmed) but never fire, and toggling prints a short confirmation (#31)
+- The reminder list now keeps a stable order (by creation) so enabling/disabling a reminder no longer reorders the list
+
 ## [v12.2.0](https://github.com/pcg79/Reminders-Addon/tree/v12.2.0) (2026-07-25)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.1.0...v12.2.0)
 

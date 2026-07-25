@@ -94,6 +94,12 @@ local function SortByNextRemindAt(t, a, b)
     return aNextRemindAt < bNextRemindAt
 end
 
+-- Stable list order by creation (ids are "r1", "r2", ...), so enabling or
+-- disabling a reminder (or rescheduling it) never reorders the list.
+local function SortByCreation(t, a, b)
+    return tonumber(strsub(a, 2)) < tonumber(strsub(b, 2))
+end
+
 local function SortAlphabetically(t, a, b)
     return a:lower() < b:lower()
 end
@@ -591,7 +597,7 @@ local function CreateReminderItem(reminder, i, parentFrame)
         reminderItem.title = reminderItem:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
         reminderItem.title:SetJustifyH("LEFT")
         reminderItem.title:SetWordWrap(false)
-        reminderItem.title:SetPoint("TOPLEFT", 12, -6)
+        reminderItem.title:SetPoint("TOPLEFT", 34, -6)
         reminderItem.title:SetPoint("RIGHT", reminderItem, "RIGHT", -170, 0)
 
         -- Condition (secondary line, dimmed)
@@ -621,6 +627,22 @@ local function CreateReminderItem(reminder, i, parentFrame)
         end)
         deleteButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
         reminderItem.deleteButton = deleteButton
+
+        -- Enable/disable checkbox on the left (checked = enabled)
+        local enabledCheck = CreateFrame("CheckButton", nil, reminderItem, "UICheckButtonTemplate")
+        enabledCheck:SetSize(24, 24)
+        enabledCheck:SetPoint("LEFT", reminderItem, "LEFT", 6, 0)
+        enabledCheck:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            if self:GetChecked() then
+                GameTooltip:AddLine("Enabled - click to disable", 1, 1, 1)
+            else
+                GameTooltip:AddLine("Disabled - click to enable", 1, 1, 1)
+            end
+            GameTooltip:Show()
+        end)
+        enabledCheck:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        reminderItem.enabledCheck = enabledCheck
     end
 
     reminderItem:SetSize(SCROLLWIDTH - 80, REMINDER_ROW_HEIGHT)
@@ -647,6 +669,23 @@ local function CreateReminderItem(reminder, i, parentFrame)
             intervalText = intervalText .. " \194\183 " .. (Reminders:DayList()[tonumber(reminder.day)] or "")
         end
         reminderItem.intervalText:SetText(intervalText)
+    end
+
+    -- Reflect the enabled/disabled state: checkbox + dimmed text when disabled.
+    reminderItem.enabledCheck:SetChecked(not reminder.disabled)
+    reminderItem.enabledCheck:SetScript("OnClick", function(self)
+        reminder:SetDisabled(not self:GetChecked())
+        Reminders:LoadReminders(parentFrame)
+    end)
+
+    if reminder.disabled then
+        reminderItem.title:SetTextColor(0.45, 0.45, 0.45)
+        reminderItem.subtitle:SetTextColor(0.4, 0.4, 0.4)
+        reminderItem.intervalText:SetTextColor(0.45, 0.4, 0.3)
+    else
+        reminderItem.title:SetTextColor(1, 1, 1)
+        reminderItem.subtitle:SetTextColor(0.6, 0.6, 0.6)
+        reminderItem.intervalText:SetTextColor(0.85, 0.72, 0.42)
     end
 
     reminderItem:SetScript("OnClick", function(self, button)
@@ -684,7 +723,7 @@ end
 
 function Reminders:LoadReminders(parentFrame)
     local i = 0
-    for key, reminder in spairs(RemindersDB.global.reminders, SortByNextRemindAt) do
+    for key, reminder in spairs(RemindersDB.global.reminders, SortByCreation) do
         i = i + 1
 
         local reminder = Reminders:BuildReminder(reminder)

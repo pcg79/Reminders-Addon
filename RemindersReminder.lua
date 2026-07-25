@@ -87,6 +87,7 @@ local function Serialize(self)
         message = self.message,
         interval = self.interval,
         day = self.day,
+        disabled = self.disabled,
     }
 end
 
@@ -133,6 +134,11 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
 end
 
 local function Evaluate(self)
+    -- Disabled reminders never fire.
+    if self.disabled then
+        return
+    end
+
     local message = ""
     if RemindersDB.char.debug then
         message = self.message
@@ -383,6 +389,25 @@ local function Delete(self)
     RemindersDB.global.reminders[id] = nil
 end
 
+-- Enable or disable a reminder without deleting it.  Disabled reminders stay in
+-- the list but never fire, so we drop their timer and this character's pending
+-- entry; re-enabling arms them again for their next occurrence.
+local function SetDisabled(self, disabled)
+    self.disabled = disabled
+    self:Save()
+
+    if disabled then
+        if remindersTimers[self.id] then
+            CancelReminderTimer(self.id)
+        end
+        Reminders:DeletePlayerReminder(self.id)
+    else
+        self:SetAndScheduleNextReminder()
+    end
+
+    Reminders:ChatMessage("Reminder for |cff32cd32" .. self.message .. "|r has been " .. (disabled and "disabled" or "enabled"))
+end
+
 function Reminders:BuildReminder(params)
     local self = {}
     self.message = params.message
@@ -390,6 +415,7 @@ function Reminders:BuildReminder(params)
     self.interval = (params.interval or "daily")
     self.day = (params.day or 3) -- Default to Tuesday for backwards compatability
     self.id = params.id
+    self.disabled = params.disabled or false -- Default enabled for reminders saved before this existed
 
     self.IsEqual = IsEqual
     self.ToString = ToString
@@ -399,6 +425,7 @@ function Reminders:BuildReminder(params)
     self.EvaluateCondition = EvaluateCondition
     self.Save = Save
     self.Delete = Delete
+    self.SetDisabled = SetDisabled
     self.DeletePlayerReminder = DeletePlayerReminder
     self.Serialize = Serialize
     self.Evaluate = Evaluate
