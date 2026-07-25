@@ -89,6 +89,7 @@ function Reminders:CreateOptions()
                         name = "Debug mode (requires UI reload)",
                         desc = "Enables / disables debugging",
                         type = "toggle",
+                        width = "full",
                         order = 2.1,
                         get = function(_) return RemindersDB.char.debug end,
                         set = function(_, val) RemindersDB.char.debug = val end,
