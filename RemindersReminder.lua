@@ -160,7 +160,15 @@ local function Evaluate(self)
                     snooze = .1667
                 end
                 self:SetAndScheduleNextReminder(snooze * 60)
-                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snooze .. " minutes")
+
+                local snoozeText
+                if snooze < 1 then
+                    local seconds = floor(snooze * 60 + 0.5)
+                    snoozeText = seconds .. (seconds == 1 and " second" or " seconds")
+                else
+                    snoozeText = snooze .. (snooze == 1 and " minute" or " minutes")
+                end
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snoozeText)
                 this:SetText("Snoozed!")
                 this:Disable()
             end
