@@ -89,24 +89,25 @@ local function StopMovingAndRecordPosition(frame)
   }
 end
 
--- Dismissing a reminder hides its row in place, which would leave a gap and
--- dead space at the bottom.  Re-anchor the still-visible rows into contiguous
--- slots from the top, shrink the popup to fit, and close it if none remain.
-local function RepackReminderFrames(masterFrame)
-  local slot = 0
+-- Position the visible rows top-to-bottom using each row's own height (rows are
+-- sized to fit their text, so long reminders don't overflow), shrink the popup
+-- to fit, and close it if none remain. Handles both the dismiss-reflow (#44)
+-- and variable-height rows (#20).
+local function LayoutReminderFrames(masterFrame)
+  local y = 40
   for _, reminderFrame in ipairs(masterFrame.reminderFrames) do
     if reminderFrame:IsShown() then
       reminderFrame:ClearAllPoints()
-      reminderFrame:SetPoint("TOPLEFT", masterFrame, 20, -(40 + (slot * reminderFrameHeight)))
-      slot = slot + 1
+      reminderFrame:SetPoint("TOPLEFT", masterFrame, 20, -y)
+      y = y + (reminderFrame.rowHeight or reminderFrameHeight)
     end
   end
 
-  if slot == 0 then
+  if y == 40 then
     masterFrame:Hide()
   else
     local baseMasterFrameHeight = (masterFrame.data and masterFrame.data.baseMasterFrameHeight) or default.baseMasterFrameHeight
-    masterFrame:SetHeight(baseMasterFrameHeight + (slot * reminderFrameHeight))
+    masterFrame:SetHeight(baseMasterFrameHeight + (y - 40))
   end
 end
 
@@ -133,11 +134,9 @@ local function NewFrame(parentFrame, reminder, i)
     tinsert(parentFrame.reminderFrames, frame)
   end
 
-  -- Frame
-  frame:ClearAllPoints()
-  frame:SetPoint("TOPLEFT", parentFrame, 20, -(40 + ((i-1) * reminderFrameHeight)))
+  -- Frame width is set now; its height is sized to the text below and its
+  -- position is assigned by LayoutReminderFrames.
   frame:SetWidth(parentFrame:GetWidth() - 30)
-  frame:SetHeight(reminderFrameHeight)
 
   local snoozeButton = reminder.snoozeButton
   frame.snoozeButton:ClearAllPoints()
@@ -159,7 +158,7 @@ local function NewFrame(parentFrame, reminder, i)
     if originalOnDismiss then
       originalOnDismiss(self, mouseButton, down)
     end
-    RepackReminderFrames(parentFrame)
+    LayoutReminderFrames(parentFrame)
   end)
   frame.dismissButton:Enable()
 
@@ -167,7 +166,15 @@ local function NewFrame(parentFrame, reminder, i)
   frame.text:SetJustifyH("LEFT")
   frame.text:SetPoint("TOPLEFT", frame, 0, 0)
   frame.text:SetWidth(frame:GetWidth() - frame.snoozeButton:GetWidth() - frame.dismissButton:GetWidth())
+  frame.text:SetWordWrap(true)
   frame.text:SetText(reminder.text)
+
+  -- Size the row to fit its (possibly wrapped) text so long reminders don't
+  -- overflow into the next one. GetStringHeight measures the rendered height,
+  -- which also accounts for the player's font size. (#20)
+  local textHeight = frame.text:GetStringHeight() or 0
+  frame.rowHeight = math.max(reminderFrameHeight, math.ceil(textHeight) + 6)
+  frame:SetHeight(frame.rowHeight)
 
   frame:Show()
 end
@@ -182,6 +189,8 @@ local function CreateIndividualReminderFrames(frame)
   for i, reminder in pairs(reminders) do
     NewFrame(frame, reminder, i)
   end
+
+  LayoutReminderFrames(frame)
 end
 
 local function NewMasterFrame(data)
@@ -245,12 +254,10 @@ function Reminders:DisplayInlinePopup(data)
     tinsert(ReminderPopupFrames, frame)
   end
 
-  local baseMasterFrameHeight = data.baseMasterFrameHeight or default.baseMasterFrameHeight
-  frame:SetHeight(baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
-
   -- Set the current data (replacing whatever the popup was showing)
   frame.data = data
 
+  -- CreateIndividualReminderFrames lays out the rows and sizes the popup to fit.
   CreateIndividualReminderFrames(frame)
   frame:Show()
 end

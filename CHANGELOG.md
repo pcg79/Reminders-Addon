@@ -9,6 +9,7 @@
 - Widened the "Debug mode" option so its label is no longer cut off
 - Fixed reminder popups stacking on top of each other; a new reminder now reuses the single popup instead of piling up (#4)
 - The snooze confirmation message now shows seconds when the snooze is under a minute (instead of a fractional minute count)
+- Fixed long reminder text overflowing into the next reminder in the popup; popup rows now grow to fit their (wrapped) text (#20)
 
 ## [v12.2.0](https://github.com/pcg79/Reminders-Addon/tree/v12.2.0) (2026-07-25)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.1.0...v12.2.0)
