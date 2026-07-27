@@ -1,5 +1,9 @@
 # Reminders
 
+## Unreleased
+
+- The reminder popup now remembers where you drag it (per character) across reloads and sessions (#23)
+
 ## [v12.3.0](https://github.com/pcg79/Reminders-Addon/tree/v12.3.0) (2026-07-25)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.2.0...v12.3.0)
 

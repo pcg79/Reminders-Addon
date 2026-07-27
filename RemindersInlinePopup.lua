@@ -68,20 +68,14 @@ local default = {
   y = 0,
 }
 
-local movedPosition = {
-  x = nil,
-  y = nil,
-  point = nil,
-  relPoint = nil,
-}
-
 --[[ Internal API ]]--
 
 -- Since GetLeft and GetTop are measured from the BOTTOMLEFT of the screen we'll set the relPoint
 -- to BOTTOMLEFT in order to make the positioning easier
 local function StopMovingAndRecordPosition(frame)
   frame:StopMovingOrSizing()
-  movedPosition = {
+  -- Persist per-character so the popup reopens where you last left it. (#23)
+  RemindersDB.char.popupPosition = {
     x = frame:GetLeft(),
     y = frame:GetTop(),
     point = "TOPLEFT",
@@ -210,8 +204,9 @@ local function NewMasterFrame(data)
   _G[frameName.."TitleBG"]:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground")
   _G[frameName.."DialogBG"]:SetTexture("Interface\\ACHIEVEMENTFRAME\\UI-GuildAchievement-AchievementBackground")
 
+  local pos = RemindersDB.char.popupPosition
   frame:ClearAllPoints()
-  frame:SetPoint((movedPosition.point or data.point), data.anchor, (movedPosition.relPoint or data.relPoint), (movedPosition.x or data.x), (movedPosition.y or data.y))
+  frame:SetPoint((pos and pos.point) or data.point, data.anchor, (pos and pos.relPoint) or data.relPoint, (pos and pos.x) or data.x, (pos and pos.y) or data.y)
   frame:SetWidth(data.width + 16)
   frame:SetHeight(data.baseMasterFrameHeight + (NumReminders * reminderFrameHeight))
   frame.Title:SetText(data.title)
