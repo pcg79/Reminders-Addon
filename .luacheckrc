@@ -34,7 +34,7 @@ read_globals = {
     "LibStub",
     "CreateFrame", "UIParent", "GameTooltip",
     "C_Timer", "C_AddOns", "GetAddOnMetadata",
-    "UnitName", "UnitClass", "UnitLevel", "UnitAffectingCombat",
+    "UnitName", "UnitClass", "UnitLevel", "UnitAffectingCombat", "GetRealmName",
     "GetAverageItemLevel", "GetProfessions", "GetProfessionInfo",
     "GetQuestResetTime",
     "IsAltKeyDown", "IsControlKeyDown",

@@ -91,6 +91,10 @@ function Reminders:ResetAll()
     RemindersDB.global = _G["RemindersDBG"]
     RemindersDB.char   = _G["RemindersDBPC"]
 
+    -- Re-seed the roster with this character; nothing to migrate after a wipe.
+    Reminders:CaptureCurrentCharacter()
+    RemindersDB.char.migratedSchedule = true
+
     GUI = Reminders:CreateUI()
 end
 
@@ -109,6 +113,24 @@ function Reminders:OnInitialize()
     RemindersDB.char   = _G["RemindersDBPC"]
 
     SetDefaultsIfUnset()
+
+    -- Ensure the account-wide roster exists for accounts created before #21.
+    if not RemindersDB.global.characters then
+        RemindersDB.global.characters = {}
+    end
+
+    -- Snapshot this character into the roster, then one-time migrate its
+    -- schedule out of the per-character SavedVariables (which other characters
+    -- can't read) into the account-wide roster entry. (#21)
+    Reminders:CaptureCurrentCharacter()
+    if not RemindersDB.char.migratedSchedule then
+        local current = Reminders:CurrentCharacter()
+        for id, nextRemindAt in pairs(RemindersDB.char.reminders or {}) do
+            current.reminders[id] = nextRemindAt
+        end
+        RemindersDB.char.migratedSchedule = true
+    end
+
     Reminders:debug("Done Initializing")
 end
 
@@ -198,23 +220,81 @@ function Reminders:EvaluateReminders()
     Reminders:BuildAndDisplayReminders(reminderMessages)
 end
 
--- When a reminder is deleted we delete it from the global reminders but we can't go through
--- all of the player's characters data and delete it.  So we'll just go through their reminders
--- and delete those that don't exist in the global list.  Performance is going to suck on big
--- lists, though.  Might have to revisit this.
+-- Drop scheduled next-remind times for reminders that no longer exist. Now that
+-- schedules live account-wide (#21) we can prune every character's entries, not
+-- just the current one.
 function Reminders:CleanUpPlayerReminders()
-    for id, _ in pairs(RemindersDB.char.reminders) do
-        local globalReminder = RemindersDB.global.reminders[id]
-
-        if globalReminder == nil then
-            Reminders:debug("Reminder "..id.." doesn't exist in global list.  Deleting...")
-            RemindersDB.char.reminders[id] = nil
+    for _, char in pairs(RemindersDB.global.characters) do
+        for id, _ in pairs(char.reminders) do
+            if RemindersDB.global.reminders[id] == nil then
+                Reminders:debug("Reminder "..id.." doesn't exist in global list.  Deleting...")
+                char.reminders[id] = nil
+            end
         end
     end
 end
 
+-- Build a stable, canonical identity for the current character. UnitName("player")
+-- can return a realm-suffixed name on connected realms (and inconsistently so),
+-- which would create duplicate roster entries for one character. So we always
+-- derive the key ourselves as "Name-Realm" from the bare name plus GetRealmName.
+-- The bare name is kept separately for matching name/Self conditions. (#21)
+local function CurrentCharacterIdentity()
+    local name = UnitName("player") or "Unknown"
+    name = name:match("^[^-]+") or name -- strip any "-Realm" suffix; character names have no hyphens
+    local realm = GetRealmName() or "Unknown"
+    return name, realm, name .. "-" .. realm
+end
+
+function Reminders:CurrentCharacterKey()
+    local _, _, key = CurrentCharacterIdentity()
+    return key
+end
+
+-- Returns the account-wide roster entry for the current character, creating a
+-- bare one if needed. Kept cheap (no attribute lookups) since it's called on
+-- every schedule read/write; full attribute capture happens in
+-- CaptureCurrentCharacter at login.
+function Reminders:CurrentCharacter()
+    local name, realm, key = CurrentCharacterIdentity()
+    local char = RemindersDB.global.characters[key]
+    if not char then
+        char = { name = name, realm = realm, reminders = {} }
+        RemindersDB.global.characters[key] = char
+    end
+    if not char.reminders then
+        char.reminders = {}
+    end
+    return char
+end
+
+-- Snapshot the current character's attributes into the roster so other
+-- characters can reason about it while it's offline. Called once at login. (#21)
+function Reminders:CaptureCurrentCharacter()
+    local name, realm = CurrentCharacterIdentity()
+    local char = Reminders:CurrentCharacter()
+    char.name = name
+    char.realm = realm
+    char.class = UnitClass("player")
+    char.level = UnitLevel("player")
+    char.ilevel = GetAverageItemLevel()
+
+    local professions = {}
+    local prof1, prof2 = GetProfessions()
+    for _, index in ipairs({ prof1, prof2 }) do
+        local name = GetProfessionInfo(index)
+        if name then
+            tinsert(professions, name)
+        end
+    end
+    char.professions = professions
+
+    char.lastSeen = time()
+    return char
+end
+
 function Reminders:GetPlayerReminder(reminder_id)
-    return RemindersDB.char.reminders[reminder_id]
+    return Reminders:CurrentCharacter().reminders[reminder_id]
 end
 
 function Reminders:SetPlayerReminder(reminder_id, value)
@@ -225,7 +305,7 @@ function Reminders:SetPlayerReminder(reminder_id, value)
     else
         Reminders:debug("[SetPlayerReminder] Deleting reminder")
     end
-    RemindersDB.char.reminders[reminder_id] = value
+    Reminders:CurrentCharacter().reminders[reminder_id] = value
 end
 
 function Reminders:DeletePlayerReminder(reminder_id)
@@ -241,7 +321,7 @@ function Reminders:DebugPrintReminders()
     end
 
     Reminders:debug("Printing profile reminders:")
-    reminders = RemindersDB.char.reminders
+    reminders = Reminders:CurrentCharacter().reminders
     for key, remindAt in pairs(reminders) do
         Reminders:debug("[Profile Reminders] " .. key .. " = " .. remindAt)
     end
@@ -251,6 +331,12 @@ function Reminders:GlobalDefaults()
     return {
         reminders = {},
         remindersCount = 0,
+        -- Account-wide roster keyed by character name. Each entry caches that
+        -- character's attributes plus its per-reminder next-remind times, which
+        -- used to live in the per-character SavedVariables (unreadable from other
+        -- characters). Storing them here is what lets one character surface
+        -- another's reminders. (#21)
+        characters = {},
     }
 end
 
