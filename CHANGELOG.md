@@ -1,6 +1,7 @@
 # Reminders
 
-## Unreleased
+## [v12.4.0](https://github.com/pcg79/Reminders-Addon/tree/v12.4.0) (2026-07-27)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.3.0...v12.4.0)
 
 - The reminder popup now remembers where you drag it (per character) across reloads and sessions (#23)
 - Reminders that come due close together (e.g. snoozed a few seconds apart) are now grouped into a single popup instead of appearing one at a time (#30)
