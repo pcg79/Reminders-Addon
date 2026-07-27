@@ -587,6 +587,13 @@ function Reminders:CreateUI()
     closeButton:SetWidth(100)
     closeButton:SetText("Close")
 
+    local whatsNewButton = CreateFrame("Button", frameName.."WhatsNew", gui, "UIPanelButtonTemplate")
+    whatsNewButton:SetScript("OnClick", function() Reminders:ShowWhatsNew() end)
+    whatsNewButton:SetPoint("BOTTOMLEFT", 27, 17)
+    whatsNewButton:SetHeight(20)
+    whatsNewButton:SetWidth(120)
+    whatsNewButton:SetText("What's New")
+
     return gui
 end
 

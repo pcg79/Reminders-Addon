@@ -1,0 +1,175 @@
+-- Auto-generated from CHANGELOG.md by scripts/generate_changelog_lua.py
+-- Do not edit by hand; regenerate when cutting a release.
+
+Reminders.changelog = {
+    {
+        version = "12.4.0",
+        date = "2026-07-27",
+        entries = {
+            "The reminder popup now remembers where you drag it (per character) across reloads and sessions (#23)",
+            "Reminders that come due close together (e.g. snoozed a few seconds apart) are now grouped into a single popup instead of appearing one at a time (#30)",
+        },
+    },
+    {
+        version = "12.3.0",
+        date = "2026-07-25",
+        entries = {
+            "Added the ability to enable/disable a reminder via a checkbox in the list, instead of only deleting it; disabled reminders stay listed (dimmed) but never fire, and toggling prints a short confirmation (#31)",
+            "The reminder list now keeps a stable order (by creation) so enabling/disabling a reminder no longer reorders the list",
+            "Scoped ~15 accidental globals to local so they can't collide with other addons, added a .luacheckrc + lint CI to keep it that way, and fixed the latent cross-file bugs it surfaced — including the broken /reminders delete <id> command (#40)",
+            "Fixed /reminders opt (options) erroring on current WoW; the Settings API now needs a numeric category id, so the options open in their own window instead",
+            "Widened the \"Debug mode\" option so its label is no longer cut off",
+            "Fixed reminder popups stacking on top of each other; a new reminder now reuses the single popup instead of piling up (#4)",
+            "The snooze confirmation message now shows seconds when the snooze is under a minute (instead of a fractional minute count)",
+            "Fixed long reminder text overflowing into the next reminder in the popup; popup rows now grow to fit their (wrapped) text (#20)",
+            "The value field is now disabled (and cleared) until you pick a condition that uses it, so a typed value no longer lingers under value-less conditions like Everyone",
+        },
+    },
+    {
+        version = "12.2.0",
+        date = "2026-07-25",
+        entries = {
+            "Fixed the reminder popup leaving a blank gap when a reminder in the middle was dismissed; the remaining reminders now reflow to fill the space, the popup resizes to fit, and it closes automatically when the last one is dismissed (#44)",
+            "Polished the create-a-reminder form: field labels, native-styled input boxes with placeholder hint text, a cleaner aligned layout, and a divider separating the form from the list",
+        },
+    },
+    {
+        version = "12.1.0",
+        date = "2026-07-24",
+        entries = {
+            "Added a \"Not Equals\" (not equal to) operation for the Level and iLevel conditions (#14)",
+            "Fixed the operation dropdown showing a stale checkmark after the form reset or the condition changed; a chosen operation is now kept when it's still valid for the newly selected condition",
+            "Redesigned the reminder list: cleaner rows (message, condition, and interval) with a hover highlight, alternating row shading, and a per-row delete button; added an empty state; the list now scrolls properly and clips overflow instead of covering the Close button",
+        },
+    },
+    {
+        version = "11.0.2",
+        date = "2024-08-13",
+        entries = {
+            "Updated app for 11.0.2",
+            "Updated call to now deprecated GetAddOnMetadata",
+            "Fixed the day drop down not showing anything when you choose \"Weekly\"",
+            "Fixed the /reminders options chat command",
+        },
+    },
+    {
+        version = "10.1.0",
+        date = "2023-05-13",
+        entries = {
+            "Updated app for 10.1.0",
+        },
+    },
+    {
+        version = "9.1.0",
+        date = "2021-06-29",
+        entries = {
+            "Updated app for 9.1.0",
+        },
+    },
+    {
+        version = "9.0.4",
+        date = "2021-03-09",
+        entries = {
+            "Updated app for 9.0.5",
+        },
+    },
+    {
+        version = "9.0.3",
+        date = "2020-11-17",
+        entries = {
+            "Updated app for 9.0.2",
+        },
+    },
+    {
+        version = "9.0.2",
+        date = "2020-11-12",
+        entries = {
+            "Removed Ace3 Addon as a requirement by embedding the necessary libs in this addon.",
+            "Bumped Interface number to 90001 (as I should've done in 9.0.1. Oops)",
+        },
+    },
+    {
+        version = "9.0.1",
+        date = "2020-11-11",
+        entries = {
+            "Updated TOC for 9.0.1",
+            "Blizzard removed the Backdrop Frame mixin by default in 9.0 so it has to be explicitly added to Frames that need it.",
+            "This one's for my dog, Hina.  I miss her everyday.",
+        },
+    },
+    {
+        version = "8.2.5",
+        date = "2019-09-28",
+        entries = {
+            "Updated app for 8.2.5",
+        },
+    },
+    {
+        version = "8.2.0",
+        date = "2019-06-27",
+        entries = {
+            "Updated app for 8.2.0",
+        },
+    },
+    {
+        version = "8.1.1",
+        date = "2019-03-30",
+        entries = {
+            "Added Dismiss button to individual reminder items",
+        },
+    },
+    {
+        version = "8.1.0",
+        date = "2018-09-07",
+        entries = {
+            "Updated to support BfA version 8.1",
+        },
+    },
+    {
+        version = "8.0.10",
+        date = "2018-09-07",
+        entries = {
+            "Added config setting for Snooze amount",
+        },
+    },
+    {
+        version = "8.0.9",
+        date = "2018-08-12",
+        entries = {
+            "Added a config panel to allow configuring default weekly day and turning on/off debugging.",
+        },
+    },
+    {
+        version = "8.0.8",
+        date = "2018-08-10",
+        entries = {
+            "Allow choosing which day of the week to remind weekly. Defaults to Tuesday.",
+        },
+    },
+    {
+        version = "8.0.7",
+        date = "2018-08-05",
+        entries = {
+            "Removed FirstAid as it's no longer in the game (thanks, Linschlager!)",
+            "Added OnEnter tooltips to reminder items",
+            "Bug Fix: Reset Profession dropdown to no values checked on form reset",
+            "Preserve remind times between reload",
+            "Bug Fix: Consistent popup heights",
+        },
+    },
+    {
+        version = "8.0.6",
+        date = "2018-08-03",
+        entries = {
+            "Bug Fix: DB would not get initialized",
+        },
+    },
+    {
+        version = "8.0.5",
+        date = "2018-08-02",
+        entries = {
+            "Switched to in-line reminder messages, no more pages",
+            "Changed Snooze to 10 minutes (from 5 seconds for debugging)",
+        },
+    },
+}

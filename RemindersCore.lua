@@ -128,6 +128,10 @@ function Reminders:OnEnable()
     Reminders:LoadReminders(GUI)
 
     if RemindersDB.char.debug then GUI:Show() end
+
+    -- Show the changelog once after the addon updates (#55)
+    Reminders:MaybeShowWhatsNewOnLogin()
+
     Reminders:debug("Done Enabling")
 end
 
