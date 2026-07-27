@@ -1,6 +1,7 @@
 # Reminders
 
-## Unreleased
+## [v12.4.1](https://github.com/pcg79/Reminders-Addon/tree/v12.4.1) (2026-07-27)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.4.0...v12.4.1)
 
 - Added a "What's New" window that shows the changelog in-game: it opens automatically the first time you log in after updating, and there's a "What's New" button on the Reminders window to reopen it any time (#55)
 

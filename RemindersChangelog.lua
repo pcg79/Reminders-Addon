@@ -3,6 +3,13 @@
 
 Reminders.changelog = {
     {
+        version = "12.4.1",
+        date = "2026-07-27",
+        entries = {
+            "Added a \"What's New\" window that shows the changelog in-game: it opens automatically the first time you log in after updating, and there's a \"What's New\" button on the Reminders window to reopen it any time (#55)",
+        },
+    },
+    {
         version = "12.4.0",
         date = "2026-07-27",
         entries = {
