@@ -11,6 +11,11 @@ local R_OR  = "or"
 
 local remindersTimers = {}
 
+-- Reminders due within this many seconds of "now" are fired together, so a
+-- cluster of reminders (e.g. snoozed a few seconds apart) shows as a single
+-- popup instead of several separate ones. (#30)
+local GROUP_WINDOW = 10
+
 local function CalculateNextRemindAt(self)
     local secondsInADay = 24 * 60 * 60
     local timeNow = time()
@@ -98,7 +103,7 @@ local function CancelReminderTimer(id)
     remindersTimers[id] = nil
 end
 
-local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
+local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt, forceReschedule)
     local nextRemindAt = Reminders:GetPlayerReminder(self.id)
     local timeNow = time()
 
@@ -106,7 +111,7 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt)
         timeUntilnextRemindAt = floor(timeUntilnextRemindAt)
         -- Snoozed so set for time + snoozed time
         nextRemindAt = timeUntilnextRemindAt + timeNow
-    elseif nextRemindAt and nextRemindAt > timeNow then
+    elseif not forceReschedule and nextRemindAt and nextRemindAt > timeNow then
         -- Toon already has an entry for this reminder and it's in the future
         -- so set for that amount of time
         timeUntilnextRemindAt = nextRemindAt - timeNow
@@ -350,7 +355,9 @@ local function Process(self)
             Reminders:debug("[Process] player has reminder " .. self.id .. " already")
             Reminders:debug("[Process] timeNow = " .. timeNow .. " (aka " .. date("%X", timeNow ) .. ")")
             Reminders:debug("[Process] playerReminder = " .. playerReminder.. " (aka " .. date("%X", playerReminder ) .. ")")
-            if timeNow >= playerReminder then
+            -- Fire reminders that are due, past due, or due within the next
+            -- GROUP_WINDOW seconds, so a cluster shows as a single popup. (#30)
+            if timeNow + GROUP_WINDOW >= playerReminder then
                 shouldRemind = true
             end
         else -- This toon has never seen this reminder but they qualify for it
@@ -359,7 +366,11 @@ local function Process(self)
             shouldRemind = true
         end
 
-        if shouldRemind or not remindersTimers[self.id] then
+        if shouldRemind then
+            -- Firing now (possibly a little early to group it), so advance to
+            -- the next interval instead of re-using the stored near-future time.
+            self:SetAndScheduleNextReminder(nil, true)
+        elseif not remindersTimers[self.id] then
             self:SetAndScheduleNextReminder()
         end
 
