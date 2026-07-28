@@ -1,5 +1,9 @@
 # Reminders
 
+## Unreleased
+
+- Cross-character reminders: check "Remind on my other characters" when creating a Name or Self reminder and it will also show up while you're playing your other characters (as "Name: message"), so you don't have to log into each alt to find out what it still owes. Those alt reminders are snooze-only, so you can't accidentally clear a chore from another character without doing it. (#21)
+
 ## [v12.4.1](https://github.com/pcg79/Reminders-Addon/tree/v12.4.1) (2026-07-27)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.4.0...v12.4.1)
 

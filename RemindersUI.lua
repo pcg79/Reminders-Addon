@@ -52,6 +52,7 @@ local MESSAGE_EDIT_BOX = nil
 local IntervalDropDown
 local DayDropDown
 local CreateButton
+local CrossCharCheck
 
 
 -- Utility functions --
@@ -297,7 +298,9 @@ end
 local function CreateReminder()
     if AreInputsValid() then
         local reminderText = BuildReminderText()
-        local newReminder = Reminders:BuildReminder(ParseReminder(reminderText))
+        local params = ParseReminder(reminderText)
+        params.crossChar = (CrossCharCheck and CrossCharCheck:GetChecked()) or false
+        local newReminder = Reminders:BuildReminder(params)
 
         AddReminder(newReminder)
         Reminders:ResetInputUI()
@@ -367,6 +370,45 @@ local function CreateMessageEditBox(parentFrame)
     SetPlaceholder(editbox, "What do you want to be reminded about?")
 
     MESSAGE_EDIT_BOX = editbox
+end
+
+-- Enable/disable the "remind on other characters" checkbox and dim it to match,
+-- clearing the check when disabling so it can't be saved for a condition that
+-- doesn't support it. (#21)
+local function SetCrossCharEnabled(enabled)
+    if not CrossCharCheck then return end
+    if enabled then
+        CrossCharCheck:Enable()
+        CrossCharCheck:SetAlpha(1)
+    else
+        CrossCharCheck:SetChecked(false)
+        CrossCharCheck:Disable()
+        CrossCharCheck:SetAlpha(0.5)
+    end
+end
+
+-- Opt-in to also surfacing this reminder on your other characters. Only makes
+-- sense for name/Self-targeted reminders, so it's enabled just for those. (#21)
+local function CreateCrossCharCheck(parentFrame)
+    local check = CreateFrame("CheckButton", "RemindersCrossCharCheck", parentFrame, "UICheckButtonTemplate")
+    check:SetPoint("TOPLEFT", parentFrame, "TOPLEFT", 634, -60)
+    check:SetSize(24, 24)
+
+    local label = check:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    label:SetPoint("LEFT", check, "RIGHT", 2, 0)
+    label:SetText("Remind on my other characters")
+    label:SetTextColor(1, 0.82, 0)
+
+    check:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText("Remind on my other characters")
+        GameTooltip:AddLine("Also shows this reminder on your other characters (as \"Name: message\"). Available for Name and Self reminders.", 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    check:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    CrossCharCheck = check
+    SetCrossCharEnabled(false)
 end
 
 local function CreateDayDropDown(parentFrame)
@@ -464,6 +506,9 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
         if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
     end
 
+    -- Cross-character reminding only applies to name/Self-targeted reminders.
+    SetCrossCharEnabled(conditionText == "Name" or conditionText == "Self")
+
     OnInputValueChanged()
 end
 
@@ -557,6 +602,7 @@ function Reminders:CreateUI()
     gui.Title:SetText("Reminders")
 
     CreateMessageEditBox(gui)
+    CreateCrossCharCheck(gui)
 
     CreateConditionFrame(gui)
 
@@ -685,6 +731,9 @@ local function CreateReminderItem(reminder, i, parentFrame)
         reminderItem.title:SetText(reminder.message)
 
         local conditionText = (reminder.condition == "*") and "All characters" or reminder.condition
+        if reminder.crossChar then
+            conditionText = conditionText .. "  \194\183  on all my characters"
+        end
         reminderItem.subtitle:SetText(conditionText)
 
         local intervalText = tostring(reminder.interval):gsub("^%l", string.upper)
@@ -781,6 +830,7 @@ end
 
 function Reminders:ResetInputUI()
     MESSAGE_EDIT_BOX:SetText("")
+    SetCrossCharEnabled(false)
     IntervalDropDown:SetValue(0)
     IntervalDropDown:SetText(INTERVAL_LIST_DEFAULT)
     ClearDropDownChecks(IntervalDropDown)

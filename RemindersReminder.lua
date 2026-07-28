@@ -93,6 +93,7 @@ local function Serialize(self)
         interval = self.interval,
         day = self.day,
         disabled = self.disabled,
+        crossChar = self.crossChar,
     }
 end
 
@@ -138,6 +139,15 @@ local function SetAndScheduleNextReminder(self, timeUntilnextRemindAt, forceResc
     Reminders:SetPlayerReminder(self.id, nextRemindAt)
 end
 
+-- Human-readable snooze duration, e.g. "10 minutes" or "30 seconds".
+local function SnoozeText(snooze)
+    if snooze < 1 then
+        local seconds = floor(snooze * 60 + 0.5)
+        return seconds .. (seconds == 1 and " second" or " seconds")
+    end
+    return snooze .. (snooze == 1 and " minute" or " minutes")
+end
+
 local function Evaluate(self)
     -- Disabled reminders never fire.
     if self.disabled then
@@ -166,14 +176,7 @@ local function Evaluate(self)
                 end
                 self:SetAndScheduleNextReminder(snooze * 60)
 
-                local snoozeText
-                if snooze < 1 then
-                    local seconds = floor(snooze * 60 + 0.5)
-                    snoozeText = seconds .. (seconds == 1 and " second" or " seconds")
-                else
-                    snoozeText = snooze .. (snooze == 1 and " minute" or " minutes")
-                end
-                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. snoozeText)
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. SnoozeText(snooze))
                 this:SetText("Snoozed!")
                 this:Disable()
             end
@@ -433,6 +436,88 @@ local function SetDisabled(self, disabled)
     Reminders:ChatMessage("Reminder for |cff32cd32" .. self.message .. "|r has been " .. (disabled and "disabled" or "enabled"))
 end
 
+-- If the condition is a plain "name = X" (the Name and Self conditions), return
+-- X. Anything else -- not-equals, level/class/profession, or compound conditions
+-- -- returns nil and is left out of cross-character surfacing for v1. (#21)
+local function ParseNameEquals(condition)
+    return condition:match("^%s*name%s*=%s*(%S+)%s*$")
+end
+
+-- Build a popup row for a *different* character that still owes this reminder.
+-- These are snooze-only: showing or dismissing it doesn't advance that
+-- character's schedule (so you can't clear an alt's chore from your main without
+-- doing it) -- only playing that character or snoozing changes anything. (#21)
+local function BuildOtherCharacterMessage(self, char)
+    local message = char.name .. ": " .. self.message
+
+    local snoozeButton = {
+        text = "Snooze",
+        onClick = function(this, button)
+            local snooze = RemindersDB.char.snoozeAmount
+            if RemindersDB.char.debug then
+                snooze = .1667
+            end
+            -- Push out the *target* character's next-remind time, not ours, and
+            -- re-run evaluation when the snooze expires (we aren't that character,
+            -- so no per-reminder timer is driving it otherwise).
+            char.reminders[self.id] = floor(snooze * 60) + time()
+            Reminders:ScheduleTimer("EvaluateReminders", floor(snooze * 60))
+
+            Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r has been snoozed for " .. SnoozeText(snooze))
+            this:SetText("Snoozed!")
+            this:Disable()
+        end
+    }
+
+    local dismissButton = {
+        text = "Dismiss",
+        onClick = function(this, button)
+            Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r dismissed")
+            this:GetParent():Hide()
+        end
+    }
+
+    return {
+        text = message,
+        snoozeButton = snoozeButton,
+        dismissButton = dismissButton,
+    }
+end
+
+-- Surface this reminder for any *other* roster character that is its target and
+-- still owes it, when cross-character reminding is enabled. v1 only handles
+-- name/Self-targeted reminders ("name = X"). Returns a list of popup rows. (#21)
+local function EvaluateForOtherCharacters(self)
+    if self.disabled or not self.crossChar then
+        return
+    end
+
+    local targetName = ParseNameEquals(self.condition)
+    if not targetName then
+        return
+    end
+
+    local currentKey = Reminders:CurrentCharacterKey()
+    local timeNow = time()
+    local messages = {}
+
+    for key, char in pairs(RemindersDB.global.characters) do
+        if key ~= currentKey and char.name == targetName then
+            local nextRemindAt = char.reminders[self.id]
+            -- No schedule entry means that character has never cleared it, so it
+            -- still owes it.
+            local owes = (not nextRemindAt) or (timeNow + GROUP_WINDOW >= nextRemindAt)
+            if owes then
+                tinsert(messages, BuildOtherCharacterMessage(self, char))
+            end
+        end
+    end
+
+    if #messages > 0 then
+        return messages
+    end
+end
+
 function Reminders:BuildReminder(params)
     local self = {}
     self.message = params.message
@@ -441,6 +526,7 @@ function Reminders:BuildReminder(params)
     self.day = (params.day or 3) -- Default to Tuesday for backwards compatability
     self.id = params.id
     self.disabled = params.disabled or false -- Default enabled for reminders saved before this existed
+    self.crossChar = params.crossChar or false -- Also remind on other characters (#21)
 
     self.IsEqual = IsEqual
     self.ToString = ToString
@@ -453,6 +539,7 @@ function Reminders:BuildReminder(params)
     self.SetDisabled = SetDisabled
     self.Serialize = Serialize
     self.Evaluate = Evaluate
+    self.EvaluateForOtherCharacters = EvaluateForOtherCharacters
 
     return self
 end

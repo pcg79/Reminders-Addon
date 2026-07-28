@@ -215,6 +215,14 @@ function Reminders:EvaluateReminders()
         if messageTable then
             tinsert(reminderMessages, messageTable)
         end
+
+        -- Also surface this reminder for other characters that still owe it. (#21)
+        local otherMessages = reminder:EvaluateForOtherCharacters()
+        if otherMessages then
+            for _, otherMessage in ipairs(otherMessages) do
+                tinsert(reminderMessages, otherMessage)
+            end
+        end
     end
 
     Reminders:BuildAndDisplayReminders(reminderMessages)
