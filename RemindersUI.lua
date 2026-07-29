@@ -214,7 +214,7 @@ local function AddReminder(newReminder)
         if reminder:IsEqual(newReminder) then
             Reminders:debug("[Error] Reminder with text '"..newReminder.message.."' and condition '"..newReminder.condition .."' and interval '"..newReminder.interval.."' already exists")
             Reminders:ChatMessage("A Reminder for |cff32cd32" .. newReminder.message .. "|r with the same condition and interval already exists!")
-            return
+            return false
         end
     end
 
@@ -225,6 +225,7 @@ local function AddReminder(newReminder)
     -- keeps creation quiet but consistent across your characters. (#21)
 
     Reminders:LoadReminders(GUI)
+    return true
 end
 
 local function ParseReminder(text)
@@ -305,10 +306,14 @@ local function CreateReminder()
         params.crossChar = (CrossCharCheck and CrossCharCheck:GetChecked()) or false
         local newReminder = Reminders:BuildReminder(params)
 
-        AddReminder(newReminder)
-        Reminders:ResetInputUI()
-
-        Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+        -- Only reset the form and report success if the reminder was actually
+        -- saved. A duplicate is rejected in AddReminder (which explains why), so
+        -- leaving the form as-is lets you adjust it instead of falsely looking
+        -- like it worked. (#56)
+        if AddReminder(newReminder) then
+            Reminders:ResetInputUI()
+            Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+        end
     end
 end
 
