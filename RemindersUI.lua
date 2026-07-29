@@ -608,6 +608,13 @@ function Reminders:CreateUI()
     gui:SetSize(1000, 600)
     gui:SetPoint("CENTER")
     gui:EnableMouse(true)
+    -- Let the window be dragged by an empty part of its background; the child
+    -- widgets (edit boxes, dropdowns, buttons, list) still take their own clicks.
+    -- Position isn't persisted, so it re-centers each session. (#60)
+    gui:SetMovable(true)
+    gui:SetClampedToScreen(true)
+    gui:SetScript("OnMouseDown", function() gui:StartMoving() end)
+    gui:SetScript("OnMouseUp", function() gui:StopMovingOrSizing() end)
     gui.Title:SetText("Reminders")
 
     CreateMessageEditBox(gui)

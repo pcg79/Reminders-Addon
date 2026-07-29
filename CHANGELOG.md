@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The main Reminders window can now be dragged around — click and drag an empty part of the window to move it. Its position isn't saved between sessions (#60)
 - Fixed creating a duplicate reminder (same message, condition, and interval) appearing to succeed: it printed "created!" and cleared the form even though nothing was added. It now only tells you the reminder already exists and leaves your form intact so you can adjust it (#56)
 
 ## [v12.5.0](https://github.com/pcg79/Reminders-Addon/tree/v12.5.0) (2026-07-29)
