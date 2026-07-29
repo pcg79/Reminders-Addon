@@ -1,6 +1,7 @@
 # Reminders
 
-## Unreleased
+## [v12.6.0](https://github.com/pcg79/Reminders-Addon/tree/v12.6.0) (2026-07-29)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.5.0...v12.6.0)
 
 - The "What's New" button is now a toggle — click to open the changelog, click again to close it
 - The main Reminders window now sits consistently above the game HUD (action bars, cooldown manager, etc.) instead of some things rendering in front of it and some behind (#57)

@@ -3,6 +3,19 @@
 
 Reminders.changelog = {
     {
+        version = "12.6.0",
+        date = "2026-07-29",
+        entries = {
+            "The \"What's New\" button is now a toggle — click to open the changelog, click again to close it",
+            "The main Reminders window now sits consistently above the game HUD (action bars, cooldown manager, etc.) instead of some things rendering in front of it and some behind (#57)",
+            "Pressing Escape now closes the main Reminders window (#61)",
+            "Deleting a reminder (the ✕ on its row) now asks for confirmation first, so a misclick can't wipe a reminder — and its per-character schedule/completion state — by accident (#59)",
+            "You can now edit an existing reminder: click the Edit button on its row to load it into the form, change anything (message, condition, interval, day, cross-character), then Save — or Cancel Edit to back out. Editing keeps the reminder's id, so its per-character schedule and completion state are preserved (#58)",
+            "The main Reminders window can now be dragged around — click and drag an empty part of the window to move it. Its position isn't saved between sessions (#60)",
+            "Fixed creating a duplicate reminder (same message, condition, and interval) appearing to succeed: it printed \"created!\" and cleared the form even though nothing was added. It now only tells you the reminder already exists and leaves your form intact so you can adjust it (#56)",
+        },
+    },
+    {
         version = "12.5.0",
         date = "2026-07-29",
         entries = {
