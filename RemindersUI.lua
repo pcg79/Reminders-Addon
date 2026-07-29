@@ -744,6 +744,11 @@ function Reminders:CreateUI()
     gui:SetSize(1000, 600)
     gui:SetPoint("CENTER")
     gui:EnableMouse(true)
+    -- Sit consistently above the game HUD (action bars, cooldown manager, etc.).
+    -- HIGH stays below the DIALOG strata, so reminder popups and confirmation
+    -- dialogs still render on top of this window. (#57)
+    gui:SetFrameStrata("HIGH")
+    gui:SetToplevel(true)
     -- Let the window be dragged by an empty part of its background; the child
     -- widgets (edit boxes, dropdowns, buttons, list) still take their own clicks.
     -- Position isn't persisted, so it re-centers each session. (#60)

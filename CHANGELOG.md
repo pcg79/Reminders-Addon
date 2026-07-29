@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The main Reminders window now sits consistently above the game HUD (action bars, cooldown manager, etc.) instead of some things rendering in front of it and some behind (#57)
 - Pressing Escape now closes the main Reminders window (#61)
 - Deleting a reminder (the ✕ on its row) now asks for confirmation first, so a misclick can't wipe a reminder — and its per-character schedule/completion state — by accident (#59)
 - You can now edit an existing reminder: click the Edit button on its row to load it into the form, change anything (message, condition, interval, day, cross-character), then Save — or Cancel Edit to back out. Editing keeps the reminder's id, so its per-character schedule and completion state are preserved (#58)
