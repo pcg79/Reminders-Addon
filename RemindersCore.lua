@@ -159,6 +159,12 @@ end
 
 function Reminders:RegisterEvents()
     GUI:RegisterEvent("PLAYER_REGEN_ENABLED")
+    -- Item level and (on a cold login) professions aren't available yet when the
+    -- addon initializes, so the roster snapshot can miss them. Re-capture once the
+    -- client reports that data. (#21)
+    GUI:RegisterEvent("PLAYER_ENTERING_WORLD")
+    GUI:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
+    GUI:RegisterEvent("SKILL_LINES_CHANGED")
     GUI:SetScript("OnEvent", function(_, event, ...)
         if event == "PLAYER_REGEN_ENABLED" then
             Reminders:debug("Out of combat")
@@ -167,6 +173,10 @@ function Reminders:RegisterEvents()
                 Reminders:CancelEvaluateAfterCombat()
                 Reminders:EvaluateReminders()
             end
+        else
+            -- Attribute data (item level, professions) just became available or
+            -- changed; refresh this character's roster snapshot.
+            Reminders:CaptureCurrentCharacter()
         end
     end)
 end
@@ -288,13 +298,22 @@ function Reminders:CaptureCurrentCharacter()
     char.ilevel = GetAverageItemLevel()
 
     local professions = {}
-    local prof1, prof2 = GetProfessions()
-    for _, index in ipairs({ prof1, prof2 }) do
-        local name = GetProfessionInfo(index)
-        if name then
-            tinsert(professions, name)
+    local prof1, prof2, archaeology, fishing, cooking = GetProfessions()
+    -- Can't use ipairs here: GetProfessions returns nils for empty slots, which
+    -- would cut the iteration short. Add each slot explicitly instead.
+    local function addProfession(index)
+        if index then
+            local name = GetProfessionInfo(index)
+            if name then
+                tinsert(professions, name)
+            end
         end
     end
+    addProfession(prof1)
+    addProfession(prof2)
+    addProfession(archaeology)
+    addProfession(fishing)
+    addProfession(cooking)
     char.professions = professions
 
     char.lastSeen = time()

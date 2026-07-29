@@ -402,7 +402,7 @@ local function CreateCrossCharCheck(parentFrame)
     check:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText("Remind on my other characters")
-        GameTooltip:AddLine("Also shows this reminder on your other characters (as \"Name: message\"). Available for Name and Self reminders.", 1, 1, 1, true)
+        GameTooltip:AddLine("Also shows this reminder on your other characters that match its condition (as \"Name: message\").", 1, 1, 1, true)
         GameTooltip:Show()
     end)
     check:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -506,8 +506,9 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
         if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
     end
 
-    -- Cross-character reminding only applies to name/Self-targeted reminders.
-    SetCrossCharEnabled(conditionText == "Name" or conditionText == "Self")
+    -- Cross-character reminding works for any condition (evaluated against each
+    -- character's cached attributes), so enable it once a condition is chosen.
+    SetCrossCharEnabled(conditionText ~= CONDITION_LIST_DEFAULT)
 
     OnInputValueChanged()
 end

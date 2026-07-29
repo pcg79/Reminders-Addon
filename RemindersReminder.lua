@@ -198,18 +198,59 @@ local function Evaluate(self)
     end
 end
 
-local function GetProfessionNameByIndex(profIndex)
-    if profIndex == nil or profIndex == "" then
-        return
+-- Names of every profession (primary and secondary) the current player has.
+local function BuildProfessionList()
+    local professions = {}
+    local prof1, prof2, archaeology, fishing, cooking = GetProfessions()
+
+    local function add(index)
+        if index then
+            local name = GetProfessionInfo(index)
+            if name then
+                tinsert(professions, name)
+            end
+        end
     end
-    local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine, skillModifier, specializationIndex, specializationOffset = GetProfessionInfo(profIndex)
-    return name
+
+    add(prof1)
+    add(prof2)
+    add(archaeology)
+    add(fishing)
+    add(cooking)
+
+    return professions
+end
+
+-- Resolve the attributes a condition is evaluated against. With no character we
+-- use the live current player (preserving existing behavior); given a roster
+-- character we use its cached attributes, so a condition can be evaluated for
+-- that character while it's offline. (#21 v2)
+local function ResolveCharacterContext(character)
+    if character then
+        return {
+            name = character.name,
+            level = character.level,
+            class = character.class,
+            ilevel = character.ilevel,
+            professions = character.professions or {},
+        }
+    end
+
+    return {
+        name = UnitName("player"),
+        level = UnitLevel("player"),
+        class = UnitClass("player"),
+        ilevel = GetAverageItemLevel(),
+        professions = BuildProfessionList(),
+    }
 end
 
 -- We build up a string to evaluate based on any conditions we find
--- then we evaluate the string as a whole.
-local function EvaluateCondition(self)
+-- then we evaluate the string as a whole. Pass a roster character to evaluate
+-- the condition against its cached attributes instead of the current player.
+local function EvaluateCondition(self, character)
     local condition = self.condition
+    local ctx = ResolveCharacterContext(character)
 
     -- Reminders:debug("[EvaluateCondition] id = " .. self.id .. ", condition = " .. condition)
 
@@ -242,7 +283,7 @@ local function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local name = tokens[i+count]
-                local playerName = UnitName("player")
+                local playerName = ctx.name
 
                 local matches = playerName == name
                 if operation == "~=" then matches = not matches end
@@ -260,19 +301,23 @@ local function EvaluateCondition(self)
                     operation = "=="
                 end
 
-                local playerLevel = UnitLevel("player")
-                local levelStmt = "return "..playerLevel..operation..level
-                local levelFunc = assert(loadstring(levelStmt))
-                local result, errorMsg = levelFunc()
+                local playerLevel = ctx.level
+                if playerLevel == nil then
+                    evalString = evalString.." false"
+                else
+                    local levelStmt = "return "..playerLevel..operation..level
+                    local levelFunc = assert(loadstring(levelStmt))
+                    local result, errorMsg = levelFunc()
 
-                evalString = evalString.." "..tostring(result)
+                    evalString = evalString.." "..tostring(result)
+                end
 
             elseif token == R_CLASS then
                 count = count + 1
                 local operation = tokens[i+count]
                 count = count + 1
                 local class = tokens[i+count]
-                local playerClass = UnitClass("player")
+                local playerClass = ctx.class
 
                 local matches = playerClass == class
                 if operation == "~=" then matches = not matches end
@@ -284,15 +329,14 @@ local function EvaluateCondition(self)
                 local operation = tokens[i+count]
                 count = count + 1
                 local profession = tokens[i+count]:lower()
-                local prof1, prof2, archaeology, fishing, cooking = GetProfessions()
 
-                local prof1Name = GetProfessionNameByIndex(prof1) or ""
-                local prof2Name = GetProfessionNameByIndex(prof2) or ""
-
-                local profResult = (profession == prof1Name:lower() or profession == prof2Name:lower()) or
-                   (profession == "archaeology" and archaeology ~= nil) or
-                   (profession == "fishing" and fishing ~= nil) or
-                   (profession == "cooking" and cooking ~= nil)
+                local profResult = false
+                for _, profName in ipairs(ctx.professions) do
+                    if profession == profName:lower() then
+                        profResult = true
+                        break
+                    end
+                end
 
                 if operation == "~=" then profResult = not profResult end
 
@@ -308,12 +352,16 @@ local function EvaluateCondition(self)
                 end
                 count = count + 1
                 local ilevel = tokens[i+count]
-                local playerILevel = GetAverageItemLevel()
-                local ilevelStmt = "return "..playerILevel..operation..ilevel
-                local ilevelFunc = assert(loadstring(ilevelStmt))
-                local result, errorMsg = ilevelFunc()
+                local playerILevel = ctx.ilevel
+                if playerILevel == nil then
+                    evalString = evalString.." false"
+                else
+                    local ilevelStmt = "return "..playerILevel..operation..ilevel
+                    local ilevelFunc = assert(loadstring(ilevelStmt))
+                    local result, errorMsg = ilevelFunc()
 
-                evalString = evalString.." "..tostring(result)
+                    evalString = evalString.." "..tostring(result)
+                end
 
             elseif token == R_AND then
                 evalString = evalString.." and"
@@ -436,13 +484,6 @@ local function SetDisabled(self, disabled)
     Reminders:ChatMessage("Reminder for |cff32cd32" .. self.message .. "|r has been " .. (disabled and "disabled" or "enabled"))
 end
 
--- If the condition is a plain "name = X" (the Name and Self conditions), return
--- X. Anything else -- not-equals, level/class/profession, or compound conditions
--- -- returns nil and is left out of cross-character surfacing for v1. (#21)
-local function ParseNameEquals(condition)
-    return condition:match("^%s*name%s*=%s*(%S+)%s*$")
-end
-
 -- Build a popup row for a *different* character that still owes this reminder.
 -- These are snooze-only: showing or dismissing it doesn't advance that
 -- character's schedule (so you can't clear an alt's chore from your main without
@@ -484,16 +525,12 @@ local function BuildOtherCharacterMessage(self, char)
     }
 end
 
--- Surface this reminder for any *other* roster character that is its target and
--- still owes it, when cross-character reminding is enabled. v1 only handles
--- name/Self-targeted reminders ("name = X"). Returns a list of popup rows. (#21)
+-- Surface this reminder for any *other* roster character that qualifies for it
+-- (evaluated against that character's cached attributes) and still owes it, when
+-- cross-character reminding is enabled. Covers name/Self and attribute conditions
+-- (level, ilevel, class, profession, everyone). Returns a list of popup rows. (#21)
 local function EvaluateForOtherCharacters(self)
     if self.disabled or not self.crossChar then
-        return
-    end
-
-    local targetName = ParseNameEquals(self.condition)
-    if not targetName then
         return
     end
 
@@ -502,7 +539,7 @@ local function EvaluateForOtherCharacters(self)
     local messages = {}
 
     for key, char in pairs(RemindersDB.global.characters) do
-        if key ~= currentKey and char.name == targetName then
+        if key ~= currentKey and EvaluateCondition(self, char) then
             local nextRemindAt = char.reminders[self.id]
             -- No schedule entry means that character has never cleared it, so it
             -- still owes it.
