@@ -4,7 +4,7 @@
 ## Author: pcg79
 ## SavedVariables: RemindersDBG
 ## SavedVariablesPerCharacter: RemindersDBPC
-## Version: 12.4.1
+## Version: 12.5.0
 
 # Libraries
 Libs\embeds.xml
