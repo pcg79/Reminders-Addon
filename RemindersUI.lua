@@ -53,6 +53,13 @@ local IntervalDropDown
 local DayDropDown
 local CreateButton
 local CrossCharCheck
+local CancelButton
+-- Edit mode (#58): id of the reminder currently being edited (nil = creating a
+-- new one), plus forward decls for the functions that toggle it.
+local EDITING_ID
+local EnterEditMode
+local ExitEditMode
+local UpdateReminder
 
 
 -- Utility functions --
@@ -145,6 +152,34 @@ local function ClearDropDownChecks(dropdown)
     end
 end
 
+-- Reverse lookups for loading a saved reminder back into the form for editing. (#58)
+local OPERATION_DISPLAY = {}
+for displayName, symbol in pairs(OPERATION_LIST) do
+    OPERATION_DISPLAY[symbol] = displayName
+end
+
+-- Condition value -> form display name. "name" maps to "Name" (Self is just a
+-- create-time shortcut that also stores "name = <you>", so an edit shows it as Name).
+local CONDITION_DISPLAY = {
+    ["*"]      = "Everyone",
+    name       = "Name",
+    level      = "Level",
+    ilevel     = "iLevel",
+    profession = "Profession",
+}
+
+-- Select an AceGUI dropdown item by its display name. The list is set from an
+-- array (AlphabeticallySortedList), so an item's value is its index.
+local function SetDropdownSelection(dropdown, sortedList, displayName)
+    for index, name in ipairs(sortedList) do
+        if name == displayName then
+            dropdown:SetValue(index)
+            break
+        end
+    end
+    dropdown:SetText(displayName)
+end
+
 -- UI --
 
 local function AreInputsValid()
@@ -228,6 +263,25 @@ local function AddReminder(newReminder)
     return true
 end
 
+-- Save changes to an existing reminder in place, keeping its id (and therefore
+-- its per-character schedule / done-state). Rejects a change that would collide
+-- with a *different* existing reminder. Returns whether it saved. (#58)
+function UpdateReminder(updatedReminder)
+    for key, reminder in pairs(RemindersDB.global.reminders) do
+        if key ~= updatedReminder.id then
+            local existing = Reminders:BuildReminder(reminder)
+            if existing:IsEqual(updatedReminder) then
+                Reminders:ChatMessage("A Reminder for |cff32cd32" .. updatedReminder.message .. "|r with the same condition and interval already exists!")
+                return false
+            end
+        end
+    end
+
+    updatedReminder:Save() -- id is already set, so this overwrites in place
+    Reminders:LoadReminders(GUI)
+    return true
+end
+
 local function ParseReminder(text)
     local array = {}
     for token in string.gmatch(text, "[^,]+") do
@@ -304,17 +358,41 @@ local function CreateReminder()
         local reminderText = BuildReminderText()
         local params = ParseReminder(reminderText)
         params.crossChar = (CrossCharCheck and CrossCharCheck:GetChecked()) or false
-        local newReminder = Reminders:BuildReminder(params)
+        if EDITING_ID then
+            -- Editing: keep the same id so the reminder's schedule survives. Carry
+            -- over its enabled/disabled state (the form doesn't cover that). (#58)
+            params.id = EDITING_ID
+            local existing = RemindersDB.global.reminders[EDITING_ID]
+            if existing then
+                params.disabled = existing.disabled
+            end
+            local updatedReminder = Reminders:BuildReminder(params)
+            if UpdateReminder(updatedReminder) then
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. updatedReminder.message .. "|r has been updated!")
+                ExitEditMode()
+            end
+        else
+            local newReminder = Reminders:BuildReminder(params)
 
-        -- Only reset the form and report success if the reminder was actually
-        -- saved. A duplicate is rejected in AddReminder (which explains why), so
-        -- leaving the form as-is lets you adjust it instead of falsely looking
-        -- like it worked. (#56)
-        if AddReminder(newReminder) then
-            Reminders:ResetInputUI()
-            Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+            -- Only reset the form and report success if the reminder was actually
+            -- saved. A duplicate is rejected in AddReminder (which explains why), so
+            -- leaving the form as-is lets you adjust it instead of falsely looking
+            -- like it worked. (#56)
+            if AddReminder(newReminder) then
+                Reminders:ResetInputUI()
+                Reminders:ChatMessage("Reminder for |cff32cd32" .. newReminder.message .. "|r has been created!")
+            end
         end
     end
+end
+
+-- Leave edit mode: clear the edited id, restore the button label, hide Cancel,
+-- and clear the form. (#58)
+function ExitEditMode()
+    EDITING_ID = nil
+    if CreateButton then CreateButton:SetText("Create") end
+    if CancelButton then CancelButton:Hide() end
+    Reminders:ResetInputUI()
 end
 
 local function EditBoxOnEscapePressed(self)
@@ -599,6 +677,64 @@ local function CreateConditionFrame(parentFrame)
     CONDITION_FRAMES[i] = conditionFrame
 end
 
+-- Load an existing reminder's values back into the create form and switch the
+-- form into edit mode. The stored condition is a plain string ("*", "name = X",
+-- "level > 70", "profession = Alchemy"), so we parse it back into the widgets. (#58)
+function EnterEditMode(reminder)
+    MESSAGE_EDIT_BOX:SetText(reminder.message or "")
+
+    local tokens = {}
+    for token in string.gmatch(reminder.condition or "", "[^ ]+") do
+        tinsert(tokens, token)
+    end
+    local condValue = tokens[1]
+    local condName = CONDITION_DISPLAY[condValue] or CONDITION_LIST_DEFAULT
+
+    local conditionFrame = CONDITION_FRAMES[1]
+    local conditionDropDown = conditionFrame.conditionDropDown
+    local operationDropDown = conditionFrame.operationDropDown
+    local valueEditBox = conditionFrame.valueEditBox
+    local professionDropDown = conditionFrame.professionDropDown
+
+    -- Select the condition, then let the normal handler show/hide the right
+    -- widgets (operation, value box, profession dropdown) for it.
+    SetDropdownSelection(conditionDropDown, AlphabeticallySortedList(CONDITION_LIST), condName)
+    ConditionDropDownOnValueChanged(conditionDropDown)
+
+    -- Fill operation/value/profession *after* the handler so it doesn't clear them.
+    if condValue == "level" or condValue == "ilevel" then
+        local opName = OPERATION_DISPLAY[tokens[2]] or "Equals"
+        SetDropdownSelection(operationDropDown, AlphabeticallySortedList(OPERATION_LIST), opName)
+        SetValueBoxEnabled(valueEditBox, true)
+        valueEditBox:SetText(tokens[3] or "")
+    elseif condValue == "name" then
+        SetValueBoxEnabled(valueEditBox, true)
+        valueEditBox:SetText(tokens[3] or "")
+    elseif condValue == "profession" then
+        SetDropdownSelection(professionDropDown, AlphabeticallySortedList(PROFESSION_LIST), tokens[3] or "")
+    end
+
+    -- Interval and (for weekly) day.
+    local intervalName = tostring(reminder.interval):gsub("^%l", string.upper)
+    SetDropdownSelection(IntervalDropDown, AlphabeticallySortedList(GetIntervalList()), intervalName)
+    IntervalDropDownOnInputValueChanged(IntervalDropDown)
+    if reminder.interval == "weekly" and reminder.day then
+        DayDropDown:SetValue(tonumber(reminder.day))
+        DayDropDown:SetText(Reminders:DayList()[tonumber(reminder.day)] or DayListDefault())
+        DayDropDown.frame:Show()
+    end
+
+    -- Cross-character checkbox (the condition handler already enabled it).
+    if CrossCharCheck then
+        CrossCharCheck:SetChecked(reminder.crossChar and true or false)
+    end
+
+    EDITING_ID = reminder.id
+    CreateButton:SetText("Save")
+    if CancelButton then CancelButton:Show() end
+    OnInputValueChanged()
+end
+
 function Reminders:CreateUI()
     local frameName = "RemindersFrame"
 
@@ -656,6 +792,15 @@ function Reminders:CreateUI()
     whatsNewButton:SetWidth(120)
     whatsNewButton:SetText("What's New")
 
+    -- Shown only while editing an existing reminder; cancels back to create mode.
+    CancelButton = CreateFrame("Button", frameName.."Cancel", gui, "UIPanelButtonTemplate")
+    CancelButton:SetScript("OnClick", function() ExitEditMode() end)
+    CancelButton:SetPoint("BOTTOMRIGHT", -137, 17)
+    CancelButton:SetHeight(20)
+    CancelButton:SetWidth(100)
+    CancelButton:SetText("Cancel Edit")
+    CancelButton:Hide()
+
     return gui
 end
 
@@ -697,7 +842,8 @@ local function CreateReminderItem(reminder, i, parentFrame)
         reminderItem.intervalText = reminderItem:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
         reminderItem.intervalText:SetJustifyH("RIGHT")
         reminderItem.intervalText:SetTextColor(0.85, 0.72, 0.42)
-        reminderItem.intervalText:SetPoint("RIGHT", reminderItem, "RIGHT", -40, 0)
+        -- Leaves room on the right for the Edit and delete (X) buttons.
+        reminderItem.intervalText:SetPoint("RIGHT", reminderItem, "RIGHT", -86, 0)
 
         -- Delete (X) button
         local deleteButton = CreateFrame("Button", nil, reminderItem)
@@ -712,6 +858,20 @@ local function CreateReminderItem(reminder, i, parentFrame)
         end)
         deleteButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
         reminderItem.deleteButton = deleteButton
+
+        -- Edit button, sitting between the interval text and the X. A labeled
+        -- button reads clearly at this size (a shrunk icon didn't). (#58)
+        local editButton = CreateFrame("Button", nil, reminderItem, "UIPanelButtonTemplate")
+        editButton:SetSize(44, 18)
+        editButton:SetPoint("RIGHT", reminderItem, "RIGHT", -36, 0)
+        editButton:SetText("Edit")
+        editButton:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("Edit this reminder", 1, 1, 1)
+            GameTooltip:Show()
+        end)
+        editButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        reminderItem.editButton = editButton
 
         -- Enable/disable checkbox on the left (checked = enabled)
         local enabledCheck = CreateFrame("CheckButton", nil, reminderItem, "UICheckButtonTemplate")
@@ -776,32 +936,15 @@ local function CreateReminderItem(reminder, i, parentFrame)
         reminderItem.intervalText:SetTextColor(0.85, 0.72, 0.42)
     end
 
-    reminderItem:SetScript("OnClick", function(self, button)
-        if IsAltKeyDown() then
-            reminder:Delete()
-            Reminders:LoadReminders(parentFrame)
-            Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
-        elseif IsControlKeyDown() and RemindersDB.char.debug then
-            reminder:SetAndScheduleNextReminder(1)
-        else
-            Reminders:BuildAndDisplayReminders( { reminder:Evaluate() } )
-        end
+    -- Clicking the row itself does nothing; actions live on the per-row buttons.
+    reminderItem.editButton:SetScript("OnClick", function()
+        EnterEditMode(reminder)
     end)
 
     reminderItem.deleteButton:SetScript("OnClick", function()
         reminder:Delete()
         Reminders:LoadReminders(parentFrame)
         Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
-    end)
-
-    reminderItem:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine("Left-click to test", 1, 1, 1)
-        GameTooltip:AddLine("Alt+click or the X to delete", 0.7, 0.7, 0.7)
-        GameTooltip:Show()
-    end)
-    reminderItem:SetScript("OnLeave", function(self)
-        GameTooltip:Hide()
     end)
 
     reminderItem:Show()
