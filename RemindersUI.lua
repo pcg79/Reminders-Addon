@@ -219,7 +219,10 @@ local function AddReminder(newReminder)
     end
 
     newReminder:Save()
-    newReminder:SetAndScheduleNextReminder()
+    -- Don't pre-schedule to the next reset here: leaving it unscheduled makes
+    -- the current character "due" (never done), so the next evaluation fires it
+    -- and arms its timer -- the same way it's surfaced on other characters. This
+    -- keeps creation quiet but consistent across your characters. (#21)
 
     Reminders:LoadReminders(GUI)
 end
@@ -402,7 +405,7 @@ local function CreateCrossCharCheck(parentFrame)
     check:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText("Remind on my other characters")
-        GameTooltip:AddLine("Also shows this reminder on your other characters that match its condition (as \"Name: message\").", 1, 1, 1, true)
+        GameTooltip:AddLine("Also shows this reminder on your other characters that match its condition (as \"(Name) message\").", 1, 1, 1, true)
         GameTooltip:Show()
     end)
     check:SetScript("OnLeave", function() GameTooltip:Hide() end)

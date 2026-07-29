@@ -489,7 +489,7 @@ end
 -- character's schedule (so you can't clear an alt's chore from your main without
 -- doing it) -- only playing that character or snoozing changes anything. (#21)
 local function BuildOtherCharacterMessage(self, char)
-    local message = char.name .. ": " .. self.message
+    local message = "(" .. char.name .. ") " .. self.message
 
     local snoozeButton = {
         text = "Snooze",
