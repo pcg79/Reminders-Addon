@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The "What's New" button is now a toggle — click to open the changelog, click again to close it
 - The main Reminders window now sits consistently above the game HUD (action bars, cooldown manager, etc.) instead of some things rendering in front of it and some behind (#57)
 - Pressing Escape now closes the main Reminders window (#61)
 - Deleting a reminder (the ✕ on its row) now asks for confirmation first, so a misclick can't wipe a reminder — and its per-character schedule/completion state — by accident (#59)

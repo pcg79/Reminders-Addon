@@ -21,6 +21,17 @@ local HEADER_FONT_SIZE = 16
 -- Only one window at a time; reopening while it's up just focuses the existing one.
 local whatsNewFrame
 
+-- Toggle the window: open it if closed, close it if open. The main window's
+-- "What's New" button uses this; the login auto-open uses ShowWhatsNew directly.
+function Reminders:ToggleWhatsNew()
+    if whatsNewFrame then
+        AceGUI:Release(whatsNewFrame)
+        whatsNewFrame = nil
+        return
+    end
+    Reminders:ShowWhatsNew()
+end
+
 -- Builds and shows the scrollable changelog window.
 function Reminders:ShowWhatsNew()
     if whatsNewFrame then
