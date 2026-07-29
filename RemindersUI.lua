@@ -942,9 +942,8 @@ local function CreateReminderItem(reminder, i, parentFrame)
     end)
 
     reminderItem.deleteButton:SetScript("OnClick", function()
-        reminder:Delete()
-        Reminders:LoadReminders(parentFrame)
-        Reminders:ChatMessage("Reminder for |cff32cd32" .. reminder.message .. "|r has been deleted!")
+        -- Confirm first -- deleting is irreversible and the X is easy to misclick. (#59)
+        StaticPopup_Show("REMINDERS_DELETE_CONFIRM", reminder.message, nil, { reminder = reminder, parentFrame = parentFrame })
     end)
 
     reminderItem:Show()
@@ -1035,6 +1034,21 @@ StaticPopupDialogs["REMINDERS_REMOVE_ALL_CONFIRM"] = {
     button2 = "No",
     OnAccept = function()
         Reminders:ResetAll()
+    end,
+    timeout = 30,
+    whileDead = 1,
+    hideOnEscape = 1,
+}
+
+StaticPopupDialogs["REMINDERS_DELETE_CONFIRM"] = {
+    preferredIndex = STATICPOPUPS_NUMDIALOGS,
+    text = "Delete the reminder \"%s\"?",
+    button1 = "Delete",
+    button2 = "Cancel",
+    OnAccept = function(self, data)
+        data.reminder:Delete()
+        Reminders:LoadReminders(data.parentFrame)
+        Reminders:ChatMessage("Reminder for |cff32cd32" .. data.reminder.message .. "|r has been deleted!")
     end,
     timeout = 30,
     whileDead = 1,
