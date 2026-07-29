@@ -751,6 +751,20 @@ function Reminders:CreateUI()
     gui:SetClampedToScreen(true)
     gui:SetScript("OnMouseDown", function() gui:StartMoving() end)
     gui:SetScript("OnMouseUp", function() gui:StopMovingOrSizing() end)
+
+    -- ESC closes the window: WoW hides any frame whose name is in UISpecialFrames.
+    -- Guard against duplicate entries in case the UI is rebuilt (e.g. on reset). (#61)
+    local alreadyRegistered = false
+    for _, name in ipairs(UISpecialFrames) do
+        if name == frameName then
+            alreadyRegistered = true
+            break
+        end
+    end
+    if not alreadyRegistered then
+        tinsert(UISpecialFrames, frameName)
+    end
+
     gui.Title:SetText("Reminders")
 
     CreateMessageEditBox(gui)
