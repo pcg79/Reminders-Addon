@@ -99,8 +99,6 @@ function Reminders:ResetAll()
 end
 
 function Reminders:OnInitialize()
-    Reminders:debug("Initializing...")
-
     if not _G["RemindersDBG"] then
         _G["RemindersDBG"] = Reminders:GlobalDefaults()
     end
@@ -130,18 +128,13 @@ function Reminders:OnInitialize()
         end
         RemindersDB.char.migratedSchedule = true
     end
-
-    Reminders:debug("Done Initializing")
 end
 
 function Reminders:OnEnable()
-    Reminders:debug("Enabling...")
     Reminders:CreateOptions()
 
     Reminders:EvaluateReminders()
     Reminders:CleanUpPlayerReminders()
-
-    Reminders:debug("Creating UI")
 
     GUI = Reminders:CreateUI()
 
@@ -151,10 +144,11 @@ function Reminders:OnEnable()
 
     if RemindersDB.char.debug then GUI:Show() end
 
+    -- Greet on load with the version and how to open the UI.
+    Reminders:ChatMessage("v" .. (Reminders.version or "?") .. " loaded. Type |cffffcc00/reminders|r to add or manage reminders.")
+
     -- Show the changelog once after the addon updates (#55)
     Reminders:MaybeShowWhatsNewOnLogin()
-
-    Reminders:debug("Done Enabling")
 end
 
 function Reminders:RegisterEvents()
