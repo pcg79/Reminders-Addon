@@ -52,6 +52,19 @@ local NumReminderFrames = 0
 local NumReminders = 0
 local reminderFrameHeight = 30
 
+-- Reminder popup layout (#62): the popup sizes its width to the widest message
+-- (instead of a fixed-width banner), and each row shows a Snooze button plus a
+-- small X for dismiss.
+local ROW_INSET = 20          -- row x offset inside the popup (matches LayoutReminderFrames)
+local ROW_RIGHT_PAD = 14
+local TEXT_ACTIONS_GAP = 20   -- space between the message and the actions
+local SNOOZE_WIDTH = 74
+local DISMISS_WIDTH = 74
+local BUTTON_HEIGHT = 22
+local ACTIONS_GAP = 8         -- space between the Snooze and Dismiss buttons
+local MIN_POPUP_WIDTH = 260
+local MAX_POPUP_WIDTH = 520
+
 local default = {
   title = "Reminder!",
   width = 350,
@@ -89,12 +102,19 @@ end
 -- and variable-height rows (#20).
 local function LayoutReminderFrames(masterFrame)
   local y = 40
+  local shownCount = 0
   for _, reminderFrame in ipairs(masterFrame.reminderFrames) do
     if reminderFrame:IsShown() then
+      shownCount = shownCount + 1
       reminderFrame:ClearAllPoints()
       reminderFrame:SetPoint("TOPLEFT", masterFrame, 20, -y)
       y = y + (reminderFrame.rowHeight or reminderFrameHeight)
     end
+  end
+
+  -- Header shows the current count, updating as reminders are dismissed. (#62)
+  if masterFrame.Title then
+    masterFrame.Title:SetText(shownCount == 1 and "1 Reminder" or (shownCount .. " Reminders"))
   end
 
   if y == 40 then
@@ -105,48 +125,30 @@ local function LayoutReminderFrames(masterFrame)
   end
 end
 
-local function NewFrame(parentFrame, reminder, i)
-  if not reminder.textY then
-    reminder.textY = 0
-  end
-
-  for k, v in pairs(default) do
-    if not reminder[k] then
-      reminder[k] = v
-    end
-  end
-
-  local frame = nil
-  if parentFrame.reminderFrames[i] then
-    frame = parentFrame.reminderFrames[i]
-  else
+-- Ensure a row's widgets exist and carry the current message + handlers. Sizing
+-- and positioning happen in LayoutReminderRow once the popup width is known. (#62)
+local function BuildReminderRow(parentFrame, reminder, i)
+  local frame = parentFrame.reminderFrames[i]
+  if not frame then
     frame = CreateFrame("Frame", "$parentChildFrame" .. i, parentFrame)
-    frame.text = frame:CreateFontString(nil, nil, "GameFontHighlight")
+    frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.snoozeButton = CreateFrame("Button", "$parentSnoozeButton" .. i, frame, "UIPanelButtonTemplate")
+    -- Dismiss stays a labeled button: there's no unambiguous icon for it (the
+    -- circle-slash reads as "no", a close-X collides with the frame's corner X). (#62)
     frame.dismissButton = CreateFrame("Button", "$parentDismissButton" .. i, frame, "UIPanelButtonTemplate")
 
     tinsert(parentFrame.reminderFrames, frame)
   end
 
-  -- Frame width is set now; its height is sized to the text below and its
-  -- position is assigned by LayoutReminderFrames.
-  frame:SetWidth(parentFrame:GetWidth() - 30)
-
   local snoozeButton = reminder.snoozeButton
-  frame.snoozeButton:ClearAllPoints()
-  frame.snoozeButton:SetSize(80, 22)
-  frame.snoozeButton:SetPoint("TOPRIGHT", frame, -90, 0)
   frame.snoozeButton:SetText(snoozeButton.text)
   frame.snoozeButton:SetScript("OnClick", snoozeButton.onClick)
   frame.snoozeButton:Enable()
 
+  -- Run the original dismiss behavior (chat message + hide this row), then reflow
+  -- so remaining rows close the gap and the popup shrinks/closes.
   local dismissButton = reminder.dismissButton
-  frame.dismissButton:ClearAllPoints()
-  frame.dismissButton:SetSize(80, 22)
-  frame.dismissButton:SetPoint("TOPRIGHT", frame, 0, 0)
   frame.dismissButton:SetText(dismissButton.text)
-  -- Run the original dismiss behavior (chat message + hide this row), then
-  -- reflow so the remaining rows close the gap and the popup shrinks/closes.
   local originalOnDismiss = dismissButton.onClick
   frame.dismissButton:SetScript("OnClick", function(self, mouseButton, down)
     if originalOnDismiss then
@@ -156,16 +158,32 @@ local function NewFrame(parentFrame, reminder, i)
   end)
   frame.dismissButton:Enable()
 
-  frame.text:ClearAllPoints()
   frame.text:SetJustifyH("LEFT")
-  frame.text:SetPoint("TOPLEFT", frame, 0, 0)
-  frame.text:SetWidth(frame:GetWidth() - frame.snoozeButton:GetWidth() - frame.dismissButton:GetWidth())
   frame.text:SetWordWrap(true)
-  frame.text:SetText(reminder.text)
+  -- Accent a leading "(Name)" cross-character prefix so the target stands out.
+  frame.text:SetText((reminder.text:gsub("^(%b())", "|cffffd100%1|r")))
 
-  -- Size the row to fit its (possibly wrapped) text so long reminders don't
-  -- overflow into the next one. GetStringHeight measures the rendered height,
-  -- which also accounts for the player's font size. (#20)
+  return frame
+end
+
+-- Position a row's widgets and size its height for the popup's current width. (#62)
+local function LayoutReminderRow(parentFrame, i)
+  local frame = parentFrame.reminderFrames[i]
+  frame:SetWidth(parentFrame:GetWidth() - (ROW_INSET + ROW_RIGHT_PAD))
+
+  frame.dismissButton:ClearAllPoints()
+  frame.dismissButton:SetSize(DISMISS_WIDTH, BUTTON_HEIGHT)
+  frame.dismissButton:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+
+  frame.snoozeButton:ClearAllPoints()
+  frame.snoozeButton:SetSize(SNOOZE_WIDTH, BUTTON_HEIGHT)
+  frame.snoozeButton:SetPoint("RIGHT", frame.dismissButton, "LEFT", -ACTIONS_GAP, 0)
+
+  frame.text:ClearAllPoints()
+  frame.text:SetPoint("LEFT", frame, "LEFT", 0, 0)
+  frame.text:SetPoint("RIGHT", frame.snoozeButton, "LEFT", -TEXT_ACTIONS_GAP, 0)
+
+  -- Size the row to fit its (possibly wrapped) text. (#20)
   local textHeight = frame.text:GetStringHeight() or 0
   frame.rowHeight = math.max(reminderFrameHeight, math.ceil(textHeight) + 6)
   frame:SetHeight(frame.rowHeight)
@@ -180,8 +198,23 @@ local function CreateIndividualReminderFrames(frame)
     reminderFrame:Hide()
   end
 
+  -- First pass: build each row and measure the widest (unwrapped) message.
+  local maxTextWidth = 0
   for i, reminder in pairs(reminders) do
-    NewFrame(frame, reminder, i)
+    local row = BuildReminderRow(frame, reminder, i)
+    row.text:ClearAllPoints()
+    row.text:SetWidth(0) -- unbounded, so GetStringWidth is the natural width
+    maxTextWidth = math.max(maxTextWidth, row.text:GetStringWidth() or 0)
+  end
+
+  -- Size the popup to its content (clamped) instead of a fixed-width banner.
+  local actionsWidth = SNOOZE_WIDTH + ACTIONS_GAP + DISMISS_WIDTH
+  local desiredWidth = ROW_INSET + maxTextWidth + TEXT_ACTIONS_GAP + actionsWidth + ROW_RIGHT_PAD
+  frame:SetWidth(math.max(MIN_POPUP_WIDTH, math.min(MAX_POPUP_WIDTH, desiredWidth)))
+
+  -- Second pass: lay out each row at the final width, then reflow + size height.
+  for i in pairs(reminders) do
+    LayoutReminderRow(frame, i)
   end
 
   LayoutReminderFrames(frame)

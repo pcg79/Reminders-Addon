@@ -1,5 +1,9 @@
 # Reminders
 
+## Unreleased
+
+- Reminder popup redesign: it now sizes to its content instead of a fixed-width banner (no more empty gap between the message and buttons), the header shows the current reminder count, and cross-character reminders highlight the target character's name (#62)
+
 ## [v12.6.0](https://github.com/pcg79/Reminders-Addon/tree/v12.6.0) (2026-07-29)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.5.0...v12.6.0)
 
