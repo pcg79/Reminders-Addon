@@ -3,6 +3,14 @@
 
 Reminders.changelog = {
     {
+        version = "12.7.0",
+        date = "2026-07-30",
+        entries = {
+            "Reminders now prints a short greeting when it loads, showing the version and a reminder to type /reminders",
+            "Reminder popup redesign: it now sizes to its content instead of a fixed-width banner (no more empty gap between the message and buttons), the header shows the current reminder count, and cross-character reminders highlight the target character's name (#62)",
+        },
+    },
+    {
         version = "12.6.0",
         date = "2026-07-29",
         entries = {
