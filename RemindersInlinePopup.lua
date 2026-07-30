@@ -58,12 +58,13 @@ local reminderFrameHeight = 30
 local ROW_INSET = 20          -- row x offset inside the popup (matches LayoutReminderFrames)
 local ROW_RIGHT_PAD = 14
 local TEXT_ACTIONS_GAP = 20   -- space between the message and the actions
+local TEXT_SLACK = 18         -- breathing room past the measured text so the widest line never wraps
 local SNOOZE_WIDTH = 74
 local DISMISS_WIDTH = 74
 local BUTTON_HEIGHT = 22
 local ACTIONS_GAP = 8         -- space between the Snooze and Dismiss buttons
-local MIN_POPUP_WIDTH = 260
-local MAX_POPUP_WIDTH = 520
+local MIN_POPUP_WIDTH = 300
+local MAX_POPUP_WIDTH = 560
 
 local default = {
   title = "Reminder!",
@@ -204,12 +205,13 @@ local function CreateIndividualReminderFrames(frame)
     local row = BuildReminderRow(frame, reminder, i)
     row.text:ClearAllPoints()
     row.text:SetWidth(0) -- unbounded, so GetStringWidth is the natural width
-    maxTextWidth = math.max(maxTextWidth, row.text:GetStringWidth() or 0)
+    maxTextWidth = math.max(maxTextWidth, math.ceil(row.text:GetStringWidth() or 0))
   end
 
   -- Size the popup to its content (clamped) instead of a fixed-width banner.
+  -- TEXT_SLACK gives the widest message a little room so it never wraps.
   local actionsWidth = SNOOZE_WIDTH + ACTIONS_GAP + DISMISS_WIDTH
-  local desiredWidth = ROW_INSET + maxTextWidth + TEXT_ACTIONS_GAP + actionsWidth + ROW_RIGHT_PAD
+  local desiredWidth = ROW_INSET + maxTextWidth + TEXT_SLACK + TEXT_ACTIONS_GAP + actionsWidth + ROW_RIGHT_PAD
   frame:SetWidth(math.max(MIN_POPUP_WIDTH, math.min(MAX_POPUP_WIDTH, desiredWidth)))
 
   -- Second pass: lay out each row at the final width, then reflow + size height.
