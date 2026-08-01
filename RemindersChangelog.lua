@@ -3,6 +3,14 @@
 
 Reminders.changelog = {
     {
+        version = "12.8.0",
+        date = "2026-08-01",
+        entries = {
+            "The value field now turns red as you type when the entry is invalid for the chosen condition (e.g. letters when Level or iLevel needs a number)",
+            "Name reminders now have an \"Alts\" button next to the value field: click it to pick one of your characters from a menu instead of typing the name. You can still type any name, including a character you haven't logged into yet (#38)",
+        },
+    },
+    {
         version = "12.7.0",
         date = "2026-07-30",
         entries = {
