@@ -233,11 +233,46 @@ local function AreInputsValid()
     return true
 end
 
+-- Is the value-box text valid for the current condition? Only Level/iLevel
+-- constrain it (must be numeric). Empty is treated as neutral (not-yet-invalid)
+-- so we don't flash red before anything has been typed.
+local function IsValueBoxInputValid(conditionText, text)
+    if text == "" then
+        return true
+    end
+    if conditionText == "Level" or conditionText == "iLevel" then
+        return tonumber(text) ~= nil
+    end
+    return true
+end
+
+-- Tint the value box red while its text is invalid for the chosen condition,
+-- clearing back to normal when it's valid, empty, or disabled.
+local function RefreshValueBoxValidity(conditionFrame)
+    local box = conditionFrame.valueEditBox
+    if not box:IsEnabled() then
+        box:SetTextColor(1, 1, 1)
+        return
+    end
+    local conditionText = conditionFrame.conditionDropDown.text:GetText()
+    if IsValueBoxInputValid(conditionText, box:GetText()) then
+        box:SetTextColor(1, 1, 1)
+    else
+        box:SetTextColor(1, 0.30, 0.30)
+    end
+end
+
 local function OnInputValueChanged(widget)
     if AreInputsValid() then
         CreateButton:Enable()
     else
         CreateButton:Disable()
+    end
+
+    -- Live feedback: red-highlight any value box whose text is invalid for its
+    -- chosen condition (e.g. letters when Level/iLevel needs a number).
+    for _, conditionFrame in pairs(CONDITION_FRAMES) do
+        RefreshValueBoxValidity(conditionFrame)
     end
 end
 
@@ -1076,6 +1111,7 @@ function Reminders:ResetInputUI()
 
         SetValueBoxEnabled(conditionFrame.valueEditBox, false)
         conditionFrame.valueEditBox:SetText("")
+        conditionFrame.valueEditBox:SetTextColor(1, 1, 1) -- clear any red invalid-input highlight
         conditionFrame.valueEditBox:Show()
 
         conditionFrame.professionDropDown:SetValue(0)
