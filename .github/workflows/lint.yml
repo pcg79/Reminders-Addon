@@ -3,14 +3,17 @@ name: Lint
 # Runs luacheck (see .luacheckrc) on every push and PR to catch accidental
 # globals, undefined references, and syntax errors.
 on:
+  # Branch pushes only -- without this filter, tag pushes (releases) also count
+  # as "push" and would re-run lint a second time on the same commit.
   push:
+    branches: ['**']
   pull_request:
 
 jobs:
   luacheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Lua
         uses: leafo/gh-actions-lua@v10
