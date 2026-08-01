@@ -38,7 +38,7 @@ read_globals = {
     "GetAverageItemLevel", "GetProfessions", "GetProfessionInfo",
     "GetQuestResetTime",
     "IsAltKeyDown", "IsControlKeyDown",
-    "StaticPopup_Show", "STATICPOPUPS_NUMDIALOGS", "UISpecialFrames",
+    "StaticPopup_Show", "STATICPOPUPS_NUMDIALOGS", "UISpecialFrames", "MenuUtil",
     "Settings", "BackdropTemplateMixin",
     "loadstring", "time", "date", "floor", "tinsert", "strsub", "wipe",
     -- Font objects

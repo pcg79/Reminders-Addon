@@ -1,5 +1,9 @@
 # Reminders
 
+## Unreleased
+
+- Name reminders now have an "Alts" button next to the value field: click it to pick one of your characters from a menu instead of typing the name. You can still type any name, including a character you haven't logged into yet (#38)
+
 ## [v12.7.0](https://github.com/pcg79/Reminders-Addon/tree/v12.7.0) (2026-07-30)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.6.0...v12.7.0)
 

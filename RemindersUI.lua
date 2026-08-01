@@ -547,12 +547,14 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
     local valueEditBox = conditionDropDown.valueEditBox
     local professionDropDown = conditionDropDown.professionDropDown
     local valueLabel = conditionDropDown.valueLabel
+    local charButton = conditionDropDown.charButton
 
     operationDropDown:SetDisabled(false)
 
     SetValueBoxEnabled(valueEditBox, true)
     valueEditBox:Show()
     professionDropDown.frame:Hide()
+    if charButton then charButton:Hide() end -- shown only for Name (below)
 
     if conditionText == "Everyone" or conditionText == "Self" then
         -- No operation or value applies to this condition.
@@ -577,7 +579,9 @@ local function ConditionDropDownOnValueChanged(conditionDropDown, event, value)
             professionDropDown.frame:Show()
             if valueLabel then valueLabel:SetText("Profession"); valueLabel:Show() end
         else
+            -- Name: offer the roster picker next to the value box.
             if valueLabel then valueLabel:SetText("Value"); valueLabel:Show() end
+            if charButton then charButton:Show() end
         end
     else
         -- Level / iLevel accept every operation, so keep an existing selection
@@ -652,7 +656,7 @@ local function CreateConditionFrame(parentFrame)
     local valueEditBox = CreateFrame("EditBox", "ValueEditBox", conditionFrame, "InputBoxTemplate")
     valueEditBox:SetPoint("TOPLEFT", conditionFrame, 366, -3)
     valueEditBox:SetFontObject(GameFontHighlightSmall)
-    valueEditBox:SetWidth(150)
+    valueEditBox:SetWidth(104) -- narrowed to make room for the Alts picker button (#38)
     valueEditBox:SetHeight(20)
     valueEditBox:SetAutoFocus(false)
     valueEditBox:SetScript("OnEnterPressed", CreateReminder)
@@ -661,7 +665,50 @@ local function CreateConditionFrame(parentFrame)
     SetValueBoxEnabled(valueEditBox, false) -- disabled until a condition that uses a value is chosen
 
 
+    -- "Alts" button: opens a menu of your known characters (the account-wide
+    -- roster) to fill the value box, so you don't have to type an alt's name.
+    -- Shown only for the Name condition; free-typing still works for characters
+    -- you've never logged into. (#38)
+    local charButton = CreateFrame("Button", "ReminderCharacterButton", conditionFrame, "UIPanelButtonTemplate")
+    charButton:SetSize(74, 22)
+    charButton:SetPoint("TOPLEFT", conditionFrame, 474, -2)
+    charButton:SetText("Alts")
+    charButton:Hide()
+    charButton:SetScript("OnClick", function(self)
+        if not MenuUtil then return end
+        MenuUtil.CreateContextMenu(self, function(owner, root)
+            local seen, names = {}, {}
+            for _, char in pairs(RemindersDB.global.characters or {}) do
+                if char.name and not seen[char.name] then
+                    seen[char.name] = true
+                    tinsert(names, char.name)
+                end
+            end
+            table.sort(names)
+
+            if #names == 0 then
+                root:CreateTitle("No characters seen yet")
+                return
+            end
+
+            for _, name in ipairs(names) do
+                root:CreateButton(name, function()
+                    valueEditBox:SetText(name)
+                    OnInputValueChanged()
+                end)
+            end
+        end)
+    end)
+    charButton:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("Pick one of your characters", 1, 1, 1)
+        GameTooltip:Show()
+    end)
+    charButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+
     conditionFrame.conditionDropDown = conditionDropDown
+    conditionFrame.charButton        = charButton
     conditionFrame.operationDropDown = operationDropDown
     conditionFrame.valueEditBox      = valueEditBox
     conditionFrame.professionDropDown = professionDropDown
@@ -673,6 +720,7 @@ local function CreateConditionFrame(parentFrame)
     conditionDropDown.valueEditBox = valueEditBox
     conditionDropDown.professionDropDown = professionDropDown
     conditionDropDown.valueLabel = valueLabel
+    conditionDropDown.charButton = charButton
 
     CONDITION_FRAMES[i] = conditionFrame
 end
@@ -1034,6 +1082,8 @@ function Reminders:ResetInputUI()
         conditionFrame.professionDropDown:SetText(PROFESSION_LIST_DEFAULT)
         ClearDropDownChecks(conditionFrame.professionDropDown)
         conditionFrame.professionDropDown.frame:Hide()
+
+        if conditionFrame.charButton then conditionFrame.charButton:Hide() end
 
         if conditionFrame.valueLabel then
             conditionFrame.valueLabel:SetText("Value")
