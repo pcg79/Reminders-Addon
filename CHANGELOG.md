@@ -1,5 +1,10 @@
 # Reminders
 
+## [v12.8.1](https://github.com/pcg79/Reminders-Addon/tree/v12.8.1) (2026-08-12)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.8.0...v12.8.1)
+
+- Updated for WoW patch 12.1.0, so the addon no longer shows as "Out of date" at character select
+
 ## [v12.8.0](https://github.com/pcg79/Reminders-Addon/tree/v12.8.0) (2026-08-01)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.7.0...v12.8.0)
 
