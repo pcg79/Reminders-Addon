@@ -243,6 +243,13 @@ function Reminders:CleanUpPlayerReminders()
                 char.reminders[id] = nil
             end
         end
+
+        for id, _ in pairs(char.dismissals or {}) do
+            if RemindersDB.global.reminders[id] == nil then
+                Reminders:debug("Dismissal for reminder "..id.." doesn't exist in global list.  Deleting...")
+                char.dismissals[id] = nil
+            end
+        end
     end
 end
 
@@ -331,6 +338,22 @@ end
 
 function Reminders:DeletePlayerReminder(reminder_id)
     Reminders:SetPlayerReminder(reminder_id, nil)
+end
+
+-- Dismissing *another* character's reminder has to stick, or a /reload would
+-- just surface it again.  We record it against that character in its own table,
+-- deliberately not in char.reminders: the dismissal silences the nag until the
+-- reminder next comes due, but leaves that character's schedule alone, so the
+-- chore is still waiting when you log in as them. (#21)
+function Reminders:GetCharacterDismissal(char, reminder_id)
+    return char.dismissals and char.dismissals[reminder_id]
+end
+
+function Reminders:SetCharacterDismissal(char, reminder_id, dismissedUntil)
+    if not char.dismissals then
+        char.dismissals = {}
+    end
+    char.dismissals[reminder_id] = dismissedUntil
 end
 
 function Reminders:DebugPrintReminders()

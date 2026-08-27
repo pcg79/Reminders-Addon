@@ -484,10 +484,28 @@ local function SetDisabled(self, disabled)
     Reminders:ChatMessage("Reminder for |cff32cd32" .. self.message .. "|r has been " .. (disabled and "disabled" or "enabled"))
 end
 
+-- Has this character's reminder been dismissed, and are we still inside the
+-- dismissal window?  Expired dismissals are dropped as we find them so they
+-- don't pile up in the roster.
+local function IsDismissedForCharacter(self, char, timeNow)
+    local dismissedUntil = Reminders:GetCharacterDismissal(char, self.id)
+    if not dismissedUntil then
+        return false
+    end
+
+    if timeNow + GROUP_WINDOW >= dismissedUntil then
+        Reminders:SetCharacterDismissal(char, self.id, nil)
+        return false
+    end
+
+    return true
+end
+
 -- Build a popup row for a *different* character that still owes this reminder.
--- These are snooze-only: showing or dismissing it doesn't advance that
--- character's schedule (so you can't clear an alt's chore from your main without
--- doing it) -- only playing that character or snoozing changes anything. (#21)
+-- Dismissing it doesn't advance that character's schedule (so you can't clear an
+-- alt's chore from your main without doing it) -- it only silences the nag until
+-- the reminder next comes due. Playing that character or snoozing is still what
+-- moves their schedule. (#21)
 local function BuildOtherCharacterMessage(self, char)
     local message = "(" .. char.name .. ") " .. self.message
 
@@ -513,6 +531,14 @@ local function BuildOtherCharacterMessage(self, char)
     local dismissButton = {
         text = "Dismiss",
         onClick = function(this, button)
+            -- Hiding the row isn't enough: without a record of the dismissal the
+            -- next evaluation (a /reload, say) would surface it all over again.
+            -- Silence it until the reminder's next occurrence, leaving the target
+            -- character's own schedule untouched.
+            local dismissedUntil = self:CalculateNextRemindAt().nextRemindAt
+                or (time() + Reminders:GetQuestResetTime()) -- unknown interval: sit it out until the daily reset
+            Reminders:SetCharacterDismissal(char, self.id, dismissedUntil)
+
             Reminders:ChatMessage("Reminder for |cff32cd32" .. message .. "|r dismissed")
             this:GetParent():Hide()
         end
@@ -544,7 +570,7 @@ local function EvaluateForOtherCharacters(self)
             -- No schedule entry means that character has never cleared it, so it
             -- still owes it.
             local owes = (not nextRemindAt) or (timeNow + GROUP_WINDOW >= nextRemindAt)
-            if owes then
+            if owes and not IsDismissedForCharacter(self, char, timeNow) then
                 tinsert(messages, BuildOtherCharacterMessage(self, char))
             end
         end
