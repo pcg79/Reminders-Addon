@@ -66,6 +66,10 @@ local ACTIONS_GAP = 8         -- space between the Snooze and Dismiss buttons
 local MIN_POPUP_WIDTH = 300
 local MAX_POPUP_WIDTH = 560
 
+-- How long "Snoozed!" stays on screen before the row clears itself. Long enough
+-- to read as confirmation, short enough not to feel like the popup is stuck.
+local SNOOZE_CLEAR_DELAY = 0.5
+
 local default = {
   title = "Reminder!",
   width = 350,
@@ -141,9 +145,28 @@ local function BuildReminderRow(parentFrame, reminder, i)
     tinsert(parentFrame.reminderFrames, frame)
   end
 
+  -- Rows are pooled and reused by whatever the popup shows next, so the delayed
+  -- snooze callback below has to confirm the row is still the one it was armed
+  -- for before hiding it. Re-stamped on every build, not just on creation.
+  local rowToken = {}
+  frame.rowToken = rowToken
+
+  -- Snooze clears the row too, so snoozing every reminder tidies the popup away
+  -- instead of leaving a stack of dead "Snoozed!" rows and a stale header count.
+  -- The delay leaves that confirmation on screen for a beat first.
   local snoozeButton = reminder.snoozeButton
   frame.snoozeButton:SetText(snoozeButton.text)
-  frame.snoozeButton:SetScript("OnClick", snoozeButton.onClick)
+  local originalOnSnooze = snoozeButton.onClick
+  frame.snoozeButton:SetScript("OnClick", function(self, mouseButton, down)
+    if originalOnSnooze then
+      originalOnSnooze(self, mouseButton, down)
+    end
+    C_Timer.After(SNOOZE_CLEAR_DELAY, function()
+      if frame.rowToken ~= rowToken then return end -- row was rebuilt for a different reminder
+      frame:Hide()
+      LayoutReminderFrames(parentFrame)
+    end)
+  end)
   frame.snoozeButton:Enable()
 
   -- Run the original dismiss behavior (chat message + hide this row), then reflow
