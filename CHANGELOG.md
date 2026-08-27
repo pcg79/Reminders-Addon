@@ -1,5 +1,12 @@
 # Reminders
 
+## [v12.9.0](https://github.com/pcg79/Reminders-Addon/tree/v12.9.0) (2026-08-27)
+[Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.8.1...v12.9.0)
+
+- Dismissing another character's reminder now sticks: it stays gone through a /reload and for the rest of that day (or week), instead of popping back up on the next evaluation. It still doesn't clear the chore for that character — log in as them and the reminder is waiting
+- Snoozing a reminder now clears its row from the popup the way dismissing does, after showing "Snoozed!" for a moment. Snoozing the last one closes the popup instead of leaving a stack of greyed-out rows behind
+- Commas are no longer stripped out of reminder messages and values
+
 ## [v12.8.1](https://github.com/pcg79/Reminders-Addon/tree/v12.8.1) (2026-08-12)
 [Full Changelog](https://github.com/pcg79/Reminders-Addon/compare/v12.8.0...v12.8.1)
 

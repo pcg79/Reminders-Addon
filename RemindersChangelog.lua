@@ -3,6 +3,15 @@
 
 Reminders.changelog = {
     {
+        version = "12.9.0",
+        date = "2026-08-27",
+        entries = {
+            "Dismissing another character's reminder now sticks: it stays gone through a /reload and for the rest of that day (or week), instead of popping back up on the next evaluation. It still doesn't clear the chore for that character — log in as them and the reminder is waiting",
+            "Snoozing a reminder now clears its row from the popup the way dismissing does, after showing \"Snoozed!\" for a moment. Snoozing the last one closes the popup instead of leaving a stack of greyed-out rows behind",
+            "Commas are no longer stripped out of reminder messages and values",
+        },
+    },
+    {
         version = "12.8.1",
         date = "2026-08-12",
         entries = {
