@@ -317,15 +317,6 @@ function UpdateReminder(updatedReminder)
     return true
 end
 
-local function ParseReminder(text)
-    local array = {}
-    for token in string.gmatch(text, "[^,]+") do
-        tinsert(array, token:trim())
-    end
-
-    return { message = array[1], condition = array[2], interval = array[3], day = array[4] }
-end
-
 local function GetIntervalList()
     if RemindersDB.char.debug then
         local interval_list = {}
@@ -341,57 +332,55 @@ local function GetIntervalList()
     end
 end
 
-local function BuildReminderText()
+-- Read the form into the params table BuildReminder expects.
+--
+-- This used to build a comma-delimited string that was immediately parsed back
+-- apart, which cost nothing but bugs: commas had to be stripped out of the
+-- message and value (so "Buy flasks, potions" lost its comma), and the day index
+-- came back as a string ("3") instead of the number the dropdown gave us.
+-- Nothing ever stored that string -- reminders are saved as a table and WoW
+-- serializes SavedVariables itself -- so we build the table directly.
+--
+-- The *condition* is still a string ("name = Bob", "level > 70"): that is the
+-- stored format, space-tokenized by EvaluateCondition.
+local function BuildReminderParams()
     if not AreInputsValid() then
         return
     end
 
-    local separator = ","
+    -- Only ever one condition frame today; multiple conditions joined by AND/OR
+    -- would need a real grammar here (and in EvaluateCondition).
+    local conditionFrame = CONDITION_FRAMES[1]
+    local valueEditBox   = conditionFrame.valueEditBox
 
-    local messageText = MESSAGE_EDIT_BOX:GetText():gsub(separator, "")
+    local conditionText = conditionFrame.conditionDropDown.text:GetText()
+    local condition = CONDITION_LIST[conditionText]
 
-    local reminderText = messageText .. separator
-
-    -- This is (bad) future-proofing for if I want to implement creating multiple conditions that you can
-    -- join via AND or OR.
-    for _, conditionFrame in pairs(CONDITION_FRAMES) do
-        local conditionDropDown = conditionFrame.conditionDropDown
-        local operationDropDown = conditionFrame.operationDropDown
-        local valueEditBox      = conditionFrame.valueEditBox
-        local professionDropDown = conditionFrame.professionDropDown
-
-        local conditionText = conditionDropDown.text:GetText()
-
-        reminderText = reminderText .. CONDITION_LIST[conditionText]
-
-        if conditionText == "Self" then
-            reminderText = reminderText .. " = " .. UnitName("player")
-        elseif conditionText ~= "Everyone" then
-            local operationText = operationDropDown.text:GetText()
-            reminderText = reminderText .. " " .. OPERATION_LIST[operationText]
-        end
-
-        if valueEditBox:IsEnabled() then
-            reminderText = reminderText .. " " .. valueEditBox:GetText():gsub(separator, "")
-        elseif conditionText == PROFESSION_LIST_DEFAULT then
-            reminderText = reminderText .. " " .. professionDropDown.text:GetText()
-        end
-
-        local intervalText = IntervalDropDown.text:GetText()
-        reminderText = reminderText .. separator .. GetIntervalList()[intervalText]
-
-        if intervalText == "Weekly" then
-            reminderText = reminderText .. separator .. DayDropDown:GetValue()
-        end
+    if conditionText == "Self" then
+        condition = condition .. " = " .. UnitName("player")
+    elseif conditionText ~= "Everyone" then
+        condition = condition .. " " .. OPERATION_LIST[conditionFrame.operationDropDown.text:GetText()]
     end
 
-    return reminderText
+    if valueEditBox:IsEnabled() then
+        condition = condition .. " " .. valueEditBox:GetText():trim()
+    elseif conditionText == PROFESSION_LIST_DEFAULT then
+        condition = condition .. " " .. conditionFrame.professionDropDown.text:GetText()
+    end
+
+    local intervalText = IntervalDropDown.text:GetText()
+
+    return {
+        message   = MESSAGE_EDIT_BOX:GetText():trim(),
+        condition = condition,
+        interval  = GetIntervalList()[intervalText],
+        day       = (intervalText == "Weekly") and DayDropDown:GetValue() or nil,
+    }
 end
 
 local function CreateReminder()
     if AreInputsValid() then
-        local reminderText = BuildReminderText()
-        local params = ParseReminder(reminderText)
+        local params = BuildReminderParams()
         params.crossChar = (CrossCharCheck and CrossCharCheck:GetChecked()) or false
         if EDITING_ID then
             -- Editing: keep the same id so the reminder's schedule survives. Carry
