@@ -3,6 +3,13 @@
 
 Reminders.changelog = {
     {
+        version = "12.9.1",
+        date = "2026-10-14",
+        entries = {
+            "Updated for WoW patch 12.1.5, so the addon no longer shows as \"Out of date\" at character select",
+        },
+    },
+    {
         version = "12.9.0",
         date = "2026-08-27",
         entries = {
